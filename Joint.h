@@ -5,14 +5,12 @@
 
 #include <array>
 
-class Joint : public ColoredRenderable
+class Joint : public Component
 {
 public:
 
   void init() override;
   void update(UpdateInfo infos) override;
 
-private:
-
-  std::array<VertexData_Colored, 2> m_anchors;
+  void addChildren(const Pointer& child) override;
 };

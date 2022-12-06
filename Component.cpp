@@ -67,3 +67,17 @@ void Component::setParent(Component* parent)
 {
   m_parent = parent;
 }
+
+// ------------------------------------------------------------------------------------------------
+void Component::notifyParent(Notification notif)
+{
+  if (m_parent == nullptr) return;
+
+  m_parent->listenChild(notif);
+  m_parent->notifyParent(notif);
+}
+
+// ------------------------------------------------------------------------------------------------
+void Component::listenChild(Notification notif)
+{
+}

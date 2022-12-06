@@ -4,6 +4,7 @@
 #include "Cube.h"
 #include "Box.h"
 #include "Joint.h"
+#include "JointRenderer.h"
 #include "Floor.h"
 
 #include <QMouseEvent>
@@ -138,11 +139,15 @@ void MainWidget::initializeGL()
       //  scene->addChildren(box);
       //}
 
-      // Joint(s)
+      // Joint Renderer
       {
+        auto renderer = QSharedPointer<JointRenderer>::create();
+        renderer->setLocalToParent(QVector3D(0, 0, 2));
+        scene->addChildren(renderer);
+
         auto joint1 = QSharedPointer<Joint>::create();
         joint1->setLocalToParent(QVector3D(0, 5, 2));
-        scene->addChildren(joint1);
+        renderer->addChildren(joint1);
 
         auto joint2 = QSharedPointer<Joint>::create();
         joint2->setLocalToParent(QVector3D(-5, 2, 4));

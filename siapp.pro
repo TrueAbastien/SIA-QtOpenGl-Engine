@@ -12,6 +12,7 @@ SOURCES += \
     Cube.cpp \
     Floor.cpp \
     Joint.cpp \
+    JointRenderer.cpp \
     MainWidget.cpp \
     Renderable.cpp \
     Scene.cpp \
@@ -24,6 +25,7 @@ HEADERS += \
     Cube.h \
     Floor.h \
     Joint.h \
+    JointRenderer.h \
     MainWidget.h \
     Renderable.h \
     Scene.h \

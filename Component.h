@@ -15,6 +15,11 @@ public:
 
     using Pointer = QSharedPointer<Component>;
 
+    enum Notification
+    {
+      CHILD_ADDED
+    };
+
 protected:
 
     Component();
@@ -31,13 +36,16 @@ public:
     QMatrix4x4 localToParent() const;
     QMatrix4x4 localToWorld() const;
 
-    void addChildren(const Pointer& child);
+    virtual void addChildren(const Pointer& child);
     QVector<Pointer> children() const;
     Pointer child(int index) const; 
 
 protected:
 
     void setParent(Component* parent);
+
+    void notifyParent(Notification notif);
+    virtual void listenChild(Notification notif);
 
 protected:
 
