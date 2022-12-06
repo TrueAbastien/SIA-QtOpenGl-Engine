@@ -28,6 +28,9 @@ protected:
 
   void initShaders(const QString& vertexShader, const QString& fragmentShader);
 
+  template <typename T>
+  void updateVertices(const void* vtxData, int vtxCount);
+
 private:
 
   template <typename T> void internalInitRenderable(const void* vtxData, int vtxCount);
@@ -69,6 +72,13 @@ void Renderable::updateRenderable(GLenum mode, int idxCount)
 
   // Draw cube geometry using indices from VBO 1
   glDrawElements(mode, idxCount, GL_UNSIGNED_SHORT, nullptr);
+}
+
+// ================================================================================================
+template<typename T>
+inline void Renderable::updateVertices(const void* vtxData, int vtxCount)
+{
+  Renderable::internalInitRenderable<T>(vtxData, vtxCount);
 }
 
 // ================================================================================================

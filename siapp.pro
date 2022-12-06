@@ -10,6 +10,7 @@ SOURCES += \
     ColoredRenderable.cpp \
     Component.cpp \
     Cube.cpp \
+    Floor.cpp \
     Joint.cpp \
     MainWidget.cpp \
     Renderable.cpp \
@@ -21,6 +22,7 @@ HEADERS += \
     ColoredRenderable.h \
     Component.h \
     Cube.h \
+    Floor.h \
     Joint.h \
     MainWidget.h \
     Renderable.h \

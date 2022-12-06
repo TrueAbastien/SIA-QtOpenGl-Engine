@@ -2,9 +2,9 @@
 #include "TexturedRenderable.h"
 
 // ------------------------------------------------------------------------------------------------
-TexturedRenderable::TexturedRenderable()
+TexturedRenderable::TexturedRenderable(const QString& texFile) :
+  m_textureFile(texFile)
 {
-  // TODO ?
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -52,7 +52,7 @@ void TexturedRenderable::initShaders()
 void TexturedRenderable::initTexture()
 {
   // Load cube.png image
-  m_texture = new QOpenGLTexture(QImage(":/textures/cube.png").mirrored());
+  m_texture = new QOpenGLTexture(QImage(m_textureFile).mirrored());
 
   // Set nearest filtering mode for texture minification
   m_texture->setMinificationFilter(QOpenGLTexture::Nearest);

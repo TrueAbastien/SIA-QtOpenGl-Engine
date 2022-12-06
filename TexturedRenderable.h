@@ -9,7 +9,7 @@ class TexturedRenderable : public Renderable
 {
 public:
 
-  TexturedRenderable();
+  TexturedRenderable(const QString& texFile);
   virtual ~TexturedRenderable();
 
   virtual void init() override;
@@ -29,4 +29,5 @@ protected:
 protected:
 
   QOpenGLTexture* m_texture = nullptr;
+  QString m_textureFile;
 };

@@ -3,6 +3,8 @@
 
 #include "Cube.h"
 #include "Box.h"
+#include "Joint.h"
+#include "Floor.h"
 
 #include <QMouseEvent>
 
@@ -124,16 +126,32 @@ void MainWidget::initializeGL()
 
     scene = new Scene;
     {
-      // Cube 1
+      //// Cube 1
+      //{
+      //  scene->addChildren(QSharedPointer<Cube>::create());
+      //}
+
+      //// Cube 2
+      //{
+      //  auto box = QSharedPointer<Box>::create();
+      //  box->setLocalToParent(QVector3D(5.0, 0.0, 0.0));
+      //  scene->addChildren(box);
+      //}
+
+      // Joint(s)
       {
-        scene->addChildren(QSharedPointer<Cube>::create());
+        auto joint1 = QSharedPointer<Joint>::create();
+        joint1->setLocalToParent(QVector3D(0, 5, 2));
+        scene->addChildren(joint1);
+
+        auto joint2 = QSharedPointer<Joint>::create();
+        joint2->setLocalToParent(QVector3D(-5, 2, 4));
+        joint1->addChildren(joint2);
       }
 
-      // Cube 2
+      // Floor
       {
-        auto box = QSharedPointer<Box>::create();
-        box->setLocalToParent(QVector3D(5.0, 0.0, 0.0));
-        scene->addChildren(box);
+        scene->addChildren(QSharedPointer<Floor>::create());
       }
     }
     scene->init();

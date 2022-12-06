@@ -3,11 +3,11 @@
 
 #include "TexturedRenderable.h"
 
-class Cube final : public TexturedRenderable
+class Floor : public TexturedRenderable
 {
 public:
 
-  Cube();
+  Floor();
 
 public:
 
