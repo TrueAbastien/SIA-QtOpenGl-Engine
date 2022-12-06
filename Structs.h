@@ -8,10 +8,16 @@
 #define M_PI 3.14159265358979323846f  /* pi */
 #define ROT_EPS 0.001f
 
-struct VertexData
+struct VertexData_Textured
 {
-    QVector3D position;
-    QVector2D texCoord;
+  QVector3D position;
+  QVector2D texCoord;
+};
+
+struct VertexData_Colored
+{
+  QVector3D position;
+  QVector3D color;
 };
 
 struct UpdateInfo

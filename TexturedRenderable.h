@@ -15,8 +15,9 @@ public:
   virtual void init() override;
   virtual void update(UpdateInfo infos) override;
 
-private:
+protected:
 
+  void initShaders();
   void initTexture();
 
 protected:

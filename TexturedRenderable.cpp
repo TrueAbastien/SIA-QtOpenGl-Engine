@@ -4,7 +4,7 @@
 // ------------------------------------------------------------------------------------------------
 TexturedRenderable::TexturedRenderable()
 {
-  // TODO
+  // TODO ?
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -16,8 +16,7 @@ TexturedRenderable::~TexturedRenderable()
 // ------------------------------------------------------------------------------------------------
 void TexturedRenderable::init()
 {
-  Renderable::init();
-
+  initShaders();
   initTexture();
 }
 
@@ -29,6 +28,12 @@ void TexturedRenderable::update(UpdateInfo infos)
   Renderable::update(infos);
 
   m_program.setUniformValue("texture", 0);
+}
+
+// ------------------------------------------------------------------------------------------------
+void TexturedRenderable::initShaders()
+{
+  Renderable::initShaders(":/shaders/vshaderT.glsl", ":/shaders/fshaderT.glsl");
 }
 
 // ------------------------------------------------------------------------------------------------

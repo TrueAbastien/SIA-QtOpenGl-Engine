@@ -13,7 +13,7 @@ void Cube::init()
     // For cube we would need only 8 vertices but we have to
     // duplicate vertex for each face because texture coordinate
     // is different.
-    VertexData vertices[] = {
+    VertexData_Textured vertices[] = {
         // Vertex data for face 0
         {QVector3D(-1.0f, -1.0f,  1.0f), QVector2D(0.0f, 0.0f)},  // v0
         {QVector3D( 1.0f, -1.0f,  1.0f), QVector2D(0.33f, 0.0f)}, // v1
@@ -67,7 +67,7 @@ void Cube::init()
         20, 20, 21, 22, 23      // Face 5 - triangle strip (v20, v21, v22, v23)
     };
     
-    Renderable::initRenderable(vertices, 24, indices, 34);
+    Renderable::initRenderable<VertexData_Textured>(vertices, 24, indices, 34);
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -75,5 +75,5 @@ void Cube::update(UpdateInfo infos)
 {
   TexturedRenderable::update(infos);
 
-  Renderable::updateRenderable(GL_TRIANGLE_STRIP, 34);
+  Renderable::updateRenderable<VertexData_Textured>(GL_TRIANGLE_STRIP, 34);
 }
