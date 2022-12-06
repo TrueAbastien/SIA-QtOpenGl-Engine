@@ -46,14 +46,14 @@ void MainWidget::mouseMoveEvent(QMouseEvent* e)
 
   if (isCameraMoving)
   {
-    cameraPosition += (delta.x() * right + delta.y() * up) * 0.015f;
+    cameraPosition += (delta.x() * right + delta.y() * up) * cameraDistance * 6e-4f;
 
     previousMousePos = newPos;
     update();
   }
   else if (isCameraRotating)
   {
-    cameraRotation += QVector2D(delta.x(), -delta.y()) * 0.01f;
+    cameraRotation += QVector2D(delta.x(), -delta.y()) * 1e-2f;
     cameraRotation.setY(std::min(std::max(cameraRotation.y(), ROT_EPS), M_PI - ROT_EPS));
 
     previousMousePos = newPos;
@@ -78,7 +78,7 @@ void MainWidget::mouseReleaseEvent(QMouseEvent *e)
 void MainWidget::wheelEvent(QWheelEvent* event)
 {
   float delta = event->angleDelta().y() * 0.005f;
-  cameraDistance = std::min(std::max(cameraDistance - delta, 1.0f), 20.0f);
+  cameraDistance = std::min(std::max(cameraDistance - delta, 1.0f), 100.0f);
 
   update();
 }
@@ -146,7 +146,7 @@ void MainWidget::resizeGL(int w, int h)
     qreal aspect = qreal(w) / qreal(h ? h : 1);
 
     // Set near plane to 3.0, far plane to 7.0, field of view 45 degrees
-    const qreal zNear = 1.0, zFar = 30.0, fov = 45.0;
+    const qreal zNear = 1.0, zFar = 50.0, fov = 45.0;
 
     // Reset projection
     projection.setToIdentity();

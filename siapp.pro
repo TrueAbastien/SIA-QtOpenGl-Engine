@@ -11,7 +11,8 @@ SOURCES += \
     MainWidget.cpp \
     Renderable.cpp \
     Scene.cpp \
-    TexturedRenderable.cpp
+    TexturedRenderable.cpp \
+    WireRenderable.cpp
 
 HEADERS += \
     Component.h \
@@ -19,7 +20,8 @@ HEADERS += \
     MainWidget.h \
     Renderable.h \
     Scene.h \
-    TexturedRenderable.h
+    TexturedRenderable.h \
+    WireRenderable.h
 
 RESOURCES += \
     shaders.qrc \
