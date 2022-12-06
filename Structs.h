@@ -1,0 +1,21 @@
+
+#pragma once
+
+#include <QVector2D>
+#include <QVector3D>
+#include <QMatrix4x4>
+
+#define M_PI 3.14159265358979323846f  /* pi */
+#define ROT_EPS 0.001f
+
+struct VertexData
+{
+    QVector3D position;
+    QVector2D texCoord;
+};
+
+struct UpdateInfo
+{
+  float dt;
+  QMatrix4x4 screenToParent;
+};
