@@ -67,7 +67,7 @@ void Cube::init()
         20, 20, 21, 22, 23      // Face 5 - triangle strip (v20, v21, v22, v23)
     };
     
-    Renderable::initRenderable<VertexData_Textured>(vertices, 24, indices, 34);
+    TexturedRenderable::initRenderable(vertices, 24, indices, 34);
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -75,5 +75,5 @@ void Cube::update(UpdateInfo infos)
 {
   TexturedRenderable::update(infos);
 
-  Renderable::updateRenderable<VertexData_Textured>(GL_TRIANGLE_STRIP, 34);
+  TexturedRenderable::updateRenderable(GL_TRIANGLE_STRIP, 34);
 }

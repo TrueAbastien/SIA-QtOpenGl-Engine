@@ -1,7 +1,6 @@
 
 #pragma once
 
-#include "Cube.h"
 #include "Scene.h"
 
 #include <QOpenGLWidget>

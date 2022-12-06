@@ -4,7 +4,7 @@ precision mediump int;
 precision mediump float;
 #endif
 
-varying vec4 v_color;
+varying vec3 v_color;
 
 //! [0]
 void main()

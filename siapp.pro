@@ -6,18 +6,22 @@ TEMPLATE = app
 SOURCES += main.cpp
 
 SOURCES += \
+    Box.cpp \
     ColoredRenderable.cpp \
     Component.cpp \
     Cube.cpp \
+    Joint.cpp \
     MainWidget.cpp \
     Renderable.cpp \
     Scene.cpp \
     TexturedRenderable.cpp
 
 HEADERS += \
+    Box.h \
     ColoredRenderable.h \
     Component.h \
     Cube.h \
+    Joint.h \
     MainWidget.h \
     Renderable.h \
     Scene.h \

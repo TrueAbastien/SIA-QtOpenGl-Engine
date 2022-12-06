@@ -17,6 +17,12 @@ public:
 
 protected:
 
+  void initRenderable(const void* vtxData, int vtxCount,
+                      const void* idxData, int idxCount);
+  void updateRenderable(GLenum mode, int idxCount);
+
+protected:
+
   void initShaders();
   void initTexture();
 

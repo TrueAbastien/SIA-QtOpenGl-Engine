@@ -31,6 +31,18 @@ void TexturedRenderable::update(UpdateInfo infos)
 }
 
 // ------------------------------------------------------------------------------------------------
+void TexturedRenderable::initRenderable(const void* vtxData, int vtxCount, const void* idxData, int idxCount)
+{
+  Renderable::initRenderable<VertexData_Textured>(vtxData, vtxCount, idxData, idxCount);
+}
+
+// ------------------------------------------------------------------------------------------------
+void TexturedRenderable::updateRenderable(GLenum mode, int idxCount)
+{
+  Renderable::updateRenderable<VertexData_Textured>(mode, idxCount);
+}
+
+// ------------------------------------------------------------------------------------------------
 void TexturedRenderable::initShaders()
 {
   Renderable::initShaders(":/shaders/vshaderT.glsl", ":/shaders/fshaderT.glsl");

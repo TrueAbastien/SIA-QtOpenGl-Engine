@@ -1,6 +1,9 @@
 
 #include "MainWidget.h"
 
+#include "Cube.h"
+#include "Box.h"
+
 #include <QMouseEvent>
 
 #include <cmath>
@@ -128,9 +131,9 @@ void MainWidget::initializeGL()
 
       // Cube 2
       {
-        auto cube = QSharedPointer<Cube>::create();
-        cube->setLocalToParent(QVector3D(5.0, 0.0, 0.0));
-        scene->addChildren(cube);
+        auto box = QSharedPointer<Box>::create();
+        box->setLocalToParent(QVector3D(5.0, 0.0, 0.0));
+        scene->addChildren(box);
       }
     }
     scene->init();

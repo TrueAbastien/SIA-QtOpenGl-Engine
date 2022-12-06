@@ -7,9 +7,9 @@ precision mediump float;
 uniform mat4 mvp_matrix;
 
 attribute vec4 a_position;
-attribute vec4 a_color;
+attribute vec3 a_color;
 
-varying vec4 v_color;
+varying vec3 v_color;
 
 //! [0]
 void main()
