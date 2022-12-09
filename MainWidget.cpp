@@ -6,6 +6,7 @@
 #include "Joint.h"
 #include "JointRenderer.h"
 #include "Floor.h"
+#include "AnimatorPlug.h"
 
 #include <QMouseEvent>
 
@@ -94,10 +95,22 @@ void MainWidget::keyPressEvent(QKeyEvent* e)
 {
   switch (e->key())
   {
+    // Reset Camera
     case Qt::Key_R:
       resetCamera();
       break;
 
+    // Start Animation
+    case Qt::Key_P:
+      animController.start();
+      break;
+
+    // Stop Animation
+    case Qt::Key_S:
+      animController.stop();
+      break;
+
+    // Close Application
     case Qt::Key_Escape:
       close();
       break;
@@ -109,6 +122,8 @@ void MainWidget::keyPressEvent(QKeyEvent* e)
 // ------------------------------------------------------------------------------------------------
 void MainWidget::timerEvent(QTimerEvent *)
 {
+  update();
+
   //
 }
 
@@ -152,6 +167,11 @@ void MainWidget::initializeGL()
         auto joint2 = QSharedPointer<Joint>::create();
         joint2->setLocalToParent(QVector3D(-5, 2, 4));
         joint1->addChildren(joint2);
+
+        auto animPlug = QSharedPointer<AnimatorPlug>::create();
+        animPlug->addKeyFrame(AnimatorPlug::PropertyType::RotationX, 2.0f, 90.0f);
+        animPlug->addKeyFrame(AnimatorPlug::PropertyType::RotationX, 5.0f, -45.0f);
+        joint1->addChildren(animPlug);
       }
 
       // Floor
@@ -194,7 +214,7 @@ void MainWidget::paintGL()
     UpdateInfo infos;
     {
       infos.dt = 0.1f; // TODO
-      infos.animationTime = 0.0f; // TODO
+      infos.animationTime = animController.time();
       infos.screenToParent = projection * view;
     }
     scene->update(infos);

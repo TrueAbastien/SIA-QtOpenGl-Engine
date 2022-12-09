@@ -66,7 +66,7 @@ void Animation::updateProperties(float time)
     // Last Element
     if (it == prop.keyFrames.end())
     {
-      a = &(*it);
+      a = &(prop.keyFrames.back());
     }
 
     else

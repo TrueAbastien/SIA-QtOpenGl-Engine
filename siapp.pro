@@ -7,6 +7,7 @@ SOURCES += main.cpp
 
 SOURCES += \
     Animation.cpp \
+    AnimationController.cpp \
     AnimatorPlug.cpp \
     Box.cpp \
     ColoredRenderable.cpp \
@@ -22,6 +23,7 @@ SOURCES += \
 
 HEADERS += \
     Animation.h \
+    AnimationController.h \
     AnimatorPlug.h \
     Box.h \
     ColoredRenderable.h \

@@ -2,6 +2,7 @@
 #pragma once
 
 #include "Scene.h"
+#include "AnimationController.h"
 
 #include <QOpenGLWidget>
 #include <QOpenGLFunctions>
@@ -44,6 +45,7 @@ private:
 
     QBasicTimer timer;
     Scene* scene;
+    AnimationController animController;
 
     QMatrix4x4 projection;
 

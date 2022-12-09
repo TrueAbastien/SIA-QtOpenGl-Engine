@@ -4,6 +4,37 @@
 AnimatorPlug::AnimatorPlug()
   : m_animation(QSharedPointer<Animation>::create())
 {
+  // Position
+  for (int ii = 0; ii < 3; ++ii)
+  {
+    Animation::Property prop;
+    {
+      prop.setter = [=](float value)
+      {
+        QVector3D pos = m_parent->localPosition();
+        pos[ii] = value;
+        m_parent->setLocalPosition(pos);
+      };
+      prop.keyFrames = {};
+    }
+    m_animation->addProperty(prop);
+  }
+
+  // Rotation
+  for (int jj = 0; jj < 3; ++jj)
+  {
+    Animation::Property prop;
+    {
+      prop.setter = [=](float value)
+      {
+        QVector3D rot = m_parent->localRotation();
+        rot[jj] = value;
+        m_parent->setLocalRotation(rot);
+      };
+      prop.keyFrames = {};
+    }
+    m_animation->addProperty(prop);
+  }
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -16,46 +47,24 @@ void AnimatorPlug::init()
   QVector3D currPos = m_parent->localPosition();
   for (int ii = 0; ii < 3; ++ii)
   {
-    Animation::Property prop;
+    Animation::KeyFrame kf;
     {
-      prop.setter = [=](float value)
-      {
-        QVector3D pos = m_parent->localPosition();
-        pos[ii] = value;
-        m_parent->setLocalPosition(pos);
-      };
-
-      Animation::KeyFrame kf;
-      {
-        kf.time = 0.0f;
-        kf.value = currPos[ii];
-      }
-      prop.keyFrames = {kf};
+      kf.time = 0.0f;
+      kf.value = currPos[ii];
     }
-    m_animation->addProperty(prop);
+    m_animation->addKeyFrame(ii, kf);
   }
 
   // Rotation
   QVector3D currRot = m_parent->localRotation();
   for (int jj = 0; jj < 3; ++jj)
   {
-    Animation::Property prop;
+    Animation::KeyFrame kf;
     {
-      prop.setter = [=](float value)
-      {
-        QVector3D rot = m_parent->localRotation();
-        rot[jj] = value;
-        m_parent->setLocalRotation(rot);
-      };
-
-      Animation::KeyFrame kf;
-      {
-        kf.time = 0.0f;
-        kf.value = currRot[jj];
-      }
-      prop.keyFrames = {kf};
+      kf.time = 0.0f;
+      kf.value = currRot[jj];
     }
-    m_animation->addProperty(prop);
+    m_animation->addKeyFrame(jj + 3, kf);
   }
 }
 
