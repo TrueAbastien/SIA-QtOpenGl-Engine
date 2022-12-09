@@ -23,5 +23,6 @@ struct VertexData_Colored
 struct UpdateInfo
 {
   float dt;
+  float animationTime;
   QMatrix4x4 screenToParent;
 };

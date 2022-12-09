@@ -194,6 +194,7 @@ void MainWidget::paintGL()
     UpdateInfo infos;
     {
       infos.dt = 0.1f; // TODO
+      infos.animationTime = 0.0f; // TODO
       infos.screenToParent = projection * view;
     }
     scene->update(infos);

@@ -32,9 +32,14 @@ public:
 public:
 
     void setLocalToParent(const QVector3D& pos = QVector3D(), const QVector3D& rot = QVector3D());
-    void setLocalToParent(const QMatrix4x4& localToParent);
     QMatrix4x4 localToParent() const;
     QMatrix4x4 localToWorld() const;
+
+    void setLocalPosition(const QVector3D& pos);
+    QVector3D localPosition() const;
+
+    void setLocalRotation(const QVector3D& rot);
+    QVector3D localRotation() const;
 
     virtual void addChildren(const Pointer& child);
     QVector<Pointer> children() const;
@@ -49,7 +54,10 @@ protected:
 
 protected:
 
+    QVector3D m_localPosition;
+    QVector3D m_localRotation;
     QMatrix4x4 m_localToParent;
+
     QVector<Pointer> m_children;
     Component* m_parent;
 };

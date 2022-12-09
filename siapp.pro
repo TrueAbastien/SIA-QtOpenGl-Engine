@@ -6,6 +6,8 @@ TEMPLATE = app
 SOURCES += main.cpp
 
 SOURCES += \
+    Animation.cpp \
+    AnimatorPlug.cpp \
     Box.cpp \
     ColoredRenderable.cpp \
     Component.cpp \
@@ -19,6 +21,8 @@ SOURCES += \
     TexturedRenderable.cpp
 
 HEADERS += \
+    Animation.h \
+    AnimatorPlug.h \
     Box.h \
     ColoredRenderable.h \
     Component.h \
@@ -29,6 +33,7 @@ HEADERS += \
     MainWidget.h \
     Renderable.h \
     Scene.h \
+    Structs.h \
     TexturedRenderable.h
 
 RESOURCES += \

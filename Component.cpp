@@ -3,6 +3,8 @@
 
 // ------------------------------------------------------------------------------------------------
 Component::Component() :
+    m_localPosition(QVector3D()),
+    m_localRotation(QVector3D()),
     m_localToParent(QMatrix4x4()),
     m_children(0),
     m_parent(nullptr)
@@ -12,17 +14,14 @@ Component::Component() :
 // ------------------------------------------------------------------------------------------------
 void Component::setLocalToParent(const QVector3D& pos, const QVector3D& rot)
 {
+    m_localPosition = pos;
+    m_localRotation = rot;
+
     m_localToParent = {};
     m_localToParent.rotate(rot.x(), 1.0, 0.0, 0.0);
     m_localToParent.rotate(rot.y(), 0.0, 1.0, 0.0);
     m_localToParent.rotate(rot.z(), 0.0, 0.0, 1.0);
     m_localToParent.translate(pos);
-}
-
-// ------------------------------------------------------------------------------------------------
-void Component::setLocalToParent(const QMatrix4x4& localToParent)
-{
-    m_localToParent = localToParent;
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -38,6 +37,30 @@ QMatrix4x4 Component::localToWorld() const
     return m_localToParent;
 
   return m_parent->localToParent() * m_localToParent;
+}
+
+// ------------------------------------------------------------------------------------------------
+void Component::setLocalPosition(const QVector3D& pos)
+{
+  setLocalToParent(pos, m_localRotation);
+}
+
+// ------------------------------------------------------------------------------------------------
+QVector3D Component::localPosition() const
+{
+  return m_localPosition;
+}
+
+// ------------------------------------------------------------------------------------------------
+void Component::setLocalRotation(const QVector3D& rot)
+{
+  setLocalToParent(m_localPosition, rot);
+}
+
+// ------------------------------------------------------------------------------------------------
+QVector3D Component::localRotation() const
+{
+  return m_localRotation;
 }
 
 // ------------------------------------------------------------------------------------------------
