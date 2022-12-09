@@ -7,6 +7,7 @@
 #include "JointRenderer.h"
 #include "Floor.h"
 #include "AnimatorPlug.h"
+#include "FactoryFloor.h"
 
 #include <QMouseEvent>
 
@@ -176,7 +177,7 @@ void MainWidget::initializeGL()
 
       // Floor
       {
-        scene->addChildren(QSharedPointer<Floor>::create());
+        scene->addChildren(QSharedPointer<FactoryFloor>::create());
       }
     }
     scene->init();

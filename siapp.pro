@@ -13,6 +13,7 @@ SOURCES += \
     ColoredRenderable.cpp \
     Component.cpp \
     Cube.cpp \
+    FactoryFloor.cpp \
     Floor.cpp \
     Joint.cpp \
     JointRenderer.cpp \
@@ -29,6 +30,7 @@ HEADERS += \
     ColoredRenderable.h \
     Component.h \
     Cube.h \
+    FactoryFloor.h \
     Floor.h \
     Joint.h \
     JointRenderer.h \
