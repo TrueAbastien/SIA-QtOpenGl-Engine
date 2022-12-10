@@ -5,6 +5,9 @@
 #include <QVector3D>
 #include <QMatrix4x4>
 
+#include <functional>
+#include <string>
+
 #define M_PI 3.14159265358979323846f  /* pi */
 #define ROT_EPS 0.001f
 
@@ -26,3 +29,14 @@ struct UpdateInfo
   float animationTime;
   QMatrix4x4 screenToParent;
 };
+
+enum LogType
+{
+  DEBUG,
+  INFO,
+  WARNING,
+  ERROR_,
+  CRITICAL
+};
+
+using LogMethod = std::function<void(LogType, const std::string&)>;

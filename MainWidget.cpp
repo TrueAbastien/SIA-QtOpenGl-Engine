@@ -10,13 +10,18 @@
 #include "FactoryFloor.h"
 
 #include <QMouseEvent>
+#include <QVBoxLayout>
+#include <QHBoxLayout>
+#include <QPushButton>
+#include <QGroupBox>
 
 #include <cmath>
 
 
 // ------------------------------------------------------------------------------------------------
 MainWidget::MainWidget() :
-  isCameraRotating(false)
+  isCameraRotating(false),
+  logger(nullptr)
 {
   resetCamera();
 }
@@ -29,6 +34,71 @@ MainWidget::~MainWidget()
     makeCurrent();
     delete scene;
     doneCurrent();
+}
+
+// ------------------------------------------------------------------------------------------------
+QMenuBar* MainWidget::makeMenu()
+{
+  QMenuBar* root = new QMenuBar;
+
+  // File menu
+  {
+    QMenu* menu = new QMenu("Files");
+
+    // Load BVH Action
+    {
+      QAction* action = new QAction("Load BVH");
+      connect(action, &QAction::triggered, this, &MainWidget::loadBVH);
+      menu->addAction(action);
+    }
+
+    root->addMenu(menu);
+  }
+
+  // TODO
+
+  return root;
+}
+
+// ------------------------------------------------------------------------------------------------
+QWidget* MainWidget::makeControls()
+{
+  QGroupBox* root = new QGroupBox("Controls");
+  QVBoxLayout* layout = new QVBoxLayout;
+
+  // Button Reset
+  {
+    QPushButton* button = new QPushButton("Reset");
+    connect(button, &QPushButton::clicked, [&]()
+            {
+              resetCamera();
+            });
+    layout->addWidget(button);
+  }
+
+  // TODO
+
+  root->setLayout(layout);
+  root->setFixedWidth(200);
+  return root;
+}
+
+// ------------------------------------------------------------------------------------------------
+QWidget* MainWidget::makeLogger()
+{
+  if (logger != nullptr) delete logger;
+
+  QGroupBox* root = new QGroupBox("Logger");
+  QVBoxLayout* layout = new QVBoxLayout;
+
+  logger = new QTextEdit;
+  logger->setReadOnly(true);
+  layout->addWidget(logger);
+
+  root->setLayout(layout);
+  root->setFixedHeight(200);
+  root->setFocusPolicy(Qt::NoFocus);
+  return root;
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -157,19 +227,19 @@ void MainWidget::initializeGL()
 
       // Joint Renderer
       {
-        auto renderer = QSharedPointer<JointRenderer>::create();
+        auto renderer = createComponent<JointRenderer>();
         renderer->setLocalToParent(QVector3D(0, 0, 2));
         scene->addChildren(renderer);
 
-        auto joint1 = QSharedPointer<Joint>::create();
+        auto joint1 = createComponent<Joint>();
         joint1->setLocalToParent(QVector3D(0, 5, 2));
         renderer->addChildren(joint1);
 
-        auto joint2 = QSharedPointer<Joint>::create();
+        auto joint2 = createComponent<Joint>();
         joint2->setLocalToParent(QVector3D(-5, 2, 4));
         joint1->addChildren(joint2);
 
-        auto animPlug = QSharedPointer<AnimatorPlug>::create();
+        auto animPlug = createComponent<AnimatorPlug>();
         animPlug->addKeyFrame(AnimatorPlug::PropertyType::RotationX, 2.0f, 90.0f);
         animPlug->addKeyFrame(AnimatorPlug::PropertyType::RotationX, 5.0f, -45.0f);
         joint1->addChildren(animPlug);
@@ -177,7 +247,7 @@ void MainWidget::initializeGL()
 
       // Floor
       {
-        scene->addChildren(QSharedPointer<FactoryFloor>::create());
+        scene->addChildren(createComponent<FactoryFloor>());
       }
     }
     scene->init();
@@ -219,6 +289,48 @@ void MainWidget::paintGL()
       infos.screenToParent = projection * view;
     }
     scene->update(infos);
+}
+
+// ------------------------------------------------------------------------------------------------
+void MainWidget::internalLog(LogType type, const std::string& message)
+{
+  if (logger == nullptr)
+  {
+    return;
+  }
+
+  bool flag = true;
+  std::string colorCode;
+
+  // Color Pick
+  switch (type)
+  {
+#ifdef _DEBUG
+    case DEBUG:     colorCode = "#6224c7"; break;
+#endif
+    case INFO:      colorCode = "#2b7ce0"; break;
+    case WARNING:   colorCode = "#e6a73c"; break;
+    case ERROR_:    colorCode = "#c7341a"; break;
+    case CRITICAL:  colorCode = "#591515"; break;
+
+    default: flag = false; break;
+  }
+  if (!flag) return;
+
+  // Display Message
+  QTextCursor cursor = logger->textCursor();
+  std::string content = "<font color=\"" + colorCode + "\">" + message + "</font><br>";
+  logger->insertHtml(QString::fromStdString(content));
+  cursor.movePosition(QTextCursor::End);
+  logger->setTextCursor(cursor);
+}
+
+// ------------------------------------------------------------------------------------------------
+void MainWidget::loadBVH()
+{
+  internalLog(LogType::WARNING, "Not implemented yet..."); //DEBUG
+
+  // TODO
 }
 
 // ------------------------------------------------------------------------------------------------

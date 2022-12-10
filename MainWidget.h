@@ -10,6 +10,9 @@
 #include <QQuaternion>
 #include <QVector2D>
 #include <QBasicTimer>
+#include <QMenuBar>
+#include <QTextEdit>
+
 
 class MainWidget : public QOpenGLWidget, protected QOpenGLFunctions
 {
@@ -21,6 +24,12 @@ public:
 
     MainWidget();
     ~MainWidget();
+
+public:
+
+  QMenuBar* makeMenu();
+  QWidget* makeControls();
+  QWidget* makeLogger();
 
 protected:
 
@@ -35,6 +44,15 @@ protected:
     void resizeGL(int w, int h) override;
     void paintGL() override;
 
+    template <typename T, typename ...Args>
+    QSharedPointer<T> createComponent(Args&&... args);
+
+    void internalLog(LogType type, const std::string& message);
+
+public slots:
+
+  void loadBVH();
+
 private:
 
   QMatrix4x4 updateView();
@@ -48,6 +66,7 @@ private:
     AnimationController animController;
 
     QMatrix4x4 projection;
+    QTextEdit* logger;
 
     // Camera Controls
     QVector2D previousMousePos;
@@ -58,3 +77,19 @@ private:
     QVector3D cameraPosition;
     QVector3D forward, right, up;
 };
+
+// ------------------------------------------------------------------------------------------------
+template<typename T, typename ...Args>
+inline QSharedPointer<T> MainWidget::createComponent(Args&& ...args)
+{
+  auto result = QSharedPointer<T>::create(args...);
+
+  // Logger
+  const auto logMethod = [&](LogType type, const std::string& message)
+  {
+    internalLog(type, message);
+  };
+  result->setLogger(logMethod);
+
+  return result;
+}

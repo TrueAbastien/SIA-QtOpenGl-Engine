@@ -42,6 +42,7 @@ HEADERS += \
 
 RESOURCES += \
     shaders.qrc \
+    styles.qrc \
     textures.qrc
 
 # install

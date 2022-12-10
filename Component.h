@@ -45,12 +45,16 @@ public:
     QVector<Pointer> children() const;
     Pointer child(int index) const; 
 
+    void setLogger(LogMethod method);
+
 protected:
 
     void setParent(Component* parent);
 
     void notifyParent(Notification notif);
     virtual void listenChild(Notification notif);
+
+    void log(LogType type, const std::string& message);
 
 protected:
 
@@ -60,4 +64,8 @@ protected:
 
     QVector<Pointer> m_children;
     Component* m_parent;
+
+private:
+
+  LogMethod logMethod;
 };

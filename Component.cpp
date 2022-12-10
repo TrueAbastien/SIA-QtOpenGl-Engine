@@ -86,6 +86,12 @@ Component::Pointer Component::child(int index) const
 }
 
 // ------------------------------------------------------------------------------------------------
+void Component::setLogger(LogMethod method)
+{
+  logMethod = method;
+}
+
+// ------------------------------------------------------------------------------------------------
 void Component::setParent(Component* parent)
 {
   m_parent = parent;
@@ -103,4 +109,13 @@ void Component::notifyParent(Notification notif)
 // ------------------------------------------------------------------------------------------------
 void Component::listenChild(Notification notif)
 {
+}
+
+// ------------------------------------------------------------------------------------------------
+void Component::log(LogType type, const std::string& message)
+{
+  if (logMethod)
+  {
+    logMethod(type, message);
+  }
 }
