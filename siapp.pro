@@ -3,6 +3,8 @@ QT       += core gui widgets
 TARGET = siapp
 TEMPLATE = app
 
+win32:RC_ICONS += icon.ico
+
 SOURCES += main.cpp
 
 SOURCES += \
