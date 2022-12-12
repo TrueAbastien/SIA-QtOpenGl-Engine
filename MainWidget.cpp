@@ -9,6 +9,7 @@
 #include "AnimatorPlug.h"
 #include "FactoryFloor.h"
 #include "FileReader.h"
+#include "AxisCorrector.h"
 
 #include <QMouseEvent>
 #include <QVBoxLayout>
@@ -396,7 +397,10 @@ void MainWidget::loadBVH()
     return;
   }
 
-  scene->addChildren(result);
+  auto parent = createComponent<AxisCorrector>(AxisCorrector::Mode::Y_to_Z);
+  parent->addChildren(result);
+
+  scene->addChildren(parent);
 }
 
 // ------------------------------------------------------------------------------------------------

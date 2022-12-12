@@ -11,6 +11,7 @@ SOURCES += \
     Animation.cpp \
     AnimationController.cpp \
     AnimatorPlug.cpp \
+    AxisCorrector.cpp \
     Box.cpp \
     ColoredRenderable.cpp \
     Component.cpp \
@@ -29,6 +30,7 @@ HEADERS += \
     Animation.h \
     AnimationController.h \
     AnimatorPlug.h \
+    AxisCorrector.h \
     Box.h \
     ColoredRenderable.h \
     Component.h \
