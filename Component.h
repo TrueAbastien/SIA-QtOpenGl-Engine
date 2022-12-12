@@ -51,7 +51,7 @@ public:
 
     void setLogger(LogMethod method);
 
-    virtual void merge(const Pointer& pointer);
+    virtual void copy(const Pointer& pointer);
 
     void setMatrixConstruct(const MatrixConstruct& method);
 

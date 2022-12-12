@@ -308,7 +308,7 @@ FileReader::BVHResult FileReader::readBVH(const QString& filePath, const BVHPara
       if (jtData->parent == nullptr)
       {
         // Copy Content
-        result->merge(jtComp);
+        result->copy(jtComp);
         jointComponents[ii] = result;
         continue;
       }

@@ -97,10 +97,12 @@ void Component::setLogger(LogMethod method)
 }
 
 // ------------------------------------------------------------------------------------------------
-void Component::merge(const Pointer& pointer)
+void Component::copy(const Pointer& pointer)
 {
   setLocalToParent(pointer->localPosition(), pointer->localRotation());
+  m_matrixMethod = pointer->m_matrixMethod;
   
+  m_children.clear();
   for (const auto& child : pointer->children())
   {
     addChildren(child);
