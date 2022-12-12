@@ -24,7 +24,7 @@ struct JointData
 using JointDataVec = std::vector<QSharedPointer<JointData>>;
 
 // ------------------------------------------------------------------------------------------------
-FileReader::BVHResult FileReader::readBVH(const QString& filePath)
+FileReader::BVHResult FileReader::readBVH(const QString& filePath, const BVHParameters& params)
 {
   auto file = std::ifstream(filePath.toStdString());
   if (!file.is_open())
@@ -210,7 +210,7 @@ FileReader::BVHResult FileReader::readBVH(const QString& filePath)
       // Joint Base
       auto joint = QSharedPointer<Joint>::create();
       // TODO: use name ?
-      joint->setLocalPosition(jt->offset * 1e-2f);
+      joint->setLocalPosition(jt->offset * params.scale);
 
       // Animation
       auto anim = QSharedPointer<AnimatorPlug>::create();
@@ -220,8 +220,10 @@ FileReader::BVHResult FileReader::readBVH(const QString& filePath)
         for (size_t ii = 0; ii < kfs.size(); ++ii)
         {
           // TODO: verify offset in Position affixment
-          anim->addKeyFrame(dof.type, ii * dt, kfs[ii]
-                            * (((int)dof.type < (int)DofType::RotationX) ? 1e-2f : M_PI / 180.0f));
+          float mult = ((int) dof.type < (int) DofType::RotationX)
+            ? params.scale
+            : M_PI / 180.0f;
+          anim->addKeyFrame(dof.type, ii * dt, kfs[ii] * mult);
         }
       }
       joint->addChildren(anim);

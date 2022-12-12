@@ -9,7 +9,12 @@ public:
 
   using BVHResult = QSharedPointer<JointRenderer>;
 
+  struct BVHParameters
+  {
+    float scale;
+  };
+
 public:
 
-  static BVHResult readBVH(const QString& filePath);
+  static BVHResult readBVH(const QString& filePath, const BVHParameters& params);
 };

@@ -19,6 +19,7 @@
 #include <QLabel>
 #include <QDoubleSpinBox>
 #include <QFileDialog>
+#include <QInputDialog>
 
 #include <cmath>
 
@@ -391,7 +392,19 @@ void MainWidget::loadBVH()
     return;
   }
 
-  auto result = FileReader::readBVH(fileName);
+  bool ok = true;
+  double scale = QInputDialog::getDouble(this, "BVH Infos", "Scale", 1.0f, 0.0f, 10.0f, 2, &ok);
+  if (!ok)
+  {
+    return;
+  }
+
+  FileReader::BVHParameters params;
+  {
+    params.scale = (float) scale;
+  }
+
+  auto result = FileReader::readBVH(fileName, params);
   if (result == nullptr)
   {
     return;
