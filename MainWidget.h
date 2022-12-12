@@ -46,6 +46,8 @@ protected:
 
     template <typename T, typename ...Args>
     QSharedPointer<T> createComponent(Args&&... args);
+    template <typename T>
+    QSharedPointer<T> createComponent(QSharedPointer<T> ptr);
 
     void internalLog(LogType type, const std::string& message);
 
@@ -89,14 +91,19 @@ private:
 template<typename T, typename ...Args>
 inline QSharedPointer<T> MainWidget::createComponent(Args&& ...args)
 {
-  auto result = QSharedPointer<T>::create(args...);
+  return createComponent(QSharedPointer<T>::create(args...));
+}
 
+// ------------------------------------------------------------------------------------------------
+template<typename T>
+inline QSharedPointer<T> MainWidget::createComponent(QSharedPointer<T> ptr)
+{
   // Logger
   const auto logMethod = [&](LogType type, const std::string& message)
   {
     internalLog(type, message);
   };
-  result->setLogger(logMethod);
+  ptr->setLogger(logMethod);
 
-  return result;
+  return ptr;
 }
