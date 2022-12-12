@@ -25,10 +25,9 @@ void AnimationController::start()
 
   if (m_timer->isValid())
   {
-    m_timer->restart();
-    return;
+    m_pausedTime = 0.0f;
   }
-  
+
   m_timer->start();
 }
 
@@ -53,6 +52,7 @@ void AnimationController::stop()
   }
 
   m_timer->invalidate();
+  m_pausedTime = 0.0f;
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -68,5 +68,5 @@ float AnimationController::time() const
     return m_pausedTime;
   }
 
-  return ((float) m_timer->elapsed()) / 1'000.0f;
+  return m_pausedTime + ((float) m_timer->elapsed()) / 1'000.0f;
 }

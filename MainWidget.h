@@ -52,12 +52,19 @@ protected:
 public slots:
 
   void loadBVH();
+  void resetCamera();
+  void recenterCamera();
+  void startAnimation();
+  void pauseAnimation();
+  void stopAnimation();
+
+signals:
+
+  void animationTimeChanged(double value);
 
 private:
 
   QMatrix4x4 updateView();
-
-  void resetCamera();
 
 private:
 

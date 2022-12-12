@@ -14,6 +14,8 @@
 #include <QHBoxLayout>
 #include <QPushButton>
 #include <QGroupBox>
+#include <QLabel>
+#include <QDoubleSpinBox>
 
 #include <cmath>
 
@@ -43,7 +45,7 @@ QMenuBar* MainWidget::makeMenu()
 
   // File menu
   {
-    QMenu* menu = new QMenu("Files");
+    QMenu* menu = new QMenu("File");
 
     // Load BVH Action
     {
@@ -66,18 +68,82 @@ QWidget* MainWidget::makeControls()
   QGroupBox* root = new QGroupBox("Controls");
   QVBoxLayout* layout = new QVBoxLayout;
 
-  // Button Reset
+  // Camera
   {
-    QPushButton* button = new QPushButton("Reset");
-    connect(button, &QPushButton::clicked, [&]()
-            {
-              resetCamera();
-            });
-    layout->addWidget(button);
+    QGroupBox* box = new QGroupBox("Camera");
+    QVBoxLayout* cameraVL = new QVBoxLayout;
+
+    // Reset Button
+    {
+      QPushButton* button = new QPushButton("Reset");
+      connect(button, &QPushButton::clicked, this, &MainWidget::resetCamera);
+      cameraVL->addWidget(button);
+    }
+
+    // Recenter Button
+    {
+      QPushButton* button = new QPushButton("Recenter");
+      connect(button, &QPushButton::clicked, this, &MainWidget::recenterCamera);
+      cameraVL->addWidget(button);
+    }
+
+    box->setLayout(cameraVL);
+    layout->addWidget(box);
   }
 
-  // TODO
+  // Animation
+  {
+    QGroupBox* box = new QGroupBox("Animation");
+    QVBoxLayout* animVL = new QVBoxLayout;
 
+    // Start Button
+    {
+      QPushButton* button = new QPushButton("Start");
+      connect(button, &QPushButton::clicked, this, &MainWidget::startAnimation);
+      animVL->addWidget(button);
+    }
+
+    // Pause Button
+    {
+      QPushButton* button = new QPushButton("Pause");
+      connect(button, &QPushButton::clicked, this, &MainWidget::pauseAnimation);
+      animVL->addWidget(button);
+    }
+
+    // Stop Button
+    {
+      QPushButton* button = new QPushButton("Stop");
+      connect(button, &QPushButton::clicked, this, &MainWidget::stopAnimation);
+      animVL->addWidget(button);
+    }
+
+    // Time Label
+    {
+      QHBoxLayout* timeHL = new QHBoxLayout;
+
+      // Label
+      {
+        QLabel* label = new QLabel("Time:");
+        timeHL->addWidget(label);
+      }
+
+      // Value
+      {
+        QDoubleSpinBox* spinBox = new QDoubleSpinBox;
+        spinBox->setReadOnly(true);
+        spinBox->setButtonSymbols(QAbstractSpinBox::NoButtons);
+        connect(this, &MainWidget::animationTimeChanged, spinBox, &QDoubleSpinBox::setValue);
+        timeHL->addWidget(spinBox);
+      }
+
+      animVL->addLayout(timeHL);
+    }
+
+    box->setLayout(animVL);
+    layout->addWidget(box);
+  }
+
+  layout->setAlignment(Qt::AlignTop);
   root->setLayout(layout);
   root->setFixedWidth(200);
   return root;
@@ -166,21 +232,6 @@ void MainWidget::keyPressEvent(QKeyEvent* e)
 {
   switch (e->key())
   {
-    // Reset Camera
-    case Qt::Key_R:
-      resetCamera();
-      break;
-
-    // Start Animation
-    case Qt::Key_P:
-      animController.start();
-      break;
-
-    // Stop Animation
-    case Qt::Key_S:
-      animController.stop();
-      break;
-
     // Close Application
     case Qt::Key_Escape:
       close();
@@ -282,13 +333,16 @@ void MainWidget::paintGL()
     QMatrix4x4 view = updateView();
 
     // Draw cube geometry
+    float animTime = animController.time();
     UpdateInfo infos;
     {
       infos.dt = 0.1f; // TODO
-      infos.animationTime = animController.time();
+      infos.animationTime = animTime,
       infos.screenToParent = projection * view;
     }
     scene->update(infos);
+
+    emit animationTimeChanged(animTime);
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -334,6 +388,42 @@ void MainWidget::loadBVH()
 }
 
 // ------------------------------------------------------------------------------------------------
+void MainWidget::resetCamera()
+{
+  cameraDistance = 5.0f;
+  cameraRotation = QVector2D(0, M_PI * .5f);
+  cameraPosition = QVector3D(0, 0, 0);
+
+  update();
+}
+
+// ------------------------------------------------------------------------------------------------
+void MainWidget::recenterCamera()
+{
+  cameraPosition = QVector3D(0, 0, 0);
+
+  update();
+}
+
+// ------------------------------------------------------------------------------------------------
+void MainWidget::startAnimation()
+{
+  animController.start();
+}
+
+// ------------------------------------------------------------------------------------------------
+void MainWidget::pauseAnimation()
+{
+  animController.pause();
+}
+
+// ------------------------------------------------------------------------------------------------
+void MainWidget::stopAnimation()
+{
+  animController.stop();
+}
+
+// ------------------------------------------------------------------------------------------------
 QMatrix4x4 MainWidget::updateView()
 {
   forward = QVector3D(
@@ -347,14 +437,4 @@ QMatrix4x4 MainWidget::updateView()
   QMatrix4x4 mat;
   mat.lookAt(cameraPosition + forward * cameraDistance, cameraPosition, up);
   return mat;
-}
-
-// ------------------------------------------------------------------------------------------------
-void MainWidget::resetCamera()
-{
-  cameraDistance = 5.0f;
-  cameraRotation = QVector2D(0, M_PI * .5f);
-  cameraPosition = QVector3D(0, 0, 0);
-
-  update();
 }
