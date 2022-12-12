@@ -14,6 +14,8 @@ public:
   void init() override;
   void update(UpdateInfo infos) override;
 
+  void addChildren(const Pointer& child) override;
+
 private:
   
   void initChildren(Component* component);

@@ -224,6 +224,7 @@ FileReader::BVHResult FileReader::readBVH(const QString& filePath)
           anim->addKeyFrame(dof.type, ii * dt, kfs[ii]);
         }
       }
+      joint->addChildren(anim);
 
       jointComponents.push_back(joint);
     }

@@ -14,6 +14,16 @@ void Scene::update(UpdateInfo infos)
 }
 
 // ------------------------------------------------------------------------------------------------
+void Scene::addChildren(const Pointer& child)
+{
+  Component::addChildren(child);
+
+  // Init new Child
+  child->init();
+  initChildren(child.get());
+}
+
+// ------------------------------------------------------------------------------------------------
 void Scene::initChildren(Component* component)
 {
   // Init Children

@@ -8,6 +8,7 @@
 #include "Floor.h"
 #include "AnimatorPlug.h"
 #include "FactoryFloor.h"
+#include "FileReader.h"
 
 #include <QMouseEvent>
 #include <QVBoxLayout>
@@ -16,6 +17,7 @@
 #include <QGroupBox>
 #include <QLabel>
 #include <QDoubleSpinBox>
+#include <QFileDialog>
 
 #include <cmath>
 
@@ -280,7 +282,6 @@ void MainWidget::initializeGL()
       {
         auto renderer = createComponent<JointRenderer>();
         renderer->setLocalToParent(QVector3D(0, 0, 2));
-        scene->addChildren(renderer);
 
         auto joint1 = createComponent<Joint>();
         joint1->setLocalToParent(QVector3D(0, 5, 2));
@@ -294,6 +295,8 @@ void MainWidget::initializeGL()
         animPlug->addKeyFrame(AnimatorPlug::PropertyType::RotationX, 2.0f, 90.0f);
         animPlug->addKeyFrame(AnimatorPlug::PropertyType::RotationX, 5.0f, -45.0f);
         joint1->addChildren(animPlug);
+
+        scene->addChildren(renderer);
       }
 
       // Floor
@@ -301,7 +304,6 @@ void MainWidget::initializeGL()
         scene->addChildren(createComponent<FactoryFloor>());
       }
     }
-    scene->init();
 
     // Use QBasicTimer because its faster than QTimer
     timer.start(12, this);
@@ -382,9 +384,19 @@ void MainWidget::internalLog(LogType type, const std::string& message)
 // ------------------------------------------------------------------------------------------------
 void MainWidget::loadBVH()
 {
-  internalLog(LogType::WARNING, "Not implemented yet..."); //DEBUG
+  QString fileName = QFileDialog::getOpenFileName(this, tr("Open BVH"), "", tr("BVH Files (*.bvh)"));
+  if (fileName.isEmpty())
+  {
+    return;
+  }
 
-  // TODO
+  auto result = FileReader::readBVH(fileName);
+  if (result == nullptr)
+  {
+    return;
+  }
+
+  scene->addChildren(result);
 }
 
 // ------------------------------------------------------------------------------------------------
