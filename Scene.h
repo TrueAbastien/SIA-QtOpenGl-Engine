@@ -16,6 +16,8 @@ public:
 
   void addChildren(const Pointer& child) override;
 
+  void clear();
+
 private:
   
   void initChildren(Component* component);

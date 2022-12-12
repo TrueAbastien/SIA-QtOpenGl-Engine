@@ -9,6 +9,8 @@
 #include <QSharedPointer>
 #include <QVector>
 
+#include <functional>
+
 class Component : protected QOpenGLFunctions
 {
 public:
@@ -19,6 +21,8 @@ public:
     {
       CHILD_ADDED
     };
+
+    using MatrixConstruct = std::function<QMatrix4x4(QVector3D, QVector3D)>;
 
 protected:
 
@@ -49,6 +53,8 @@ public:
 
     virtual void merge(const Pointer& pointer);
 
+    void setMatrixConstruct(const MatrixConstruct& method);
+
 protected:
 
     void setParent(Component* parent);
@@ -66,6 +72,8 @@ protected:
 
     QVector<Pointer> m_children;
     Component* m_parent;
+
+    MatrixConstruct m_matrixMethod;
 
 private:
 

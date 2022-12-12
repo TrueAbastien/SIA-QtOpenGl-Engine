@@ -5,6 +5,7 @@
 #include <fstream>
 #include <functional>
 #include <algorithm>
+#include <numeric>
 
 // ------------------------------------------------------------------------------------------------
 using DofType = AnimatorPlug::PropertyType;
@@ -216,17 +217,83 @@ FileReader::BVHResult FileReader::readBVH(const QString& filePath, const BVHPara
       auto anim = QSharedPointer<AnimatorPlug>::create();
       for (const auto& dof : jt->dofs)
       {
+        float mult = ((int) dof.type < (int) DofType::RotationX)
+          ? params.scale
+          : 1.0f;
+
         const auto& kfs = dof.keyframes;
         for (size_t ii = 0; ii < kfs.size(); ++ii)
         {
           // TODO: verify offset in Position affixment
-          float mult = ((int) dof.type < (int) DofType::RotationX)
-            ? params.scale
-            : M_PI / 180.0f;
           anim->addKeyFrame(dof.type, ii * dt, kfs[ii] * mult);
         }
       }
       joint->addChildren(anim);
+
+      // Matrix Order
+      {
+        using MatrixInstruction = std::function<void(QMatrix4x4&, const QVector3D&)>;
+        static MatrixInstruction __instructions[6] =
+        {
+          [](QMatrix4x4& m, const QVector3D& p) // Position X
+          {
+            m.translate(QVector3D(p.x(), 0, 0));
+          },
+          [](QMatrix4x4& m, const QVector3D& p) // Position Y
+          {
+            m.translate(QVector3D(0, p.y(), 0));
+          },
+          [](QMatrix4x4& m, const QVector3D& p) // Position Z
+          {
+            m.translate(QVector3D(0, 0, p.z()));
+          },
+          [](QMatrix4x4& m, const QVector3D& r) // Rotation X
+          {
+            m.rotate(r.x(), 1.0, 0.0, 0.0);
+          },
+          [](QMatrix4x4& m, const QVector3D& r) // Rotation Y
+          {
+            m.rotate(r.y(), 0.0, 1.0, 0.0);
+          },
+          [](QMatrix4x4& m, const QVector3D& r) // Rotation Z
+          {
+            m.rotate(r.z(), 0.0, 0.0, 1.0);
+          }
+        };
+
+        // Indexors
+        std::vector<int> indexor(6);
+        std::iota(indexor.begin(), indexor.end(), 0);
+
+        // Instructions
+        std::vector<MatrixInstruction> rotInst, posInst;
+        const auto insert = [&](int i)
+        {
+          if (i < 3) posInst.push_back(__instructions[i]);
+          else rotInst.push_back(__instructions[i]);
+        };
+        for (const auto& dof : jt->dofs)
+        {
+          int index = (int) dof.type;
+          indexor.erase(std::remove(indexor.begin(), indexor.end(), index), indexor.end());
+
+          insert(index);
+        }
+        for (const auto& index : indexor)
+        {
+          insert(index);
+        }
+
+        // Method
+        const auto method = [rotInst, posInst](QVector3D pos, QVector3D rot) -> QMatrix4x4
+        {
+          QMatrix4x4 m = {};
+          for (auto inst : posInst) inst(m, pos);
+          for (auto inst : rotInst) inst(m, rot);
+          return m;
+        };
+        joint->setMatrixConstruct(method);
+      }
 
       jointComponents.push_back(joint);
     }

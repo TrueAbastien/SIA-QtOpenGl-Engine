@@ -59,6 +59,7 @@ public slots:
   void startAnimation();
   void pauseAnimation();
   void stopAnimation();
+  void clearScene();
 
 signals:
 

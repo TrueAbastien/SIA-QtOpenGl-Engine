@@ -9,6 +9,16 @@ Component::Component() :
     m_children(0),
     m_parent(nullptr)
 {
+  const auto method = [](QVector3D pos, QVector3D rot) -> QMatrix4x4
+  {
+    QMatrix4x4 m = {};
+    m.rotate(rot.x(), 1.0, 0.0, 0.0);
+    m.rotate(rot.y(), 0.0, 1.0, 0.0);
+    m.rotate(rot.z(), 0.0, 0.0, 1.0);
+    m.translate(pos);
+    return m;
+  };
+  setMatrixConstruct(method);
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -16,12 +26,7 @@ void Component::setLocalToParent(const QVector3D& pos, const QVector3D& rot)
 {
     m_localPosition = pos;
     m_localRotation = rot;
-
-    m_localToParent = {};
-    m_localToParent.rotate(rot.x(), 1.0, 0.0, 0.0);
-    m_localToParent.rotate(rot.y(), 0.0, 1.0, 0.0);
-    m_localToParent.rotate(rot.z(), 0.0, 0.0, 1.0);
-    m_localToParent.translate(pos);
+    m_localToParent = m_matrixMethod(pos, rot);
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -100,6 +105,12 @@ void Component::merge(const Pointer& pointer)
   {
     addChildren(child);
   }
+}
+
+// ------------------------------------------------------------------------------------------------
+void Component::setMatrixConstruct(const MatrixConstruct& method)
+{
+  m_matrixMethod = method;
 }
 
 // ------------------------------------------------------------------------------------------------

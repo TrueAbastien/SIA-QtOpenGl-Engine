@@ -24,6 +24,12 @@ void Scene::addChildren(const Pointer& child)
 }
 
 // ------------------------------------------------------------------------------------------------
+void Scene::clear()
+{
+  m_children.clear();
+}
+
+// ------------------------------------------------------------------------------------------------
 void Scene::initChildren(Component* component)
 {
   // Init Children

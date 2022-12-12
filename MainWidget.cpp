@@ -26,6 +26,7 @@
 
 // ------------------------------------------------------------------------------------------------
 MainWidget::MainWidget() :
+  isCameraMoving(false),
   isCameraRotating(false),
   logger(nullptr)
 {
@@ -71,6 +72,22 @@ QWidget* MainWidget::makeControls()
 {
   QGroupBox* root = new QGroupBox("Controls");
   QVBoxLayout* layout = new QVBoxLayout;
+
+  // Scene
+  {
+    QGroupBox* box = new QGroupBox("Scene");
+    QVBoxLayout* cameraVL = new QVBoxLayout;
+
+    // Clear Button
+    {
+      QPushButton* button = new QPushButton("Clear");
+      connect(button, &QPushButton::clicked, this, &MainWidget::clearScene);
+      cameraVL->addWidget(button);
+    }
+
+    box->setLayout(cameraVL);
+    layout->addWidget(box);
+  }
 
   // Camera
   {
@@ -267,45 +284,7 @@ void MainWidget::initializeGL()
     glEnable(GL_CULL_FACE);
 
     scene = new Scene;
-    {
-      //// Cube 1
-      //{
-      //  scene->addChildren(QSharedPointer<Cube>::create());
-      //}
-
-      //// Cube 2
-      //{
-      //  auto box = QSharedPointer<Box>::create();
-      //  box->setLocalToParent(QVector3D(5.0, 0.0, 0.0));
-      //  scene->addChildren(box);
-      //}
-
-      // Joint Renderer
-      /*{
-        auto renderer = createComponent<JointRenderer>();
-        renderer->setLocalToParent(QVector3D(0, 0, 2));
-
-        auto joint1 = createComponent<Joint>();
-        joint1->setLocalToParent(QVector3D(0, 5, 2));
-        renderer->addChildren(joint1);
-
-        auto joint2 = createComponent<Joint>();
-        joint2->setLocalToParent(QVector3D(-5, 2, 4));
-        joint1->addChildren(joint2);
-
-        auto animPlug = createComponent<AnimatorPlug>();
-        animPlug->addKeyFrame(AnimatorPlug::PropertyType::RotationX, 2.0f, 90.0f);
-        animPlug->addKeyFrame(AnimatorPlug::PropertyType::RotationX, 5.0f, -45.0f);
-        joint1->addChildren(animPlug);
-
-        scene->addChildren(renderer);
-      }*/
-
-      // Floor
-      {
-        scene->addChildren(createComponent<FactoryFloor>());
-      }
-    }
+    clearScene();
 
     // Use QBasicTimer because its faster than QTimer
     timer.start(12, this);
@@ -392,8 +371,8 @@ void MainWidget::loadBVH()
     return;
   }
 
-  bool ok = true;
-  double scale = QInputDialog::getDouble(this, "BVH Infos", "Scale", 1.0f, 0.0f, 10.0f, 2, &ok);
+  bool ok;
+  double scale = QInputDialog::getDouble(this, "BVH Infos", "Scale Percent", 100.0f, 0.0f, 100.0f, 2, &ok);
   if (!ok)
   {
     return;
@@ -401,7 +380,7 @@ void MainWidget::loadBVH()
 
   FileReader::BVHParameters params;
   {
-    params.scale = (float) scale;
+    params.scale = 1e-2f * scale;
   }
 
   auto result = FileReader::readBVH(fileName, params);
@@ -450,6 +429,22 @@ void MainWidget::pauseAnimation()
 void MainWidget::stopAnimation()
 {
   animController.stop();
+}
+
+// ------------------------------------------------------------------------------------------------
+void MainWidget::clearScene()
+{
+  scene->clear();
+
+  // Basic Scene
+  {
+    // Floor
+    {
+      scene->addChildren(createComponent<FactoryFloor>());
+    }
+  }
+
+  update();
 }
 
 // ------------------------------------------------------------------------------------------------
