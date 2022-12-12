@@ -19,7 +19,6 @@ struct JointData
   QVector3D offset;
 
   std::vector<AnimationData> dofs;
-  std::vector<QSharedPointer<JointData>> children;
   JointData* parent;
 };
 using JointDataVec = std::vector<QSharedPointer<JointData>>;
@@ -44,7 +43,11 @@ FileReader::BVHResult FileReader::readBVH(const QString& filePath)
   // Utilities
   const auto lassert = [](bool cond)
   {
+#ifdef _DEBUG
+    assert(cond);
+#else
     if (!cond) throw false;
+#endif
   };
   const auto next = [&](auto& value)
   {
@@ -73,7 +76,6 @@ FileReader::BVHResult FileReader::readBVH(const QString& filePath)
     auto joint = QSharedPointer<JointData>::create();
 
     // Increment
-    curr->children.push_back(joint);
     joint->parent = curr;
     curr = joint.get();
 
@@ -148,13 +150,10 @@ FileReader::BVHResult FileReader::readBVH(const QString& filePath)
       joints.push_back(readJoint(true));
 
       // Ascent
-      do
+      while ((token = skip()) == "}")
       {
         curr = curr->parent;
-
-        token = skip();
       }
-      while (token == "}");
     }
     while (curr != nullptr);
   };
@@ -163,12 +162,12 @@ FileReader::BVHResult FileReader::readBVH(const QString& filePath)
   const auto readMotion = [&]()
   {
     // Frame Count
-    lassert(upper(skip()) == "FRAMES:");
+    lassert(skip() == "Frames:");
     next(nframes);
     
     // Frame Time
-    lassert(upper(skip()) == "FRAME");
-    lassert(upper(skip()) == "TIME:");
+    lassert(skip() == "Frame");
+    lassert(skip() == "Time:");
     next(dt);
 
     // Key Frames Value
@@ -211,7 +210,7 @@ FileReader::BVHResult FileReader::readBVH(const QString& filePath)
       // Joint Base
       auto joint = QSharedPointer<Joint>::create();
       // TODO: use name ?
-      joint->setLocalPosition(jt->offset);
+      joint->setLocalPosition(jt->offset * 1e-2f);
 
       // Animation
       auto anim = QSharedPointer<AnimatorPlug>::create();
@@ -221,7 +220,8 @@ FileReader::BVHResult FileReader::readBVH(const QString& filePath)
         for (size_t ii = 0; ii < kfs.size(); ++ii)
         {
           // TODO: verify offset in Position affixment
-          anim->addKeyFrame(dof.type, ii * dt, kfs[ii]);
+          anim->addKeyFrame(dof.type, ii * dt, kfs[ii]
+                            * (((int)dof.type < (int)DofType::RotationX) ? 1e-2f : M_PI / 180.0f));
         }
       }
       joint->addChildren(anim);
@@ -238,7 +238,9 @@ FileReader::BVHResult FileReader::readBVH(const QString& filePath)
       // Root
       if (jtData->parent == nullptr)
       {
-        result->addChildren(jtComp);
+        // Copy Content
+        result->merge(jtComp);
+        jointComponents[ii] = result;
         continue;
       }
 

@@ -47,6 +47,8 @@ public:
 
     void setLogger(LogMethod method);
 
+    virtual void merge(const Pointer& pointer);
+
 protected:
 
     void setParent(Component* parent);

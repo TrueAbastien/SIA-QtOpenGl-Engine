@@ -279,7 +279,7 @@ void MainWidget::initializeGL()
       //}
 
       // Joint Renderer
-      {
+      /*{
         auto renderer = createComponent<JointRenderer>();
         renderer->setLocalToParent(QVector3D(0, 0, 2));
 
@@ -297,7 +297,7 @@ void MainWidget::initializeGL()
         joint1->addChildren(animPlug);
 
         scene->addChildren(renderer);
-      }
+      }*/
 
       // Floor
       {

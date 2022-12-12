@@ -92,6 +92,17 @@ void Component::setLogger(LogMethod method)
 }
 
 // ------------------------------------------------------------------------------------------------
+void Component::merge(const Pointer& pointer)
+{
+  setLocalToParent(pointer->localPosition(), pointer->localRotation());
+  
+  for (const auto& child : pointer->children())
+  {
+    addChildren(child);
+  }
+}
+
+// ------------------------------------------------------------------------------------------------
 void Component::setParent(Component* parent)
 {
   m_parent = parent;
