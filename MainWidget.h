@@ -54,6 +54,7 @@ protected:
 public slots:
 
   void loadBVH();
+  void loadOFF();
   void resetCamera();
   void recenterCamera();
   void startAnimation();

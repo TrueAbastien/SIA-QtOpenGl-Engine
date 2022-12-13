@@ -59,6 +59,13 @@ QMenuBar* MainWidget::makeMenu()
       menu->addAction(action);
     }
 
+    // Load OFF Action
+    {
+      QAction* action = new QAction("Load OFF");
+      connect(action, &QAction::triggered, this, &MainWidget::loadOFF);
+      menu->addAction(action);
+    }
+
     root->addMenu(menu);
   }
 
@@ -384,6 +391,39 @@ void MainWidget::loadBVH()
   }
 
   auto result = FileReader::readBVH(fileName, params);
+  if (result == nullptr)
+  {
+    return;
+  }
+
+  auto parent = createComponent<AxisCorrector>(AxisCorrector::Mode::Y_to_Z);
+  parent->addChildren(result);
+
+  scene->addChildren(parent);
+}
+
+// ------------------------------------------------------------------------------------------------
+void MainWidget::loadOFF()
+{
+  QString fileName = QFileDialog::getOpenFileName(this, tr("Open OFF"), "", tr("OFF Files (*.off)"));
+  if (fileName.isEmpty())
+  {
+    return;
+  }
+
+  bool ok;
+  double scale = QInputDialog::getDouble(this, "OFF Infos", "Scale Percent", 100.0f, 0.0f, 100.0f, 2, &ok);
+  if (!ok)
+  {
+    return;
+  }
+
+  FileReader::OFFParameters params;
+  {
+    params.scale = 1e-2f * scale;
+  }
+
+  auto result = FileReader::readOFF(fileName, params);
   if (result == nullptr)
   {
     return;

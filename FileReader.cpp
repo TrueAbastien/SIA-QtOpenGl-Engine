@@ -333,3 +333,106 @@ FileReader::BVHResult FileReader::readBVH(const QString& filePath, const BVHPara
 
   return result;
 }
+
+// ------------------------------------------------------------------------------------------------
+FileReader::OFFResult FileReader::readOFF(const QString& filePath, const OFFParameters& params)
+{
+  auto file = std::ifstream(filePath.toStdString());
+  if (!file.is_open())
+  {
+    return nullptr;
+  }
+
+  // Data
+  SkinMesh::Vertices vertices(0);
+  SkinMesh::Indices indices(0);
+  int nVtx, nTri, nEdges;
+
+  // Utilities
+  const auto lassert = [](bool cond)
+  {
+#ifdef _DEBUG
+    assert(cond);
+#else
+    if (!cond) throw false;
+#endif
+  };
+  const auto next = [&](auto& value)
+  {
+    file >> std::skipws >> value;
+  };
+  const auto skip = [&]()-> std::string
+  {
+    std::string val; next(val);
+    return val;
+  };
+  const auto upper = [](std::string s) -> std::string
+  {
+    std::string r;
+
+    std::transform(s.begin(), s.end(), std::back_inserter(r), [](char c)
+                   {
+                     return std::toupper(c);
+                   });
+
+    return r;
+  };
+
+  // Reading
+  const auto readHeader = [&]()
+  {
+    next(nVtx);
+    next(nTri);
+    next(nEdges);
+  };
+  const auto readVertices = [&]()
+  {
+    for (int ii = 0; ii < nVtx; ++ii)
+    {
+      VertexData_Colored vtx;
+
+      for (int jj = 0; jj < 3; ++jj)
+      {
+        float v; next(v);
+        v *= params.scale;
+
+        vtx.position[jj] = v;
+        vtx.color[jj] = v - (int) v;
+      }
+
+      vertices.push_back(vtx);
+    }
+  };
+  const auto readTriangles = [&]()
+  {
+    for (int ii = 0; ii < nTri; ++ii)
+    {
+      int size; next(size);
+
+      SkinMesh::Poly poly(size);
+      for (int jj = 0; jj < size; ++jj)
+      {
+        int i; next(i);
+        poly[jj] = i;
+      }
+
+      SkinMesh::ProcessPoly(indices, poly);
+    }
+  };
+
+  // Algorithm
+  try
+  {
+    lassert(upper(skip()) == "OFF");
+
+    readHeader();
+    readVertices();
+    readTriangles();
+  }
+  catch (...)
+  {
+    return nullptr;
+  }
+
+  return OFFResult::create(vertices, indices);
+}

@@ -24,6 +24,7 @@ SOURCES += \
     MainWidget.cpp \
     Renderable.cpp \
     Scene.cpp \
+    SkinMesh.cpp \
     TexturedRenderable.cpp
 
 HEADERS += \
@@ -43,6 +44,7 @@ HEADERS += \
     MainWidget.h \
     Renderable.h \
     Scene.h \
+    SkinMesh.h \
     Structs.h \
     TexturedRenderable.h
 
