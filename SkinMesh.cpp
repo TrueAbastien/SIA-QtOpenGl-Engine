@@ -36,3 +36,9 @@ void SkinMesh::update(UpdateInfo infos)
 
   ColoredRenderable::updateRenderable(GL_TRIANGLES, m_indices.size());
 }
+
+// ------------------------------------------------------------------------------------------------
+size_t SkinMesh::vSize() const
+{
+  return m_vertices.size();
+}

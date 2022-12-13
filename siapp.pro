@@ -22,6 +22,7 @@ SOURCES += \
     Joint.cpp \
     JointRenderer.cpp \
     MainWidget.cpp \
+    MeshRigRelation.cpp \
     Renderable.cpp \
     Scene.cpp \
     SkinMesh.cpp \
@@ -42,6 +43,7 @@ HEADERS += \
     Joint.h \
     JointRenderer.h \
     MainWidget.h \
+    MeshRigRelation.h \
     Renderable.h \
     Scene.h \
     SkinMesh.h \

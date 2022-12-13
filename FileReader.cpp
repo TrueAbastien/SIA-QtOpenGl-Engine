@@ -463,3 +463,160 @@ FileReader::OFFResult FileReader::readOFF(const QString& filePath, const OFFPara
 
   return OFFResult::create(vertices, indices);
 }
+
+// ------------------------------------------------------------------------------------------------
+FileReader::WeightResult FileReader::readWeight(const QString& filePath, const WeightParameters& params)
+{
+  if (params.root.isNull() || params.skin.isNull())
+  {
+    return nullptr;
+  }
+
+  auto file = std::ifstream(filePath.toStdString());
+  if (!file.is_open())
+  {
+    return nullptr;
+  }
+
+  // Data
+  QMap<QString, Component::Pointer> jointMap;
+  MeshRigRelation::VerticesWeight result(0);
+  QVector<Component::Pointer> joints(0);
+  int nVertices, nJoints;
+
+  // Utilities
+  const auto lassert = [](bool cond)
+  {
+#ifdef _DEBUG
+    assert(cond);
+#else
+    if (!cond) throw false;
+#endif
+  };
+  const auto next = [&](auto& value)
+  {
+    file >> std::skipws >> value;
+  };
+  const auto skip = [&]()-> std::string
+  {
+    std::string val; next(val);
+    return val;
+  };
+  const auto upper = [](std::string s) -> std::string
+  {
+    std::string r;
+
+    std::transform(s.begin(), s.end(), std::back_inserter(r), [](char c)
+                   {
+                     return std::toupper(c);
+                   });
+
+    return r;
+  };
+
+  // Construct
+  const auto findVertices = [&]()
+  {
+    nVertices = (int) params.skin->vSize();
+  };
+  const auto findJoints = [&]()
+  {
+    std::vector<Component::Pointer> nextJoints = {params.root}, curr(0);
+    int iter = 0;
+
+    // Iterative Search
+    while (!nextJoints.empty() && ++iter < 100)
+    {
+      curr = std::move(nextJoints);
+      nextJoints.clear();
+
+      for (const auto& jt : curr)
+      {
+        jointMap.insert(jt->name(), jt);
+
+        for (const auto& child : jt->children())
+        {
+          if (!child.dynamicCast<Joint>().isNull())
+          {
+            nextJoints.push_back(child);
+          }
+        }
+      }
+    }
+
+    nJoints = (int) joints.size();
+  };
+
+  // Read
+  const auto readJoints = [&]()
+  {
+    // Read Joint Names
+    QVector<QString> names(nJoints);
+    {
+      lassert(upper(skip()) == "ID");
+
+      for (int ii = 0; ii < nJoints; ++ii)
+      {
+        std::string name; next(name);
+        names[ii] = QString::fromStdString(name);
+      }
+    }
+
+    // Organize Joint Order
+    {
+      QVector<Component::Pointer> orderedJoints(nJoints);
+
+      for (int ii = 0; ii < nJoints; ++ii)
+      {
+        orderedJoints[ii] = jointMap[names[ii]];
+      }
+
+      joints = std::move(orderedJoints);
+    }
+  };
+  const auto readWeights = [&]()
+  {
+    static constexpr float eps = 1e-4f;
+
+    result.resize(nVertices);
+
+    for (int ii = 0; ii < nVertices; ++ii)
+    {
+      // Index
+      int index; next(index);
+      auto& weights = result[index];
+
+      // Weights
+      for (int jj = 0; jj < nJoints; ++jj)
+      {
+        float weight; next(weight);
+        if (weight < eps) continue;
+
+        MeshRigRelation::WeightData data;
+        {
+          data.joint = joints[jj];
+          data.weight = weight;
+        }
+        weights.push_back(data);
+      }
+    }
+  };
+
+  // Algorithm
+  try
+  {
+    findVertices();
+    findJoints();
+
+    readJoints();
+    readWeights();
+  }
+  catch (...)
+  {
+    return nullptr;
+  }
+
+  auto r = WeightResult::create();
+  *r = result;
+  return r;
+}

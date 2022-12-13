@@ -27,6 +27,8 @@ public:
   void init() override;
   void update(UpdateInfo infos) override;
 
+  size_t vSize() const;
+
 private:
 
   Vertices m_vertices;
