@@ -11,12 +11,11 @@ class MeshRigRelation
 {
 public:
 
-  using JointID = QString;
   struct JointInfo
   {
-    QMatrix4x4 localToWorld;
+    QMatrix4x4 worldToLocal;
   };
-  using JointMap = QMap<JointID, JointInfo>;
+  using JointMap = QMap<Component::Pointer, JointInfo>;
 
   struct WeightData
   {
@@ -34,9 +33,12 @@ public:
 public:
 
   void setWeightData(const VerticesWeight& weights);
-  void computeHomeData(const QSharedPointer<JointRenderer>& body, const std::vector<VertexData_Colored>& vertices);
+  void computeHomeData(const QSharedPointer<JointRenderer>& body,
+                       const std::vector<VertexData_Colored>& vertices,
+                       const QMatrix4x4& skin_localToWorld);
 
-  void updatePosition(std::vector<VertexData_Colored>& vertices);
+  void updatePosition(std::vector<VertexData_Colored>& vertices,
+                      const QMatrix4x4& skin_localToWorld);
 
 
 private:
