@@ -92,6 +92,13 @@ QWidget* MainWidget::makeControls()
       cameraVL->addWidget(button);
     }
 
+    // Make Skin
+    {
+      QPushButton* button = new QPushButton("Make Skin");
+      connect(button, &QPushButton::clicked, this, &MainWidget::makeSkin);
+      cameraVL->addWidget(button);
+    }
+
     box->setLayout(cameraVL);
     layout->addWidget(box);
   }
@@ -439,6 +446,22 @@ void MainWidget::loadOFF()
   internalLog(INFO, name.toStdString() + " successfully loaded !");
 
   scene->addChildren(parent);
+}
+
+// ------------------------------------------------------------------------------------------------
+void MainWidget::makeSkin()
+{
+  // Pick JointRenderer
+  // TODO
+
+  // Pick SkinMesh
+  // TODO
+
+  // Load Weights
+  // TODO
+
+  // Compute & Assignation
+  // TODO
 }
 
 // ------------------------------------------------------------------------------------------------

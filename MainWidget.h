@@ -55,6 +55,7 @@ public slots:
 
   void loadBVH();
   void loadOFF();
+  void makeSkin();
   void resetCamera();
   void recenterCamera();
   void startAnimation();
@@ -71,6 +72,14 @@ private:
   QMatrix4x4 updateView();
 
   QString getFileName(const QString& filePath) const;
+
+  template <typename T>
+  using ComponentPredicate = std::function<bool(const QSharedPointer<T>&)>;
+  template <typename T>
+  QVector<QSharedPointer<T>> find_if(ComponentPredicate<T> pred = []()
+                                     {
+                                       return true;
+                                     });
 
 private:
 
@@ -113,4 +122,39 @@ inline QSharedPointer<T> MainWidget::createComponent(const QString& name, QShare
   ptr->setLogger(logMethod);
 
   return ptr;
+}
+
+// ------------------------------------------------------------------------------------------------
+template<typename T>
+inline QVector<QSharedPointer<T>> MainWidget::find_if(ComponentPredicate<T> pred)
+{
+  using CompVec = QVector<QSharedPointer<T>>;
+
+  CompVec result(0);
+
+  QVector<Component*> next{scene}, curr;
+  int iter = 0;
+
+  // Iterative Search
+  while (!next.isEmpty() && iter < 100)
+  {
+    curr = std::move(next);
+    next.clear();
+
+    for (const auto& item : curr)
+    {
+      for (const auto& child : item->children())
+      {
+        auto childCast = child.dynamicCast<T>();
+        if (!childCast.isNull() && pred(child))
+        {
+          result.push_back(childCast);
+        }
+
+        next.push_back(child.get());
+      }
+    }
+  }
+
+  return result;
 }
