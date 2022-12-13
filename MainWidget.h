@@ -45,9 +45,9 @@ protected:
     void paintGL() override;
 
     template <typename T, typename ...Args>
-    QSharedPointer<T> createComponent(Args&&... args);
+    QSharedPointer<T> createComponent(const QString& name, Args&&... args);
     template <typename T>
-    QSharedPointer<T> createComponent(QSharedPointer<T> ptr);
+    QSharedPointer<T> createComponent(const QString& name, QSharedPointer<T> ptr);
 
     void internalLog(LogType type, const std::string& message);
 
@@ -70,6 +70,8 @@ private:
 
   QMatrix4x4 updateView();
 
+  QString getFileName(const QString& filePath) const;
+
 private:
 
     QBasicTimer timer;
@@ -91,15 +93,18 @@ private:
 
 // ------------------------------------------------------------------------------------------------
 template<typename T, typename ...Args>
-inline QSharedPointer<T> MainWidget::createComponent(Args&& ...args)
+inline QSharedPointer<T> MainWidget::createComponent(const QString& name, Args&& ...args)
 {
-  return createComponent(QSharedPointer<T>::create(args...));
+  return createComponent(name, QSharedPointer<T>::create(args...));
 }
 
 // ------------------------------------------------------------------------------------------------
 template<typename T>
-inline QSharedPointer<T> MainWidget::createComponent(QSharedPointer<T> ptr)
+inline QSharedPointer<T> MainWidget::createComponent(const QString& name, QSharedPointer<T> ptr)
 {
+  // Name
+  ptr->setName(name);
+
   // Logger
   const auto logMethod = [&](LogType type, const std::string& message)
   {

@@ -3,6 +3,7 @@
 
 // ------------------------------------------------------------------------------------------------
 Component::Component() :
+    m_name(QString("New Item")),
     m_localPosition(QVector3D()),
     m_localRotation(QVector3D()),
     m_localToParent(QMatrix4x4()),
@@ -19,6 +20,18 @@ Component::Component() :
     return m;
   };
   setMatrixConstruct(method);
+}
+
+// ------------------------------------------------------------------------------------------------
+void Component::setName(const QString& name)
+{
+  m_name = name;
+}
+
+// ------------------------------------------------------------------------------------------------
+QString Component::name() const
+{
+  return m_name;
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -99,6 +112,7 @@ void Component::setLogger(LogMethod method)
 // ------------------------------------------------------------------------------------------------
 void Component::copy(const Pointer& pointer)
 {
+  m_name = pointer->m_name;
   setLocalToParent(pointer->localPosition(), pointer->localRotation());
   m_matrixMethod = pointer->m_matrixMethod;
   

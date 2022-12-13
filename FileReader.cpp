@@ -212,7 +212,7 @@ FileReader::BVHResult FileReader::readBVH(const QString& filePath, const BVHPara
     {
       // Joint Base
       auto joint = QSharedPointer<Joint>::create();
-      // TODO: use name ?
+      joint->setName(jt->name);
       joint->setLocalPosition(jt->offset * params.scale);
 
       // Animation
@@ -226,7 +226,6 @@ FileReader::BVHResult FileReader::readBVH(const QString& filePath, const BVHPara
         const auto& kfs = dof.keyframes;
         for (size_t ii = 0; ii < kfs.size(); ++ii)
         {
-          // TODO: verify offset in Position affixment
           anim->addKeyFrame(dof.type, ii * dt, kfs[ii] * mult);
         }
       }

@@ -35,6 +35,9 @@ public:
 
 public:
 
+    void setName(const QString& name);
+    QString name() const;
+
     void setLocalToParent(const QVector3D& pos = QVector3D(), const QVector3D& rot = QVector3D());
     QMatrix4x4 localToParent() const;
     QMatrix4x4 localToWorld() const;
@@ -65,6 +68,8 @@ protected:
     void log(LogType type, const std::string& message);
 
 protected:
+
+    QString m_name;
 
     QVector3D m_localPosition;
     QVector3D m_localRotation;

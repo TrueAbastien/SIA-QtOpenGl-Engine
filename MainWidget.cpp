@@ -396,8 +396,11 @@ void MainWidget::loadBVH()
     return;
   }
 
-  auto parent = createComponent<AxisCorrector>(AxisCorrector::Mode::Y_to_Z);
+  QString name = getFileName(fileName);
+  auto parent = createComponent<AxisCorrector>(name, AxisCorrector::Mode::Y_to_Z);
   parent->addChildren(result);
+
+  internalLog(INFO, name.toStdString() + " successfully loaded !");
 
   scene->addChildren(parent);
 }
@@ -429,8 +432,11 @@ void MainWidget::loadOFF()
     return;
   }
 
-  auto parent = createComponent<AxisCorrector>(AxisCorrector::Mode::Y_to_Z);
+  QString name = getFileName(fileName);
+  auto parent = createComponent<AxisCorrector>(name, AxisCorrector::Mode::Y_to_Z);
   parent->addChildren(result);
+  
+  internalLog(INFO, name.toStdString() + " successfully loaded !");
 
   scene->addChildren(parent);
 }
@@ -480,7 +486,7 @@ void MainWidget::clearScene()
   {
     // Floor
     {
-      scene->addChildren(createComponent<FactoryFloor>());
+      scene->addChildren(createComponent<FactoryFloor>("Floor"));
     }
   }
 
@@ -501,4 +507,12 @@ QMatrix4x4 MainWidget::updateView()
   QMatrix4x4 mat;
   mat.lookAt(cameraPosition + forward * cameraDistance, cameraPosition, up);
   return mat;
+}
+
+// ------------------------------------------------------------------------------------------------
+QString MainWidget::getFileName(const QString& filePath) const
+{
+  QFileInfo fileInfo(filePath);
+  QString fileName = fileInfo.fileName();
+  return fileName.left(fileName.indexOf('.'));
 }
