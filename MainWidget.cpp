@@ -452,7 +452,31 @@ void MainWidget::loadOFF()
 void MainWidget::makeSkin()
 {
   // Pick JointRenderer
-  // TODO
+  const auto& items = find_if<JointRenderer>();
+  if (items.isEmpty()) return;
+
+  QString name;
+  {
+    // Create JointRenderer List
+    QStringList names(0);
+    const auto func = [](const QSharedPointer<JointRenderer>& jr) -> QString
+    {
+      return jr->name();
+    };
+    std::transform(items.begin(), items.end(), std::back_inserter(names), func);
+
+    // Create Dialog
+    bool ok;
+    name = QInputDialog::getItem(this, "Selected BVH", "BVH", names, 0, false, &ok);
+    if (!ok) return;
+  }
+
+  const auto pred = [&]()
+  {
+
+  };
+  const auto& item = std::find_if(items.begin(), items.end(), [&]())
+  QSharedPointer<JointRenderer> root = 
 
   // Pick SkinMesh
   // TODO
