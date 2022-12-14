@@ -4,11 +4,11 @@
 void constructOverChildren(const Component* root, const QMatrix4x4& model,
                            JointRenderer::Vertices& vts, JointRenderer::Indices& ids)
 {
-  VertexData_Wired parent_vtx
+  VertexData_Wired parent_vtx;
   {
-    model * QVector3D(0, 0, 0),
-    QVector3D(0, 0.8, 0)
-  };
+    parent_vtx.position = model * QVector3D(0, 0, 0);
+    parent_vtx.color = QVector3D(0, 0.8, 0);
+  }
   GLushort parent_idx = vts.size();
 
   vts.push_back(parent_vtx);
@@ -21,11 +21,11 @@ void constructOverChildren(const Component* root, const QMatrix4x4& model,
 
     QMatrix4x4 newModel = model * child->localToParent();
 
-    VertexData_Wired child_vtx
+    VertexData_Wired child_vtx;
     {
-      newModel * QVector3D(0, 0, 0),
-      QVector3D(0.8, 0, 0)
-    };
+      child_vtx.position = newModel * QVector3D(0, 0, 0);
+      child_vtx.color = QVector3D(0.8, 0, 0);
+    }
 
     ids.push_back(parent_idx);
     ids.push_back((GLushort) vts.size());
@@ -99,7 +99,7 @@ void JointRenderer::updateBuffers()
 
   // Recompute Buffers Infos
   WiredRenderable::initRenderable(m_vertices.data(), m_vertices.size(),
-                                    m_indices.data(), m_indices.size());
+                                  m_indices.data(), m_indices.size());
 }
 
 // ------------------------------------------------------------------------------------------------

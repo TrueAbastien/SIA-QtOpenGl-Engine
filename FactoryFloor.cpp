@@ -13,7 +13,7 @@ void FactoryFloor::init()
   float s = w / (n - 1);
   float o = -w / 2;
 
-  std::array<VertexData_Colored, n * n> vertices;
+  std::array<VertexData_Wired, n * n> vertices;
   std::array<GLushort, n << 2> indices;
 
   // Vertices

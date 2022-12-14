@@ -32,7 +32,9 @@ protected:
   void updateVertices(const void* vtxData, int vtxCount);
 
   template <typename T>
-  void computeNormals(T* vtxData, int vtxCount, const GLushort* idxData, int idxCount);
+  void computeNormals(T* vtxData, int vtxCount,
+                      const GLushort* idxData, int idxCount,
+                      int idxStep = 3, bool inverted = false);
 
 private:
 
@@ -47,9 +49,15 @@ private:
   template <> void internalUpdateRenderable<VertexData_Wired>();
 
 
-  template <typename T> void internalComputeNormals(T* vtxData, int vtxCount, const GLushort* idxData, int idxCount);
-  template <> void internalComputeNormals<VertexData_Textured>(VertexData_Textured* vtxData, int vtxCount, const GLushort* idxData, int idxCount);
-  template <> void internalComputeNormals<VertexData_Colored>(VertexData_Colored* vtxData, int vtxCount, const GLushort* idxData, int idxCount);
+  template <typename T> void internalComputeNormals(T* vtxData, int vtxCount,
+                                                    const GLushort* idxData, int idxCount,
+                                                    int idxStep, bool inverted);
+  template <> void internalComputeNormals<VertexData_Textured>(VertexData_Textured* vtxData, int vtxCount,
+                                                               const GLushort* idxData, int idxCount,
+                                                               int idxStep, bool inverted);
+  template <> void internalComputeNormals<VertexData_Colored>(VertexData_Colored* vtxData, int vtxCount,
+                                                              const GLushort* idxData, int idxCount,
+                                                              int idxStep, bool inverted);
 
 protected:
 
@@ -93,8 +101,13 @@ inline void Renderable::updateVertices(const void* vtxData, int vtxCount)
 
 // ================================================================================================
 template<typename T>
-inline void Renderable::computeNormals(T* vtxData, int vtxCount, const GLushort* idxData, int idxCount)
+inline void Renderable::computeNormals(T* vtxData, int vtxCount,
+                                       const GLushort* idxData, int idxCount,
+                                       int idxStep, bool inverted)
 {
+  assert(idxStep >= 3);
+
+  internalComputeNormals<T>(vtxDatan vtxCount, idxData, idxCount, inverted);
 }
 
 // ================================================================================================
@@ -160,6 +173,14 @@ void Renderable::internalUpdateRenderable<VertexData_Textured>()
                                offsetof(VertexData_Textured, texCoord),
                                2,
                                sizeof(VertexData_Textured));
+
+  int normalLocation = m_program.attributeLocation("a_normal");
+  m_program.enableAttributeArray(normalLocation);
+  m_program.setAttributeBuffer(normalLocation,
+                               GL_FLOAT,
+                               offsetof(VertexData_Textured, normal),
+                               3,
+                               sizeof(VertexData_Textured));
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -181,6 +202,14 @@ void Renderable::internalUpdateRenderable<VertexData_Colored>()
   m_program.setAttributeBuffer(colorLocation,
                                GL_FLOAT,
                                offsetof(VertexData_Colored, color),
+                               3,
+                               sizeof(VertexData_Colored));
+
+  int normalLocation = m_program.attributeLocation("a_normal");
+  m_program.enableAttributeArray(normalLocation);
+  m_program.setAttributeBuffer(normalLocation,
+                               GL_FLOAT,
+                               offsetof(VertexData_Colored, normal),
                                3,
                                sizeof(VertexData_Colored));
 }
@@ -208,17 +237,74 @@ void Renderable::internalUpdateRenderable<VertexData_Wired>()
                                sizeof(VertexData_Wired));
 }
 
+
+// ================================================================================================
 template<typename T>
-inline void Renderable::internalComputeNormals(T* vtxData, int vtxCount, const GLushort* idxData, int idxCount)
+inline void Renderable::internalComputeNormals(T* vtxData, int vtxCount,
+                                               const GLushort* idxData, int idxCount,
+                                               int idxStep, bool inverted)
 {
+  throw std::exception("Error, type unrecognized:\n" __FUNCTION__);
 }
 
-template<>
-inline void Renderable::internalComputeNormals(VertexData_Textured* vtxData, int vtxCount, const GLushort* idxData, int idxCount)
+// ------------------------------------------------------------------------------------------------
+template<typename T>
+inline void __processComputeNormals(T* vtxData, int vtxCount,
+                                    const GLushort* idxData, int idxCount,
+                                    int idxStep, bool inverted)
 {
+  // Reset
+  for (int ii = 0; ii < vtxCount; ++ii)
+  {
+    vtxData[ii].normal = QVector3D();
+  }
+
+  // Sum
+  for (int ii = 0; ii < idxCount; ii += idxStep)
+  {
+    GLushort indices[3] =
+    {
+      idxData[ii], idxData[ii + 1], idxData[ii + 2]
+    };
+    QVector3D positions[3];
+
+    for (int jj = 0; jj < 3; ++jj)
+    {
+      positions[jj] = vtxData[indices[jj]].position;
+    }
+
+    QVector3D normal = inverted ?
+      QVector3D::crossProduct(positions[2] - positions[0], positions[1] - positions[0]) :
+      QVector3D::crossProduct(positions[1] - positions[0], positions[2] - positions[0]);
+    normal.normalize();
+
+    for (int jj = 0; jj < idxStep; ++jj)
+    {
+      vtxData[indices[ii + jj]].normal += normal;
+    }
+  }
+
+  // Normalize
+  for (int ii = 0; ii < vtxCount; ++ii)
+  {
+    vtxData[ii].normal.normalize();
+  }
 }
 
+// ------------------------------------------------------------------------------------------------
 template<>
-inline void Renderable::internalComputeNormals(VertexData_Colored* vtxData, int vtxCount, const GLushort* idxData, int idxCount)
+inline void Renderable::internalComputeNormals(VertexData_Textured* vtxData, int vtxCount,
+                                               const GLushort* idxData, int idxCount,
+                                               int idxStep, bool inverted)
 {
+  __processComputeNormals<VertexData_Textured>(vtxData, vtxCount, idxData, idxCount, idxStep, inverted);
+}
+
+// ------------------------------------------------------------------------------------------------
+template<>
+inline void Renderable::internalComputeNormals(VertexData_Colored* vtxData, int vtxCount,
+                                               const GLushort* idxData, int idxCount,
+                                               int idxStep, bool inverted)
+{
+  __processComputeNormals<VertexData_Colored>(vtxData, vtxCount, idxData, idxCount, idxStep, inverted);
 }

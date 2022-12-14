@@ -5,6 +5,7 @@ precision mediump float;
 #endif
 
 varying vec3 v_color;
+varying vec3 v_normal;
 
 //! [0]
 void main()

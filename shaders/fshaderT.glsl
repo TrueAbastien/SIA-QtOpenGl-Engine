@@ -7,6 +7,7 @@ precision mediump float;
 uniform sampler2D texture;
 
 varying vec2 v_texcoord;
+varying vec3 v_normal;
 
 //! [0]
 void main()
