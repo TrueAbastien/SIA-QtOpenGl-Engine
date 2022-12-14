@@ -24,7 +24,7 @@ void Renderable::update(UpdateInfo infos)
   m_program.bind();
 
   // Set modelview-projection matrix
-  m_program.setUniformValue("mvp_matrix", infos.screenToParent * m_localToParent);
+  m_program.setUniformValue("mvp_matrix", infos.parentToScreen * m_localToParent);
 }
 
 // ------------------------------------------------------------------------------------------------

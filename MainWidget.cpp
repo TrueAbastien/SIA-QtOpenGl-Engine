@@ -335,7 +335,7 @@ void MainWidget::paintGL()
     {
       infos.dt = 0.1f; // TODO
       infos.animationTime = animTime,
-      infos.screenToParent = projection * view;
+      infos.parentToScreen = projection * view;
     }
     scene->update(infos);
 
@@ -452,40 +452,101 @@ void MainWidget::loadOFF()
 void MainWidget::makeSkin()
 {
   // Pick JointRenderer
-  const auto& items = find_if<JointRenderer>();
-  if (items.isEmpty()) return;
-
-  QString name;
+  QSharedPointer<JointRenderer> root;
   {
-    // Create JointRenderer List
-    QStringList names(0);
-    const auto func = [](const QSharedPointer<JointRenderer>& jr) -> QString
-    {
-      return jr->name();
-    };
-    std::transform(items.begin(), items.end(), std::back_inserter(names), func);
+    const auto& items = find_if<JointRenderer>();
+    if (items.isEmpty()) return;
 
-    // Create Dialog
-    bool ok;
-    name = QInputDialog::getItem(this, "Selected BVH", "BVH", names, 0, false, &ok);
-    if (!ok) return;
+    QString name;
+    {
+      // Create JointRenderer List
+      QStringList names(0);
+      const auto func = [](const QSharedPointer<JointRenderer>& jr) -> QString
+      {
+        return jr->name();
+      };
+      std::transform(items.begin(), items.end(), std::back_inserter(names), func);
+
+      // Create Dialog
+      bool ok;
+      name = QInputDialog::getItem(this, "Select BVH", "BVH", names, 0, false, &ok);
+      if (!ok) return;
+    }
+
+    const auto pred = [&](const QSharedPointer<JointRenderer>& jr) -> bool
+    {
+      return jr->name() == name;
+    };
+    const auto& item = std::find_if(items.begin(), items.end(), pred);
+    if (item == items.end()) return;
+
+    root = *item;
   }
 
-  const auto pred = [&]()
-  {
-
-  };
-  const auto& item = std::find_if(items.begin(), items.end(), [&]())
-  QSharedPointer<JointRenderer> root = 
-
   // Pick SkinMesh
-  // TODO
+  QSharedPointer<SkinMesh> skin;
+  {
+    const auto& items = find_if<SkinMesh>();
+    if (items.isEmpty()) return;
+
+    QString name;
+    {
+      // Create SkinMesh List
+      QStringList names(0);
+      const auto func = [](const QSharedPointer<SkinMesh>& sm) -> QString
+      {
+        return sm->name();
+      };
+      std::transform(items.begin(), items.end(), std::back_inserter(names), func);
+
+      // Create Dialog
+      bool ok;
+      name = QInputDialog::getItem(this, "Select Skin", "Skin", names, 0, false, &ok);
+      if (!ok) return;
+    }
+
+    const auto pred = [&](const QSharedPointer<SkinMesh>& sm) -> bool
+    {
+      return sm->name() == name;
+    };
+    const auto& item = std::find_if(items.begin(), items.end(), pred);
+    if (item == items.end()) return;
+
+    skin = *item;
+  }
 
   // Load Weights
-  // TODO
+  FileReader::WeightResult weights;
+  {
+    QString fileName = QFileDialog::getOpenFileName(this, tr("Open Weight"), "", tr("Weight Files (*.txt)"));
+    if (fileName.isEmpty())
+    {
+      return;
+    }
+
+    FileReader::WeightParameters params;
+    {
+      params.root = root;
+      params.skin = skin;
+    }
+
+    weights = FileReader::readWeight(fileName, params);
+    if (weights.isNull())
+    {
+      return;
+    }
+  }
 
   // Compute & Assignation
-  // TODO
+  {
+    auto relation = QSharedPointer<MeshRigRelation>::create();
+
+    relation->setWeightData(*weights);
+
+    relation->computeHomeData(root, skin->vertices(), skin->localToWorld());
+
+    skin->setRelation(relation);
+  }
 }
 
 // ------------------------------------------------------------------------------------------------

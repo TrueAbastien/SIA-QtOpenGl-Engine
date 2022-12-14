@@ -27,7 +27,7 @@ struct UpdateInfo
 {
   float dt;
   float animationTime;
-  QMatrix4x4 screenToParent;
+  QMatrix4x4 parentToScreen;
 };
 
 enum LogType

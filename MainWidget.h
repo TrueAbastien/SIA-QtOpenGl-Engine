@@ -76,7 +76,8 @@ private:
   template <typename T>
   using ComponentPredicate = std::function<bool(const QSharedPointer<T>&)>;
   template <typename T>
-  QVector<QSharedPointer<T>> find_if(ComponentPredicate<T> pred = []()
+  QVector<QSharedPointer<T>> find_if(ComponentPredicate<T> pred =
+                                     [](const QSharedPointer<T>&) -> bool
                                      {
                                        return true;
                                      });
@@ -146,7 +147,7 @@ inline QVector<QSharedPointer<T>> MainWidget::find_if(ComponentPredicate<T> pred
       for (const auto& child : item->children())
       {
         auto childCast = child.dynamicCast<T>();
-        if (!childCast.isNull() && pred(child))
+        if (!childCast.isNull() && pred(childCast))
         {
           result.push_back(childCast);
         }

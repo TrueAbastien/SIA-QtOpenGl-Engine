@@ -2,6 +2,7 @@
 #pragma once
 
 #include "ColoredRenderable.h"
+#include "MeshRigRelation.h"
 
 #include <array>
 #include <vector>
@@ -12,6 +13,8 @@ public:
 
   using Vertices = std::vector<VertexData_Colored>;
   using Indices = std::vector<GLushort>;
+
+  using RigPtr = QSharedPointer<MeshRigRelation>;
 
 public:
 
@@ -27,10 +30,15 @@ public:
   void init() override;
   void update(UpdateInfo infos) override;
 
+  Vertices vertices() const;
   size_t vSize() const;
+
+  void setRelation(const RigPtr& rig);
 
 private:
 
   Vertices m_vertices;
   Indices m_indices;
+
+  RigPtr m_relation;
 };

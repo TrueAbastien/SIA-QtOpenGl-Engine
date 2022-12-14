@@ -14,7 +14,7 @@ void SkinMesh::ProcessPoly(Indices& indices, const Poly& p)
 
 // ------------------------------------------------------------------------------------------------
 SkinMesh::SkinMesh(const Vertices& vertices, const Indices& indices)
-  : m_vertices(vertices), m_indices(indices)
+  : m_vertices(vertices), m_indices(indices), m_relation(nullptr)
 {
 }
 
@@ -31,14 +31,30 @@ void SkinMesh::update(UpdateInfo infos)
 {
   ColoredRenderable::update(infos);
 
-  // TODO: update positions
-  //Renderable::updateVertices<VertexData_Colored>(m_vertices.data(), m_vertices.size());
+  if (m_relation.isNull())
+  {
+    m_relation->updatePosition(m_vertices, this->localToWorld());
+
+    Renderable::updateVertices<VertexData_Colored>(m_vertices.data(), m_vertices.size());
+  }
 
   ColoredRenderable::updateRenderable(GL_TRIANGLES, m_indices.size());
+}
+
+// ------------------------------------------------------------------------------------------------
+SkinMesh::Vertices SkinMesh::vertices() const
+{
+  return m_vertices;
 }
 
 // ------------------------------------------------------------------------------------------------
 size_t SkinMesh::vSize() const
 {
   return m_vertices.size();
+}
+
+// ------------------------------------------------------------------------------------------------
+void SkinMesh::setRelation(const RigPtr& rig)
+{
+  m_relation = rig;
 }
