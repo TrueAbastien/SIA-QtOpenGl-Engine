@@ -532,19 +532,24 @@ FileReader::WeightResult FileReader::readWeight(const QString& filePath, const W
 
       for (const auto& jt : curr)
       {
-        jointMap.insert(jt->name(), jt);
-
+        bool isEnd = true;
         for (const auto& child : jt->children())
         {
           if (!child.dynamicCast<Joint>().isNull())
           {
+            isEnd = false; // Has child joints
             nextJoints.push_back(child);
           }
+        }
+
+        if (!isEnd)
+        {
+          jointMap.insert(jt->name(), jt);
         }
       }
     }
 
-    nJoints = (int) joints.size();
+    nJoints = (int) jointMap.size();
   };
 
   // Read
@@ -568,7 +573,10 @@ FileReader::WeightResult FileReader::readWeight(const QString& filePath, const W
 
       for (int ii = 0; ii < nJoints; ++ii)
       {
-        orderedJoints[ii] = jointMap[names[ii]];
+        QString name = names[ii];
+        lassert(jointMap.contains(name));
+
+        orderedJoints[ii] = jointMap.value(name);
       }
 
       joints = std::move(orderedJoints);

@@ -31,7 +31,7 @@ void SkinMesh::update(UpdateInfo infos)
 {
   ColoredRenderable::update(infos);
 
-  if (m_relation.isNull())
+  if (!m_relation.isNull())
   {
     m_relation->updatePosition(m_vertices, this->localToWorld());
 

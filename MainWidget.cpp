@@ -455,7 +455,11 @@ void MainWidget::makeSkin()
   QSharedPointer<JointRenderer> root;
   {
     const auto& items = find_if<JointRenderer>();
-    if (items.isEmpty()) return;
+    if (items.isEmpty())
+    {
+      internalLog(ERROR_, "No BVH found...");
+      return;
+    }
 
     QString name;
     {
@@ -470,7 +474,10 @@ void MainWidget::makeSkin()
       // Create Dialog
       bool ok;
       name = QInputDialog::getItem(this, "Select BVH", "BVH", names, 0, false, &ok);
-      if (!ok) return;
+      if (!ok)
+      {
+        return;
+      }
     }
 
     const auto pred = [&](const QSharedPointer<JointRenderer>& jr) -> bool
@@ -478,7 +485,11 @@ void MainWidget::makeSkin()
       return jr->name() == name;
     };
     const auto& item = std::find_if(items.begin(), items.end(), pred);
-    if (item == items.end()) return;
+    if (item == items.end())
+    {
+      internalLog(ERROR_, "BVH couldn't be found...");
+      return;
+    }
 
     root = *item;
   }
@@ -487,7 +498,11 @@ void MainWidget::makeSkin()
   QSharedPointer<SkinMesh> skin;
   {
     const auto& items = find_if<SkinMesh>();
-    if (items.isEmpty()) return;
+    if (items.isEmpty())
+    {
+      internalLog(ERROR_, "No Skin found...");
+      return;
+    }
 
     QString name;
     {
@@ -502,7 +517,10 @@ void MainWidget::makeSkin()
       // Create Dialog
       bool ok;
       name = QInputDialog::getItem(this, "Select Skin", "Skin", names, 0, false, &ok);
-      if (!ok) return;
+      if (!ok)
+      {
+        return;
+      }
     }
 
     const auto pred = [&](const QSharedPointer<SkinMesh>& sm) -> bool
@@ -510,7 +528,11 @@ void MainWidget::makeSkin()
       return sm->name() == name;
     };
     const auto& item = std::find_if(items.begin(), items.end(), pred);
-    if (item == items.end()) return;
+    if (item == items.end())
+    {
+      internalLog(ERROR_, "Skin couldn't be found...");
+      return;
+    }
 
     skin = *item;
   }
@@ -533,6 +555,7 @@ void MainWidget::makeSkin()
     weights = FileReader::readWeight(fileName, params);
     if (weights.isNull())
     {
+      internalLog(ERROR_, "Weight couldn't be loaded...");
       return;
     }
   }
@@ -547,6 +570,8 @@ void MainWidget::makeSkin()
 
     skin->setRelation(relation);
   }
+
+  internalLog(INFO, "Relation created successfully !");
 }
 
 // ------------------------------------------------------------------------------------------------
