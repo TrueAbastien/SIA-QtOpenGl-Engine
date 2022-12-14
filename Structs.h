@@ -15,9 +15,17 @@ struct VertexData_Textured
 {
   QVector3D position;
   QVector2D texCoord;
+  QVector3D normal;
 };
 
 struct VertexData_Colored
+{
+  QVector3D position;
+  QVector3D color;
+  QVector3D normal;
+};
+
+struct VertexData_Wired
 {
   QVector3D position;
   QVector3D color;

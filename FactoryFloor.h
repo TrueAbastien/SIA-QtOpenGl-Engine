@@ -1,9 +1,9 @@
 
 #pragma once
 
-#include "ColoredRenderable.h"
+#include "WiredRenderable.h"
 
-class FactoryFloor final : public ColoredRenderable
+class FactoryFloor final : public WiredRenderable
 {
 public:
 

@@ -26,7 +26,8 @@ SOURCES += \
     Renderable.cpp \
     Scene.cpp \
     SkinMesh.cpp \
-    TexturedRenderable.cpp
+    TexturedRenderable.cpp \
+    WiredRenderable.cpp
 
 HEADERS += \
     Animation.h \
@@ -48,7 +49,8 @@ HEADERS += \
     Scene.h \
     SkinMesh.h \
     Structs.h \
-    TexturedRenderable.h
+    TexturedRenderable.h \
+    WiredRenderable.h
 
 RESOURCES += \
     shaders.qrc \

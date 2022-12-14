@@ -4,7 +4,7 @@
 void constructOverChildren(const Component* root, const QMatrix4x4& model,
                            JointRenderer::Vertices& vts, JointRenderer::Indices& ids)
 {
-  VertexData_Colored parent_vtx
+  VertexData_Wired parent_vtx
   {
     model * QVector3D(0, 0, 0),
     QVector3D(0, 0.8, 0)
@@ -21,7 +21,7 @@ void constructOverChildren(const Component* root, const QMatrix4x4& model,
 
     QMatrix4x4 newModel = model * child->localToParent();
 
-    VertexData_Colored child_vtx
+    VertexData_Wired child_vtx
     {
       newModel * QVector3D(0, 0, 0),
       QVector3D(0.8, 0, 0)
@@ -57,7 +57,7 @@ void updateOverChildren(const Component* root, const QMatrix4x4& model,
 // ------------------------------------------------------------------------------------------------
 void JointRenderer::init()
 {
-  ColoredRenderable::init();
+  WiredRenderable::init();
 
   updateBuffers();
 }
@@ -65,11 +65,11 @@ void JointRenderer::init()
 // ------------------------------------------------------------------------------------------------
 void JointRenderer::update(UpdateInfo infos)
 {
-  ColoredRenderable::update(infos);
+  WiredRenderable::update(infos);
 
   updatePositions();
 
-  ColoredRenderable::updateRenderable(GL_LINES, m_indices.size());
+  WiredRenderable::updateRenderable(GL_LINES, m_indices.size());
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -98,7 +98,7 @@ void JointRenderer::updateBuffers()
   constructOverChildren(this, QMatrix4x4(), m_vertices, m_indices);
 
   // Recompute Buffers Infos
-  ColoredRenderable::initRenderable(m_vertices.data(), m_vertices.size(),
+  WiredRenderable::initRenderable(m_vertices.data(), m_vertices.size(),
                                     m_indices.data(), m_indices.size());
 }
 
@@ -110,5 +110,5 @@ void JointRenderer::updatePositions()
   updateOverChildren(this, QMatrix4x4(), m_vertices, jtIndex);
 
   // Update Buffers Infos
-  Renderable::updateVertices<VertexData_Colored>(m_vertices.data(), m_vertices.size());
+  Renderable::updateVertices<VertexData_Wired>(m_vertices.data(), m_vertices.size());
 }

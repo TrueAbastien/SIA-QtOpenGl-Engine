@@ -2,14 +2,14 @@
 #pragma once
 
 #include "Joint.h"
-#include "ColoredRenderable.h"
+#include "WiredRenderable.h"
 
 
-class JointRenderer final : public ColoredRenderable
+class JointRenderer final : public WiredRenderable
 {
 public:
 
-  using Vertices = QVector<VertexData_Colored>;
+  using Vertices = QVector<VertexData_Wired>;
   using Indices = QVector<GLushort>;
 
 public:

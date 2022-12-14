@@ -8,7 +8,7 @@ const int n = 10;
 // ------------------------------------------------------------------------------------------------
 void FactoryFloor::init()
 {
-  ColoredRenderable::init();
+  WiredRenderable::init();
 
   float s = w / (n - 1);
   float o = -w / 2;
@@ -47,13 +47,13 @@ void FactoryFloor::init()
     indices[index + 1] = y * n + h;
   }
 
-  ColoredRenderable::initRenderable(vertices.data(), n * n, indices.data(), n << 2);
+  WiredRenderable::initRenderable(vertices.data(), n * n, indices.data(), n << 2);
 }
 
 // ------------------------------------------------------------------------------------------------
 void FactoryFloor::update(UpdateInfo infos)
 {
-  ColoredRenderable::update(infos);
+  WiredRenderable::update(infos);
 
-  ColoredRenderable::updateRenderable(GL_LINES, n << 2);
+  WiredRenderable::updateRenderable(GL_LINES, n << 2);
 }
