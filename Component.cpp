@@ -104,6 +104,12 @@ Component::Pointer Component::child(int index) const
 }
 
 // ------------------------------------------------------------------------------------------------
+const Component* Component::parent() const
+{
+  return m_parent;
+}
+
+// ------------------------------------------------------------------------------------------------
 void Component::setLogger(LogMethod method)
 {
   logMethod = method;

@@ -451,6 +451,14 @@ void MainWidget::loadOFF()
 // ------------------------------------------------------------------------------------------------
 void MainWidget::makeSkin()
 {
+  const auto naming = [](const Component::Pointer& ptr) -> QString
+  {
+    if (ptr.isNull()) return "";
+    const Component* parent = ptr->parent();
+    if (parent == nullptr) return ptr->name();
+    return parent->name();
+  };
+
   // Pick JointRenderer
   QSharedPointer<JointRenderer> root;
   {
@@ -465,9 +473,9 @@ void MainWidget::makeSkin()
     {
       // Create JointRenderer List
       QStringList names(0);
-      const auto func = [](const QSharedPointer<JointRenderer>& jr) -> QString
+      const auto func = [&](const QSharedPointer<JointRenderer>& jr) -> QString
       {
-        return jr->name();
+        return naming(jr);
       };
       std::transform(items.begin(), items.end(), std::back_inserter(names), func);
 
@@ -482,7 +490,7 @@ void MainWidget::makeSkin()
 
     const auto pred = [&](const QSharedPointer<JointRenderer>& jr) -> bool
     {
-      return jr->name() == name;
+      return naming(jr) == name;
     };
     const auto& item = std::find_if(items.begin(), items.end(), pred);
     if (item == items.end())
@@ -508,9 +516,9 @@ void MainWidget::makeSkin()
     {
       // Create SkinMesh List
       QStringList names(0);
-      const auto func = [](const QSharedPointer<SkinMesh>& sm) -> QString
+      const auto func = [&](const QSharedPointer<SkinMesh>& sm) -> QString
       {
-        return sm->name();
+        return naming(sm);
       };
       std::transform(items.begin(), items.end(), std::back_inserter(names), func);
 
@@ -525,7 +533,7 @@ void MainWidget::makeSkin()
 
     const auto pred = [&](const QSharedPointer<SkinMesh>& sm) -> bool
     {
-      return sm->name() == name;
+      return naming(sm) == name;
     };
     const auto& item = std::find_if(items.begin(), items.end(), pred);
     if (item == items.end())

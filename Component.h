@@ -51,6 +51,7 @@ public:
     virtual void addChildren(const Pointer& child);
     QVector<Pointer> children() const;
     Pointer child(int index) const; 
+    const Component* parent() const;
 
     void setLogger(LogMethod method);
 
