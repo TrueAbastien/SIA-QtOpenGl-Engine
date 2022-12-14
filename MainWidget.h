@@ -55,6 +55,7 @@ public slots:
 
   void loadBVH();
   void loadOFF();
+
   void makeSkin();
   void resetCamera();
   void recenterCamera();
@@ -62,6 +63,9 @@ public slots:
   void pauseAnimation();
   void stopAnimation();
   void clearScene();
+
+  void clearLogger();
+  void resizeLoggerText(int value);
 
 signals:
 

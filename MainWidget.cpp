@@ -20,6 +20,7 @@
 #include <QDoubleSpinBox>
 #include <QFileDialog>
 #include <QInputDialog>
+#include <QSpinBox>
 
 #include <cmath>
 
@@ -190,11 +191,58 @@ QWidget* MainWidget::makeLogger()
   if (logger != nullptr) delete logger;
 
   QGroupBox* root = new QGroupBox("Logger");
-  QVBoxLayout* layout = new QVBoxLayout;
+  QHBoxLayout* layout = new QHBoxLayout;
 
-  logger = new QTextEdit;
-  logger->setReadOnly(true);
-  layout->addWidget(logger);
+  // Logger
+  {
+    logger = new QTextEdit;
+    logger->setReadOnly(true);
+    layout->addWidget(logger);
+  }
+
+  // Controls
+  {
+    QGroupBox* controlBox = new QGroupBox("Controls");
+    QVBoxLayout* controls = new QVBoxLayout;
+
+    {
+      // Clear
+      {
+        QPushButton* button = new QPushButton("Clear");
+        connect(button, &QPushButton::clicked, this, &MainWidget::clearLogger);
+        controls->addWidget(button);
+      }
+
+      // Resize
+      {
+        QHBoxLayout* resizeHL = new QHBoxLayout;
+
+        // Label
+        {
+          QLabel* label = new QLabel("Size:");
+          resizeHL->addWidget(label);
+        }
+
+        // Value
+        {
+          QSpinBox* spinBox = new QSpinBox;
+          spinBox->setValue(logger->font().pointSize());
+          spinBox->setMinimum(1);
+          spinBox->setMaximum(100);
+          connect(spinBox, SIGNAL(valueChanged(int)), this, SLOT(resizeLoggerText(int)));
+          resizeHL->addWidget(spinBox);
+        }
+
+        controls->addLayout(resizeHL);
+      }
+    }
+
+    controls->setAlignment(Qt::AlignTop);
+    controlBox->setLayout(controls);
+    controlBox->setFixedWidth(160);
+    controlBox->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Expanding);
+    layout->addWidget(controlBox);
+  }
 
   root->setLayout(layout);
   root->setFixedHeight(200);
@@ -632,6 +680,30 @@ void MainWidget::clearScene()
   }
 
   update();
+}
+
+// ------------------------------------------------------------------------------------------------
+void MainWidget::clearLogger()
+{
+  if (logger == nullptr)
+  {
+    return;
+  }
+
+  logger->clear();
+}
+
+// ------------------------------------------------------------------------------------------------
+void MainWidget::resizeLoggerText(int value)
+{
+  if (logger == nullptr)
+  {
+    return;
+  }
+
+  QFont font = logger->font();
+  font.setPointSize(value);
+  logger->setFont(font);
 }
 
 // ------------------------------------------------------------------------------------------------
