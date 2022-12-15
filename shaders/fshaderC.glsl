@@ -23,7 +23,6 @@ void main()
     vec3 col = v_color * (ka + kd * dot(L, N) + ks * pow(max(dot(R, v_camDir), 0.0), shininess));
 
     // Set fragment color
-    //gl_FragColor = vec4(col, 1.0);
     gl_FragColor = vec4(col, 1.0);
 }
 //! [0]
