@@ -21,6 +21,7 @@
 #include <QFileDialog>
 #include <QInputDialog>
 #include <QSpinBox>
+#include <QSlider>
 
 #include <cmath>
 
@@ -36,6 +37,14 @@ MainWidget::MainWidget() :
   logger(nullptr)
 {
   resetCamera();
+
+  // Material
+  {
+    material.ka = 1.0f;
+    material.kd = 1.0f;
+    material.ks = 1.0f;
+    material.shininess = 32.0f;
+  }
 
 #ifdef _DEBUG
   CustomDebug::log = [&](const std::string& message)
@@ -190,9 +199,201 @@ QWidget* MainWidget::makeControls()
     layout->addWidget(box);
   }
 
+  // Material
+  {
+    QGroupBox* box = new QGroupBox("Material");
+    QVBoxLayout* materialVL = new QVBoxLayout;
+
+    // Ambient
+    {
+      QGroupBox* valueBox = new QGroupBox("Ambient");
+      QVBoxLayout* valueLayout = new QVBoxLayout;
+
+      {
+        // Labelling
+        QSpinBox* spinBox;
+        {
+          QHBoxLayout* labelLayout = new QHBoxLayout;
+
+          // Value
+          {
+            spinBox = new QSpinBox;
+            spinBox->setReadOnly(true);
+            spinBox->setButtonSymbols(QSpinBox::NoButtons);
+            spinBox->setMaximumWidth(30);
+            spinBox->setAlignment(Qt::AlignCenter);
+            spinBox->setMinimum(0);
+            spinBox->setMaximum(200);
+            spinBox->setValue((int) (material.ka * 100));
+            labelLayout->addWidget(spinBox);
+          }
+
+          // Type
+          {
+            QLabel* label = new QLabel("%");
+            labelLayout->addWidget(label);
+          }
+
+          valueLayout->addLayout(labelLayout);
+        }
+
+        // Slider
+        {
+          QSlider* slider = new QSlider(Qt::Horizontal);
+          slider->setMinimum(0);
+          slider->setMaximum(200);
+          slider->setValue((int) (material.ka * 100));
+          connect(slider, &QSlider::valueChanged, this, &MainWidget::changeAmbient);
+          connect(slider, &QSlider::valueChanged, spinBox, &QSpinBox::setValue);
+          valueLayout->addWidget(slider);
+        }
+      }
+
+      valueBox->setLayout(valueLayout);
+      materialVL->addWidget(valueBox);
+    }
+
+    // Diffuse
+    {
+      QGroupBox* valueBox = new QGroupBox("Diffuse");
+      QVBoxLayout* valueLayout = new QVBoxLayout;
+
+      {
+        // Labelling
+        QSpinBox* spinBox;
+        {
+          QHBoxLayout* labelLayout = new QHBoxLayout;
+
+          // Value
+          {
+            spinBox = new QSpinBox;
+            spinBox->setReadOnly(true);
+            spinBox->setButtonSymbols(QSpinBox::NoButtons);
+            spinBox->setMaximumWidth(30);
+            spinBox->setAlignment(Qt::AlignCenter);
+            spinBox->setMinimum(0);
+            spinBox->setMaximum(200);
+            spinBox->setValue((int) (material.kd * 100));
+            labelLayout->addWidget(spinBox);
+          }
+
+          // Type
+          {
+            QLabel* label = new QLabel("%");
+            labelLayout->addWidget(label);
+          }
+
+          valueLayout->addLayout(labelLayout);
+        }
+
+        // Slider
+        {
+          QSlider* slider = new QSlider(Qt::Horizontal);
+          slider->setMinimum(0);
+          slider->setMaximum(200);
+          slider->setValue((int) (material.kd * 100));
+          connect(slider, &QSlider::valueChanged, this, &MainWidget::changeDiffuse);
+          connect(slider, &QSlider::valueChanged, spinBox, &QSpinBox::setValue);
+          valueLayout->addWidget(slider);
+        }
+      }
+
+      valueBox->setLayout(valueLayout);
+      materialVL->addWidget(valueBox);
+    }
+
+    // Specular
+    {
+      QGroupBox* valueBox = new QGroupBox("Specular");
+      QVBoxLayout* valueLayout = new QVBoxLayout;
+
+      {
+        // Labelling
+        QSpinBox* spinBox;
+        {
+          QHBoxLayout* labelLayout = new QHBoxLayout;
+
+          // Value
+          {
+            spinBox = new QSpinBox;
+            spinBox->setReadOnly(true);
+            spinBox->setButtonSymbols(QSpinBox::NoButtons);
+            spinBox->setMaximumWidth(30);
+            spinBox->setAlignment(Qt::AlignCenter);
+            spinBox->setMinimum(0);
+            spinBox->setMaximum(200);
+            spinBox->setValue((int) (material.ks * 100));
+            labelLayout->addWidget(spinBox);
+          }
+
+          // Type
+          {
+            QLabel* label = new QLabel("%");
+            labelLayout->addWidget(label);
+          }
+
+          valueLayout->addLayout(labelLayout);
+        }
+
+        // Slider
+        {
+          QSlider* slider = new QSlider(Qt::Horizontal);
+          slider->setMinimum(0);
+          slider->setMaximum(200);
+          slider->setValue((int) (material.ks * 100));
+          connect(slider, &QSlider::valueChanged, this, &MainWidget::changeSpecular);
+          connect(slider, &QSlider::valueChanged, spinBox, &QSpinBox::setValue);
+          valueLayout->addWidget(slider);
+        }
+      }
+
+      valueBox->setLayout(valueLayout);
+      materialVL->addWidget(valueBox);
+    }
+
+    // Shininess
+    {
+      QGroupBox* valueBox = new QGroupBox("Shininess");
+      QVBoxLayout* valueLayout = new QVBoxLayout;
+
+      {
+        // Labelling
+        QSpinBox* spinBox;
+        {
+          spinBox = new QSpinBox;
+          spinBox->setReadOnly(true);
+          spinBox->setButtonSymbols(QSpinBox::NoButtons);
+          spinBox->setMaximumWidth(30);
+          spinBox->setAlignment(Qt::AlignCenter);
+          spinBox->setMinimum(0);
+          spinBox->setMaximum(255);
+          spinBox->setValue((int) material.shininess);
+          valueLayout->addWidget(spinBox);
+        }
+
+        // Slider
+        {
+          QSlider* slider = new QSlider(Qt::Horizontal);
+          slider->setMinimum(0);
+          slider->setMaximum(255);
+          slider->setValue((int) material.shininess);
+          connect(slider, &QSlider::valueChanged, this, &MainWidget::changeShininess);
+          connect(slider, &QSlider::valueChanged, spinBox, &QSpinBox::setValue);
+          valueLayout->addWidget(slider);
+        }
+      }
+
+      valueBox->setLayout(valueLayout);
+      materialVL->addWidget(valueBox);
+    }
+
+    box->setLayout(materialVL);
+    layout->addWidget(box);
+  }
+
   layout->setAlignment(Qt::AlignTop);
   root->setLayout(layout);
-  root->setFixedWidth(200);
+  root->setFixedWidth(250);
   return root;
 }
 
@@ -256,7 +457,7 @@ QWidget* MainWidget::makeLogger()
   }
 
   root->setLayout(layout);
-  root->setFixedHeight(200);
+  root->setFixedHeight(250);
   root->setFocusPolicy(Qt::NoFocus);
   return root;
 }
@@ -396,7 +597,8 @@ void MainWidget::paintGL()
       infos.animationTime = animTime,
       infos.parentToScreen = projection * view;
       infos.parentToWorld = QMatrix4x4();
-      infos.cameraPosition = view * QVector3D(0, 0, 0);
+      infos.cameraPosition = view.inverted() * QVector3D(0, 0, 0);
+      infos.material = material;
     }
     scene->update(infos);
 
@@ -693,6 +895,30 @@ void MainWidget::clearScene()
   }
 
   update();
+}
+
+// ------------------------------------------------------------------------------------------------
+void MainWidget::changeAmbient(int value)
+{
+  material.ka = 1e-2f * value;
+}
+
+// ------------------------------------------------------------------------------------------------
+void MainWidget::changeDiffuse(int value)
+{
+  material.kd = 1e-2f * value;
+}
+
+// ------------------------------------------------------------------------------------------------
+void MainWidget::changeSpecular(int value)
+{
+  material.ks = 1e-2f * value;
+}
+
+// ------------------------------------------------------------------------------------------------
+void MainWidget::changeShininess(int value)
+{
+  material.shininess = (float) value;
 }
 
 // ------------------------------------------------------------------------------------------------

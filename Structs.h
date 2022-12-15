@@ -39,6 +39,14 @@ struct VertexData_Wired
   QVector3D color;
 };
 
+struct GlobalMaterial
+{
+  float ka;
+  float kd;
+  float ks;
+  float shininess;
+};
+
 struct UpdateInfo
 {
   float dt;
@@ -46,6 +54,7 @@ struct UpdateInfo
   QMatrix4x4 parentToScreen;
   QMatrix4x4 parentToWorld;
   QVector3D cameraPosition;
+  GlobalMaterial material;
 };
 
 enum LogType

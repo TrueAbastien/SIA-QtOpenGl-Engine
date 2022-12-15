@@ -64,6 +64,11 @@ public slots:
   void stopAnimation();
   void clearScene();
 
+  void changeAmbient(int value);
+  void changeDiffuse(int value);
+  void changeSpecular(int value);
+  void changeShininess(int value);
+
   void clearLogger();
   void resizeLoggerText(int value);
 
@@ -91,6 +96,7 @@ private:
     QBasicTimer timer;
     Scene* scene;
     AnimationController animController;
+    GlobalMaterial material;
 
     QMatrix4x4 projection;
     QTextEdit* logger;

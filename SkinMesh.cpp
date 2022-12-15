@@ -23,7 +23,8 @@ void SkinMesh::init()
 {
   ColoredRenderable::init();
 
-  Renderable::computeNormals<VertexData_Colored>(m_vertices.data(), m_vertices.size(), m_indices.data(), m_indices.size());
+  Renderable::computeNormals<VertexData_Colored>(m_vertices.data(), m_vertices.size(),
+                                                 m_indices.data(), m_indices.size(), 3, true);
 
   ColoredRenderable::initRenderable(m_vertices.data(), m_vertices.size(), m_indices.data(), m_indices.size());
 }
@@ -37,7 +38,8 @@ void SkinMesh::update(UpdateInfo infos)
   {
     m_relation->updatePosition(m_vertices, this->localToWorld());
 
-    Renderable::computeNormals<VertexData_Colored>(m_vertices.data(), m_vertices.size(), m_indices.data(), m_indices.size());
+    Renderable::computeNormals<VertexData_Colored>(m_vertices.data(), m_vertices.size(),
+                                                   m_indices.data(), m_indices.size(), 3, true);
 
     Renderable::updateVertices<VertexData_Colored>(m_vertices.data(), m_vertices.size());
   }
