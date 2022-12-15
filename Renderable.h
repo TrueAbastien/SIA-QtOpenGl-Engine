@@ -18,8 +18,8 @@ public:
 protected:
 
   template <typename T>
-  void initRenderable(const void* vtxData, int vtxCount,
-                      const void* idxData, int idxCount);
+  void initRenderable(T* vtxData, int vtxCount,
+                      const GLushort* idxData, int idxCount);
 
   template <typename T>
   void updateRenderable(GLenum mode, int idxCount);
@@ -29,7 +29,7 @@ protected:
   void initShaders(const QString& vertexShader, const QString& fragmentShader);
 
   template <typename T>
-  void updateVertices(const void* vtxData, int vtxCount);
+  void updateVertices(T* vtxData, int vtxCount);
 
   template <typename T>
   void computeNormals(T* vtxData, int vtxCount,
@@ -38,10 +38,10 @@ protected:
 
 private:
 
-  template <typename T> void internalInitRenderable(const void* vtxData, int vtxCount);
-  template <> void internalInitRenderable<VertexData_Textured>(const void* vtxData, int vtxCount);
-  template <> void internalInitRenderable<VertexData_Colored>(const void* vtxData, int vtxCount);
-  template <> void internalInitRenderable<VertexData_Wired>(const void* vtxData, int vtxCount);
+  template <typename T> void internalInitRenderable(T* vtxData, int vtxCount);
+  template <> void internalInitRenderable<VertexData_Textured>(VertexData_Textured* vtxData, int vtxCount);
+  template <> void internalInitRenderable<VertexData_Colored>(VertexData_Colored* vtxData, int vtxCount);
+  template <> void internalInitRenderable<VertexData_Wired>(VertexData_Wired* vtxData, int vtxCount);
 
   template <typename T> void internalUpdateRenderable();
   template <> void internalUpdateRenderable<VertexData_Textured>();
@@ -69,13 +69,13 @@ protected:
 
 // ================================================================================================
 template <typename T>
-void Renderable::initRenderable(const void* vtxData, int vtxCount, const void* idxData, int idxCount)
+void Renderable::initRenderable(T* vtxData, int vtxCount, const GLushort* idxData, int idxCount)
 {
   Renderable::internalInitRenderable<T>(vtxData, vtxCount);
 
   // Transfer index data to VBO 1
   m_indices.bind();
-  m_indices.allocate(idxData, idxCount * sizeof(GLushort));
+  m_indices.allocate((const void*) idxData, idxCount * sizeof(GLushort));
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -94,7 +94,7 @@ void Renderable::updateRenderable(GLenum mode, int idxCount)
 
 // ================================================================================================
 template<typename T>
-inline void Renderable::updateVertices(const void* vtxData, int vtxCount)
+inline void Renderable::updateVertices(T* vtxData, int vtxCount)
 {
   Renderable::internalInitRenderable<T>(vtxData, vtxCount);
 }
@@ -107,41 +107,41 @@ inline void Renderable::computeNormals(T* vtxData, int vtxCount,
 {
   assert(idxStep >= 3);
 
-  internalComputeNormals<T>(vtxDatan vtxCount, idxData, idxCount, inverted);
+  Renderable::internalComputeNormals<T>(vtxData, vtxCount, idxData, idxCount, idxStep, inverted);
 }
 
 // ================================================================================================
 template<typename T>
-inline void Renderable::internalInitRenderable(const void* vtxData, int vtxCount)
+inline void Renderable::internalInitRenderable(T* vtxData, int vtxCount)
 {
   throw std::exception("Error, type unrecognized:\n" __FUNCTION__);
 }
 
 // ------------------------------------------------------------------------------------------------
 template <>
-void Renderable::internalInitRenderable<VertexData_Textured>(const void* vtxData, int vtxCount)
+void Renderable::internalInitRenderable<VertexData_Textured>(VertexData_Textured* vtxData, int vtxCount)
 {
   // Transfer vertex data to VBO 0
   m_vertices.bind();
-  m_vertices.allocate(vtxData, vtxCount * sizeof(VertexData_Textured));
+  m_vertices.allocate((const void*) vtxData, vtxCount * sizeof(VertexData_Textured));
 }
 
 // ------------------------------------------------------------------------------------------------
 template <>
-void Renderable::internalInitRenderable<VertexData_Colored>(const void* vtxData, int vtxCount)
+void Renderable::internalInitRenderable<VertexData_Colored>(VertexData_Colored* vtxData, int vtxCount)
 {
   // Transfer vertex data to VBO 0
   m_vertices.bind();
-  m_vertices.allocate(vtxData, vtxCount * sizeof(VertexData_Colored));
+  m_vertices.allocate((const void*) vtxData, vtxCount * sizeof(VertexData_Colored));
 }
 
 // ------------------------------------------------------------------------------------------------
 template <>
-void Renderable::internalInitRenderable<VertexData_Wired>(const void* vtxData, int vtxCount)
+void Renderable::internalInitRenderable<VertexData_Wired>(VertexData_Wired* vtxData, int vtxCount)
 {
   // Transfer vertex data to VBO 0
   m_vertices.bind();
-  m_vertices.allocate(vtxData, vtxCount * sizeof(VertexData_Wired));
+  m_vertices.allocate((const void*) vtxData, vtxCount * sizeof(VertexData_Wired));
 }
 
 
@@ -273,14 +273,13 @@ inline void __processComputeNormals(T* vtxData, int vtxCount,
       positions[jj] = vtxData[indices[jj]].position;
     }
 
-    QVector3D normal = inverted ?
-      QVector3D::crossProduct(positions[2] - positions[0], positions[1] - positions[0]) :
-      QVector3D::crossProduct(positions[1] - positions[0], positions[2] - positions[0]);
+    QVector3D normal = QVector3D::crossProduct(positions[1] - positions[0], positions[2] - positions[0]);
+    if (inverted) normal = -normal;
     normal.normalize();
 
     for (int jj = 0; jj < idxStep; ++jj)
     {
-      vtxData[indices[ii + jj]].normal += normal;
+      vtxData[idxData[ii + jj]].normal += normal;
     }
   }
 

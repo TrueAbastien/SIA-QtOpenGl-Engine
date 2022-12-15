@@ -28,10 +28,11 @@ void TexturedRenderable::update(UpdateInfo infos)
   Renderable::update(infos);
 
   m_program.setUniformValue("texture", 0);
+  m_program.setUniformValue("model_matrix", infos.parentToWorld * m_localToParent);
 }
 
 // ------------------------------------------------------------------------------------------------
-void TexturedRenderable::initRenderable(const void* vtxData, int vtxCount, const void* idxData, int idxCount)
+void TexturedRenderable::initRenderable(VertexData_Textured* vtxData, int vtxCount, const GLushort* idxData, int idxCount)
 {
   Renderable::initRenderable<VertexData_Textured>(vtxData, vtxCount, idxData, idxCount);
 }

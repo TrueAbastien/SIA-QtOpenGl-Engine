@@ -1,5 +1,7 @@
 #include "Renderable.h"
 
+#include <QOpenGLShader>
+
 // ------------------------------------------------------------------------------------------------
 Renderable::Renderable() :
   m_indices(QOpenGLBuffer::IndexBuffer)
@@ -30,6 +32,28 @@ void Renderable::update(UpdateInfo infos)
 // ------------------------------------------------------------------------------------------------
 void Renderable::initShaders(const QString& vertexShader, const QString& fragmentShader)
 {
+#ifdef _DEBUG
+  {
+    // Compile the Shaders
+    // -- Vertex
+    {
+      QOpenGLShader vShader(QOpenGLShader::Vertex);
+      if (!vShader.compileSourceFile(vertexShader))
+      {
+        CustomDebug::log(vShader.log().toStdString());
+      }
+    }
+    // -- Fragment
+    {
+      QOpenGLShader fShader(QOpenGLShader::Fragment);
+      if (!fShader.compileSourceFile(fragmentShader))
+      {
+        CustomDebug::log(fShader.log().toStdString());
+      }
+    }
+  }
+#endif
+
   // Compile vertex shader
   m_program.addShaderFromSourceFile(QOpenGLShader::Vertex, vertexShader);
 
@@ -39,6 +63,11 @@ void Renderable::initShaders(const QString& vertexShader, const QString& fragmen
   // Link shader pipeline
   m_program.link();
 
-  // Bind shader pipeline for use
-  //m_program.bind();
+#ifdef _DEBUG
+  {
+    // Test the shader
+    QString r = m_program.log();
+    if (!r.isEmpty()) CustomDebug::log(r.toStdString());
+  }
+#endif
 }

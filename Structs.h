@@ -11,6 +11,14 @@
 #define M_PI 3.14159265358979323846f  /* pi */
 #define ROT_EPS 0.001f
 
+#ifdef _DEBUG
+struct CustomDebug final
+{
+  using LogMethod = std::function<void(const std::string&)>;
+  static LogMethod log;
+};
+#endif
+
 struct VertexData_Textured
 {
   QVector3D position;
@@ -36,6 +44,8 @@ struct UpdateInfo
   float dt;
   float animationTime;
   QMatrix4x4 parentToScreen;
+  QMatrix4x4 parentToWorld;
+  QVector3D cameraPosition;
 };
 
 enum LogType

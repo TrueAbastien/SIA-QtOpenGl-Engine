@@ -17,8 +17,8 @@ public:
 
 protected:
 
-  void initRenderable(const void* vtxData, int vtxCount,
-                      const void* idxData, int idxCount);
+  void initRenderable(VertexData_Textured* vtxData, int vtxCount,
+                      const GLushort* idxData, int idxCount);
   void updateRenderable(GLenum mode, int idxCount);
 
 protected:

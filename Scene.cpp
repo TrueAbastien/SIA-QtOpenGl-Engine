@@ -46,6 +46,7 @@ void Scene::updateChildren(Component* component, UpdateInfo _infos)
 {
   UpdateInfo infos = _infos;
   infos.parentToScreen *= component->localToParent();
+  infos.parentToWorld *= component->localToParent();
 
   // Update Children
   for (const auto& child : component->children())

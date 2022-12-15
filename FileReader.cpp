@@ -425,7 +425,8 @@ FileReader::OFFResult FileReader::readOFF(const QString& filePath, const OFFPara
         vtx.position[jj] = v;
       }
 
-      vtx.color = coloration(360.0f * gen.generateDouble());
+      //vtx.color = coloration(360.0f * gen.generateDouble());
+      vtx.color = QVector3D(0.5, 0.5, 0.5);
 
       vertices.push_back(vtx);
     }

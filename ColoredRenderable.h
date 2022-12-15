@@ -8,11 +8,12 @@ class ColoredRenderable : public Renderable
 public:
 
   virtual void init() override;
+  virtual void update(UpdateInfo infos) override;
 
 protected:
 
-  void initRenderable(const void* vtxData, int vtxCount,
-                      const void* idxData, int idxCount);
+  void initRenderable(VertexData_Colored* vtxData, int vtxCount,
+                      const GLushort* idxData, int idxCount);
   void updateRenderable(GLenum mode, int idxCount);
 
 protected:

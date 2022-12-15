@@ -24,6 +24,10 @@
 
 #include <cmath>
 
+#ifdef _DEBUG
+CustomDebug::LogMethod CustomDebug::log = {};
+#endif
+
 
 // ------------------------------------------------------------------------------------------------
 MainWidget::MainWidget() :
@@ -32,6 +36,13 @@ MainWidget::MainWidget() :
   logger(nullptr)
 {
   resetCamera();
+
+#ifdef _DEBUG
+  CustomDebug::log = [&](const std::string& message)
+  {
+    internalLog(DEBUG, message);
+  };
+#endif
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -384,6 +395,8 @@ void MainWidget::paintGL()
       infos.dt = 0.1f; // TODO
       infos.animationTime = animTime,
       infos.parentToScreen = projection * view;
+      infos.parentToWorld = QMatrix4x4();
+      infos.cameraPosition = view * QVector3D(0, 0, 0);
     }
     scene->update(infos);
 

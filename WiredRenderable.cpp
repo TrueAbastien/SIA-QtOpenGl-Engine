@@ -7,7 +7,7 @@ void WiredRenderable::init()
 }
 
 // ------------------------------------------------------------------------------------------------
-void WiredRenderable::initRenderable(const void* vtxData, int vtxCount, const void* idxData, int idxCount)
+void WiredRenderable::initRenderable(VertexData_Wired* vtxData, int vtxCount, const GLushort* idxData, int idxCount)
 {
   Renderable::initRenderable<VertexData_Wired>(vtxData, vtxCount, idxData, idxCount);
 }
