@@ -22,6 +22,7 @@
 #include <QInputDialog>
 #include <QSpinBox>
 #include <QSlider>
+#include <QScrollArea>
 
 #include <cmath>
 
@@ -304,51 +305,51 @@ QWidget* MainWidget::makeControls()
 
     // Specular
     {
-      QGroupBox* valueBox = new QGroupBox("Specular");
-      QVBoxLayout* valueLayout = new QVBoxLayout;
+    QGroupBox* valueBox = new QGroupBox("Specular");
+    QVBoxLayout* valueLayout = new QVBoxLayout;
 
+    {
+      // Labelling
+      QSpinBox* spinBox;
       {
-        // Labelling
-        QSpinBox* spinBox;
+        QHBoxLayout* labelLayout = new QHBoxLayout;
+
+        // Value
         {
-          QHBoxLayout* labelLayout = new QHBoxLayout;
-
-          // Value
-          {
-            spinBox = new QSpinBox;
-            spinBox->setReadOnly(true);
-            spinBox->setButtonSymbols(QSpinBox::NoButtons);
-            spinBox->setMaximumWidth(30);
-            spinBox->setAlignment(Qt::AlignCenter);
-            spinBox->setMinimum(0);
-            spinBox->setMaximum(200);
-            spinBox->setValue((int) (material.ks * 100));
-            labelLayout->addWidget(spinBox);
-          }
-
-          // Type
-          {
-            QLabel* label = new QLabel("%");
-            labelLayout->addWidget(label);
-          }
-
-          valueLayout->addLayout(labelLayout);
+          spinBox = new QSpinBox;
+          spinBox->setReadOnly(true);
+          spinBox->setButtonSymbols(QSpinBox::NoButtons);
+          spinBox->setMaximumWidth(30);
+          spinBox->setAlignment(Qt::AlignCenter);
+          spinBox->setMinimum(0);
+          spinBox->setMaximum(200);
+          spinBox->setValue((int) (material.ks * 100));
+          labelLayout->addWidget(spinBox);
         }
 
-        // Slider
+        // Type
         {
-          QSlider* slider = new QSlider(Qt::Horizontal);
-          slider->setMinimum(0);
-          slider->setMaximum(200);
-          slider->setValue((int) (material.ks * 100));
-          connect(slider, &QSlider::valueChanged, this, &MainWidget::changeSpecular);
-          connect(slider, &QSlider::valueChanged, spinBox, &QSpinBox::setValue);
-          valueLayout->addWidget(slider);
+          QLabel* label = new QLabel("%");
+          labelLayout->addWidget(label);
         }
+
+        valueLayout->addLayout(labelLayout);
       }
 
-      valueBox->setLayout(valueLayout);
-      materialVL->addWidget(valueBox);
+      // Slider
+      {
+        QSlider* slider = new QSlider(Qt::Horizontal);
+        slider->setMinimum(0);
+        slider->setMaximum(200);
+        slider->setValue((int) (material.ks * 100));
+        connect(slider, &QSlider::valueChanged, this, &MainWidget::changeSpecular);
+        connect(slider, &QSlider::valueChanged, spinBox, &QSpinBox::setValue);
+        valueLayout->addWidget(slider);
+      }
+    }
+
+    valueBox->setLayout(valueLayout);
+    materialVL->addWidget(valueBox);
     }
 
     // Shininess
@@ -389,6 +390,17 @@ QWidget* MainWidget::makeControls()
 
     box->setLayout(materialVL);
     layout->addWidget(box);
+  }
+
+  // Scrolling Area
+  {
+    QWidget* scrollAreaContent = new QWidget;
+    scrollAreaContent->setLayout(layout);
+    QScrollArea* scrollArea = new QScrollArea;
+    scrollArea->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
+    scrollArea->setVerticalScrollBarPolicy(Qt::ScrollBarAsNeeded);
+    scrollArea->setWidgetResizable(true);
+    scrollArea->setWidget(scrollAreaContent);
   }
 
   layout->setAlignment(Qt::AlignTop);
