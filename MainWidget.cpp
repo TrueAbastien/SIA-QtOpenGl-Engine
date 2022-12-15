@@ -597,7 +597,7 @@ void MainWidget::paintGL()
       infos.animationTime = animTime,
       infos.parentToScreen = projection * view;
       infos.parentToWorld = QMatrix4x4();
-      infos.cameraPosition = view.inverted() * QVector3D(0, 0, 0);
+      infos.cameraDirection = forward;
       infos.material = material;
     }
     scene->update(infos);

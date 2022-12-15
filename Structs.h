@@ -53,7 +53,7 @@ struct UpdateInfo
   float animationTime;
   QMatrix4x4 parentToScreen;
   QMatrix4x4 parentToWorld;
-  QVector3D cameraPosition;
+  QVector3D cameraDirection;
   GlobalMaterial material;
 };
 

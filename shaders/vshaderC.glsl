@@ -6,7 +6,6 @@ precision mediump float;
 
 uniform mat4 mvp_matrix;
 uniform mat4 model_matrix;
-uniform vec3 cam_position;
 
 attribute vec4 a_position;
 attribute vec3 a_color;
@@ -14,7 +13,6 @@ attribute vec3 a_normal;
 
 varying vec3 v_color;
 varying vec3 v_normal;
-varying vec3 v_camDir;
 
 //! [0]
 void main()
@@ -24,6 +22,5 @@ void main()
     
     v_color = a_color;
     v_normal = (model_matrix * vec4(a_normal, 0)).xyz;
-    v_camDir = normalize(cam_position - gl_Position.xyz);
 }
 //! [0]

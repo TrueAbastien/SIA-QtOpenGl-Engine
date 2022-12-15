@@ -29,7 +29,6 @@ void TexturedRenderable::update(UpdateInfo infos)
 
   // Vertex Uniforms
   m_program.setUniformValue("model_matrix", infos.parentToWorld * m_localToParent);
-  m_program.setUniformValue("cam_position", infos.cameraPosition);
 
   // Fragment Uniforms
   m_program.setUniformValue("texture", 0);
@@ -37,6 +36,7 @@ void TexturedRenderable::update(UpdateInfo infos)
   m_program.setUniformValue("kd", infos.material.kd);
   m_program.setUniformValue("ks", infos.material.ks);
   m_program.setUniformValue("shininess", infos.material.shininess);
+  m_program.setUniformValue("cam_dir", infos.cameraDirection);
 }
 
 // ------------------------------------------------------------------------------------------------
