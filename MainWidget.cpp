@@ -23,6 +23,7 @@
 #include <QSpinBox>
 #include <QSlider>
 #include <QScrollArea>
+#include <QSizePolicy>
 
 #include <cmath>
 
@@ -101,6 +102,7 @@ QWidget* MainWidget::makeControls()
 {
   QGroupBox* root = new QGroupBox("Controls");
   QVBoxLayout* layout = new QVBoxLayout;
+  layout->setAlignment(Qt::AlignTop);
 
   // Scene
   {
@@ -393,19 +395,23 @@ QWidget* MainWidget::makeControls()
   }
 
   // Scrolling Area
+  QVBoxLayout* layoutContainer = new QVBoxLayout;
   {
     QWidget* scrollAreaContent = new QWidget;
     scrollAreaContent->setLayout(layout);
+
     QScrollArea* scrollArea = new QScrollArea;
-    scrollArea->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
-    scrollArea->setVerticalScrollBarPolicy(Qt::ScrollBarAsNeeded);
-    scrollArea->setWidgetResizable(true);
-    scrollArea->setWidget(scrollAreaContent);
+    {
+      scrollArea->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
+      scrollArea->setVerticalScrollBarPolicy(Qt::ScrollBarAsNeeded);
+      scrollArea->setWidgetResizable(true);
+      scrollArea->setWidget(scrollAreaContent);
+    }
+    layoutContainer->addWidget(scrollArea);
   }
 
-  layout->setAlignment(Qt::AlignTop);
-  root->setLayout(layout);
-  root->setFixedWidth(250);
+  root->setLayout(layoutContainer);
+  root->setFixedWidth(300);
   return root;
 }
 
