@@ -379,29 +379,6 @@ FileReader::OFFResult FileReader::readOFF(const QString& filePath, const OFFPara
     return r;
   };
 
-  // Color
-  const auto coloration = [](float seed) -> QVector3D
-  {
-    float h = fmod(seed, 360.0);
-    float s = 0.8f;
-    float v = 0.8f;
-    float C = s * v;
-    float X = C * (1 - abs(fmod(h / 60.0, 2) - 1));
-    float m = v - C;
-    QVector3D r;
-
-    if (h < 60)       r = {C, X, 0};
-    else if (h < 120) r = {X, C, 0};
-    else if (h < 180) r = {0, C, X};
-    else if (h < 240) r = {0, X, C};
-    else if (h < 300) r = {X, 0, C};
-    else              r = {C, 0, X};
-
-    for (int ii = 0; ii < 3; ++ii) r[ii] += m;
-
-    return r;
-  };
-
   // Reading
   const auto readHeader = [&]()
   {
@@ -411,8 +388,6 @@ FileReader::OFFResult FileReader::readOFF(const QString& filePath, const OFFPara
   };
   const auto readVertices = [&]()
   {
-    QRandomGenerator gen;
-
     for (int ii = 0; ii < nVtx; ++ii)
     {
       VertexData_Colored vtx;
@@ -424,8 +399,6 @@ FileReader::OFFResult FileReader::readOFF(const QString& filePath, const OFFPara
 
         vtx.position[jj] = v;
       }
-
-      //vtx.color = coloration(360.0f * gen.generateDouble());
       vtx.color = QVector3D(0.5, 0.5, 0.5);
 
       vertices.push_back(vtx);

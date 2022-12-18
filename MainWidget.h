@@ -85,7 +85,8 @@ private:
   template <typename T>
   using ComponentPredicate = std::function<bool(const QSharedPointer<T>&)>;
   template <typename T>
-  QVector<QSharedPointer<T>> find_if(ComponentPredicate<T> pred =
+  QVector<QSharedPointer<T>> find_if(Component* parent = nullptr,
+                                     ComponentPredicate<T> pred =
                                      [](const QSharedPointer<T>&) -> bool
                                      {
                                        return true;
@@ -137,13 +138,13 @@ inline QSharedPointer<T> MainWidget::createComponent(const QString& name, QShare
 
 // ------------------------------------------------------------------------------------------------
 template<typename T>
-inline QVector<QSharedPointer<T>> MainWidget::find_if(ComponentPredicate<T> pred)
+inline QVector<QSharedPointer<T>> MainWidget::find_if(Component* parent, ComponentPredicate<T> pred)
 {
   using CompVec = QVector<QSharedPointer<T>>;
 
   CompVec result(0);
 
-  QVector<Component*> next{scene}, curr;
+  QVector<Component*> next{parent == nullptr ? scene : parent}, curr;
   int iter = 0;
 
   // Iterative Search
