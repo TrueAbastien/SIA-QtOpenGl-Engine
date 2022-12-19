@@ -506,20 +506,15 @@ FileReader::WeightResult FileReader::readWeight(const QString& filePath, const W
 
       for (const auto& jt : curr)
       {
-        bool isEnd = true;
         for (const auto& child : jt->children())
         {
           if (!child.dynamicCast<Joint>().isNull())
           {
-            isEnd = false; // Has child joints
             nextJoints.push_back(child);
           }
         }
 
-        if (!isEnd)
-        {
-          jointMap.insert(jt->name(), jt);
-        }
+        jointMap.insert(jt->name(), jt);
       }
     }
 
