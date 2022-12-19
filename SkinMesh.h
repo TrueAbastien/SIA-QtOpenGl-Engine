@@ -39,6 +39,8 @@ public:
 
   void setRelation(const RigPtr& rig);
 
+  void verticesUpdate();
+
 private:
 
   float m_scale;

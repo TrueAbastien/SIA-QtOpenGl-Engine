@@ -63,10 +63,7 @@ void SkinMesh::update(UpdateInfo infos)
   {
     m_relation->updatePosition(m_vertices, this->localToWorld());
 
-    Renderable::computeNormals<VertexData_Colored>(m_vertices.data(), m_vertices.size(),
-                                                   m_indices.data(), m_indices.size(), 3, true);
-
-    Renderable::updateVertices<VertexData_Colored>(m_vertices.data(), m_vertices.size());
+    verticesUpdate();
   }
 
   ColoredRenderable::updateRenderable(GL_TRIANGLES, m_indices.size());
@@ -94,4 +91,13 @@ size_t SkinMesh::vSize() const
 void SkinMesh::setRelation(const RigPtr& rig)
 {
   m_relation = rig;
+}
+
+// ------------------------------------------------------------------------------------------------
+void SkinMesh::verticesUpdate()
+{
+  Renderable::computeNormals<VertexData_Colored>(m_vertices.data(), m_vertices.size(),
+                                                 m_indices.data(), m_indices.size(), 3, true);
+
+  Renderable::updateVertices<VertexData_Colored>(m_vertices.data(), m_vertices.size());
 }

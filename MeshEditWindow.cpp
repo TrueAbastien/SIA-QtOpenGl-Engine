@@ -4,16 +4,19 @@
 #include <QVBoxLayout>
 #include <QHBoxLayout>
 #include <QLabel>
-#include <QTextEdit>
+#include <QLineEdit>
 #include <QDoubleSpinBox>
+#include <QPushButton>
 
 // ------------------------------------------------------------------------------------------------
-MeshEditWindow::MeshEditWindow(QWidget* parent)
-  : QWidget(parent),
+MeshEditWindow::MeshEditWindow(QWidget* parent) :
+  QDialog(parent),
   m_scale(1.0f), m_savedScale(1.0f),
   m_rotation{}, m_savedRotation{},
   m_position{}, m_savedPosition{}
 {
+  setWindowTitle("Mesh Edit");
+
   // Content
   {
     QVBoxLayout* root = new QVBoxLayout;
@@ -32,9 +35,9 @@ MeshEditWindow::MeshEditWindow(QWidget* parent)
 
       // Name
       {
-        QTextEdit* edit = new QTextEdit("");
+        QLineEdit* edit = new QLineEdit("");
         edit->setReadOnly(true);
-        connect(this, &MeshEditWindow::meshChanged, edit, &QTextEdit::setPlainText);
+        connect(this, &MeshEditWindow::meshChanged, edit, &QLineEdit::setText);
         name->addWidget(edit);
       }
     }
@@ -60,6 +63,7 @@ MeshEditWindow::MeshEditWindow(QWidget* parent)
             spinBox->setValue(0.0);
             spinBox->setMaximum(100.0);
             spinBox->setMinimum(-100.0);
+            spinBox->setSingleStep(1.0);
             connect(this, &MeshEditWindow::positionXChanged, spinBox, &QDoubleSpinBox::setValue);
             connect(spinBox, SIGNAL(valueChanged(double)), this, SLOT(updatePositionX(double)));
             edit->addWidget(spinBox, 0, 1);
@@ -71,6 +75,7 @@ MeshEditWindow::MeshEditWindow(QWidget* parent)
             spinBox->setValue(0.0);
             spinBox->setMaximum(100.0);
             spinBox->setMinimum(-100.0);
+            spinBox->setSingleStep(1.0);
             connect(this, &MeshEditWindow::positionYChanged, spinBox, &QDoubleSpinBox::setValue);
             connect(spinBox, SIGNAL(valueChanged(double)), this, SLOT(updatePositionY(double)));
             edit->addWidget(spinBox, 0, 2);
@@ -82,6 +87,7 @@ MeshEditWindow::MeshEditWindow(QWidget* parent)
             spinBox->setValue(0.0);
             spinBox->setMaximum(100.0);
             spinBox->setMinimum(-100.0);
+            spinBox->setSingleStep(1.0);
             connect(this, &MeshEditWindow::positionZChanged, spinBox, &QDoubleSpinBox::setValue);
             connect(spinBox, SIGNAL(valueChanged(double)), this, SLOT(updatePositionZ(double)));
             edit->addWidget(spinBox, 0, 3);
@@ -103,8 +109,9 @@ MeshEditWindow::MeshEditWindow(QWidget* parent)
           {
             QDoubleSpinBox* spinBox = new QDoubleSpinBox;
             spinBox->setValue(0.0);
-            spinBox->setMaximum(100.0);
-            spinBox->setMinimum(-100.0);
+            spinBox->setMaximum(180.0);
+            spinBox->setMinimum(-180.0);
+            spinBox->setSingleStep(5.0);
             connect(this, &MeshEditWindow::rotationXChanged, spinBox, &QDoubleSpinBox::setValue);
             connect(spinBox, SIGNAL(valueChanged(double)), this, SLOT(updateRotationX(double)));
             edit->addWidget(spinBox, 1, 1);
@@ -114,8 +121,9 @@ MeshEditWindow::MeshEditWindow(QWidget* parent)
           {
             QDoubleSpinBox* spinBox = new QDoubleSpinBox;
             spinBox->setValue(0.0);
-            spinBox->setMaximum(100.0);
-            spinBox->setMinimum(-100.0);
+            spinBox->setMaximum(180.0);
+            spinBox->setMinimum(-180.0);
+            spinBox->setSingleStep(5.0);
             connect(this, &MeshEditWindow::rotationYChanged, spinBox, &QDoubleSpinBox::setValue);
             connect(spinBox, SIGNAL(valueChanged(double)), this, SLOT(updateRotationY(double)));
             edit->addWidget(spinBox, 1, 2);
@@ -125,8 +133,9 @@ MeshEditWindow::MeshEditWindow(QWidget* parent)
           {
             QDoubleSpinBox* spinBox = new QDoubleSpinBox;
             spinBox->setValue(0.0);
-            spinBox->setMaximum(100.0);
-            spinBox->setMinimum(-100.0);
+            spinBox->setMaximum(180.0);
+            spinBox->setMinimum(-180.0);
+            spinBox->setSingleStep(5.0);
             connect(this, &MeshEditWindow::rotationZChanged, spinBox, &QDoubleSpinBox::setValue);
             connect(spinBox, SIGNAL(valueChanged(double)), this, SLOT(updateRotationZ(double)));
             edit->addWidget(spinBox, 1, 3);
@@ -147,8 +156,9 @@ MeshEditWindow::MeshEditWindow(QWidget* parent)
           QDoubleSpinBox* spinBox = new QDoubleSpinBox;
           spinBox->setValue(1.0);
           spinBox->setDecimals(4);
-          spinBox->setMaximum(2.0);
+          spinBox->setMaximum(10.0);
           spinBox->setMinimum(0.0);
+          spinBox->setSingleStep(0.1);
           connect(this, &MeshEditWindow::scaleChanged, spinBox, &QDoubleSpinBox::setValue);
           connect(spinBox, SIGNAL(valueChanged(double)), this, SLOT(updateScale(double)));
           edit->addWidget(spinBox, 2, 1, 1, 3);
@@ -158,7 +168,30 @@ MeshEditWindow::MeshEditWindow(QWidget* parent)
 
     // Buttons
     {
-      // TODO
+      QHBoxLayout* buttons = new QHBoxLayout;
+      root->addLayout(buttons);
+
+      // Save
+      {
+        QPushButton* button = new QPushButton("Save");
+        connect(button, &QPushButton::pressed, this, &MeshEditWindow::save);
+        connect(this, &MeshEditWindow::unedited, button, &QPushButton::setEnabled);
+        buttons->addWidget(button);
+      }
+
+      // Apply
+      {
+        QPushButton* button = new QPushButton("Apply");
+        connect(button, &QPushButton::pressed, this, &MeshEditWindow::apply);
+        buttons->addWidget(button);
+      }
+
+      // Cancel
+      {
+        QPushButton* button = new QPushButton("Cancel");
+        connect(button, &QPushButton::pressed, this, &MeshEditWindow::cancel);
+        buttons->addWidget(button);
+      }
     }
   }
 
@@ -178,7 +211,15 @@ void MeshEditWindow::setSkinMesh(const MeshPtr& mesh)
 
   resetTransform();
 
-  emit meshChanged(mesh->name());
+  emit meshChanged(mesh->parent()->name());
+}
+
+// ------------------------------------------------------------------------------------------------
+void MeshEditWindow::closeEvent(QCloseEvent* e)
+{
+  cancel();
+
+  m_mesh = nullptr;
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -269,6 +310,7 @@ void MeshEditWindow::apply()
   {
     vertex.position = tr * vertex.position;
   }
+  m_mesh->verticesUpdate();
 
   m_mesh->setScale(1.0f);
   m_mesh->setLocalRotation(QVector3D());
@@ -289,8 +331,6 @@ void MeshEditWindow::cancel()
   m_mesh->setLocalPosition(m_savedPosition);
 
   resetTransform();
-
-  m_mesh = nullptr;
 }
 
 // ------------------------------------------------------------------------------------------------

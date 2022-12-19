@@ -4,9 +4,10 @@
 #include "Structs.h"
 #include "SkinMesh.h"
 
-#include <QWidget>
+#include <QDialog>
+#include <QCloseEvent>
 
-class MeshEditWindow final : public QWidget
+class MeshEditWindow final : public QDialog
 {
   Q_OBJECT;
 
@@ -21,6 +22,10 @@ public:
 public:
 
   void setSkinMesh(const MeshPtr& mesh);
+
+protected:
+
+  void closeEvent(QCloseEvent* e) override;
 
 public slots:
 

@@ -54,6 +54,9 @@ MainWidget::MainWidget() :
     internalLog(DEBUG, message);
   };
 #endif
+
+  // Sub-Windows
+  meshEditWindow = new MeshEditWindow(this);
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -86,6 +89,20 @@ QMenuBar* MainWidget::makeMenu()
     {
       QAction* action = new QAction("Load OFF");
       connect(action, &QAction::triggered, this, &MainWidget::loadOFF);
+      menu->addAction(action);
+    }
+
+    root->addMenu(menu);
+  }
+
+  // Tool menu
+  {
+    QMenu* menu = new QMenu("Tool");
+
+    // Mesh Edit Action
+    {
+      QAction* action = new QAction("Edit Mesh");
+      connect(action, &QAction::triggered, this, &MainWidget::openMeshEdit);
       menu->addAction(action);
     }
 
@@ -727,6 +744,71 @@ void MainWidget::loadOFF()
   internalLog(INFO, name.toStdString() + " successfully loaded !");
 
   scene->addChildren(parent);
+}
+
+// ------------------------------------------------------------------------------------------------
+void MainWidget::openMeshEdit()
+{
+  if (meshEditWindow->isVisible())
+  {
+    internalLog(DEBUG, "Mesh Edit Window is already opened...");
+    return;
+  }
+
+  const auto naming = [](const Component::Pointer& ptr) -> QString
+  {
+    if (ptr.isNull()) return "";
+    const Component* parent = ptr->parent();
+    if (parent == nullptr) return ptr->name();
+    return parent->name();
+  };
+
+  // Pick SkinMesh
+  QSharedPointer<SkinMesh> skin;
+  {
+    const auto& items = find_if<SkinMesh>();
+    if (items.isEmpty())
+    {
+      internalLog(ERROR_, "No Skin found...");
+      return;
+    }
+
+    QString name;
+    {
+      // Create SkinMesh List
+      QStringList names(0);
+      const auto func = [&](const QSharedPointer<SkinMesh>& sm) -> QString
+      {
+        return naming(sm);
+      };
+      std::transform(items.begin(), items.end(), std::back_inserter(names), func);
+
+      // Create Dialog
+      bool ok;
+      name = QInputDialog::getItem(this, "Select Skin", "Skin", names, 0, false, &ok);
+      if (!ok)
+      {
+        return;
+      }
+    }
+
+    const auto pred = [&](const QSharedPointer<SkinMesh>& sm) -> bool
+    {
+      return naming(sm) == name;
+    };
+    const auto& item = std::find_if(items.begin(), items.end(), pred);
+    if (item == items.end())
+    {
+      internalLog(ERROR_, "Skin couldn't be found...");
+      return;
+    }
+
+    skin = *item;
+  }
+
+  // Oepn Mesh Edit
+  meshEditWindow->setSkinMesh(skin);
+  meshEditWindow->show();
 }
 
 // ------------------------------------------------------------------------------------------------

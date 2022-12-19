@@ -3,6 +3,7 @@
 
 #include "Scene.h"
 #include "AnimationController.h"
+#include "MeshEditWindow.h"
 
 #include <QOpenGLWidget>
 #include <QOpenGLFunctions>
@@ -55,6 +56,8 @@ public slots:
 
   void loadBVH();
   void loadOFF();
+
+  void openMeshEdit();
 
   void makeSkin();
   void resetCamera();
@@ -110,6 +113,9 @@ private:
     float cameraDistance;
     QVector3D cameraPosition;
     QVector3D forward, right, up;
+
+    // Tool Sub-Windows
+    MeshEditWindow* meshEditWindow;
 };
 
 // ------------------------------------------------------------------------------------------------
