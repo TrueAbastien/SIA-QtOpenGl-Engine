@@ -18,6 +18,7 @@ SOURCES += \
     Cube.cpp \
     FactoryFloor.cpp \
     FileReader.cpp \
+    FileWriter.cpp \
     Floor.cpp \
     Joint.cpp \
     JointRenderer.cpp \
@@ -41,6 +42,7 @@ HEADERS += \
     Cube.h \
     FactoryFloor.h \
     FileReader.h \
+    FileWriter.h \
     Floor.h \
     Joint.h \
     JointRenderer.h \

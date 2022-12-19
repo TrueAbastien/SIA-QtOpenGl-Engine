@@ -1,5 +1,7 @@
 #include "MeshEditWindow.h"
 
+#include "FileWriter.h"
+
 #include <QGridLayout>
 #include <QVBoxLayout>
 #include <QHBoxLayout>
@@ -7,6 +9,7 @@
 #include <QLineEdit>
 #include <QDoubleSpinBox>
 #include <QPushButton>
+#include <QFileDialog>
 
 // ------------------------------------------------------------------------------------------------
 MeshEditWindow::MeshEditWindow(QWidget* parent) :
@@ -194,11 +197,6 @@ MeshEditWindow::MeshEditWindow(QWidget* parent) :
       }
     }
   }
-
-  // Connections
-  {
-    // TODO
-  }
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -295,7 +293,18 @@ void MeshEditWindow::updatePositionZ(double value)
 // ------------------------------------------------------------------------------------------------
 void MeshEditWindow::save()
 {
-  // TODO
+  QString fileName = QFileDialog::getSaveFileName(this, tr("Save OFF"), "", tr("OFF Files (*.off)"));
+  if (fileName.isEmpty())
+  {
+    return;
+  }
+
+  FileWriter::OFFParameters params;
+  {
+    params.inverted = true;
+    params.scale = 1.0f;
+  }
+  FileWriter::writeOFF(fileName, m_mesh, params);
 }
 
 // ------------------------------------------------------------------------------------------------

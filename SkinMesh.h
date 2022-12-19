@@ -33,6 +33,7 @@ public:
   void init() override;
   void update(UpdateInfo infos) override;
 
+  Indices indices() const;
   Vertices vertices() const;
   Vertices& vertices();
   size_t vSize() const;

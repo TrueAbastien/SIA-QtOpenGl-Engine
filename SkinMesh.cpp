@@ -70,6 +70,12 @@ void SkinMesh::update(UpdateInfo infos)
 }
 
 // ------------------------------------------------------------------------------------------------
+SkinMesh::Indices SkinMesh::indices() const
+{
+  return m_indices;
+}
+
+// ------------------------------------------------------------------------------------------------
 SkinMesh::Vertices SkinMesh::vertices() const
 {
   return m_vertices;
