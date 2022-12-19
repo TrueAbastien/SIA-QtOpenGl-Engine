@@ -27,15 +27,21 @@ public:
 
 public:
 
+  void setScale(float scale);
+  float scale() const;
+
   void init() override;
   void update(UpdateInfo infos) override;
 
   Vertices vertices() const;
+  Vertices& vertices();
   size_t vSize() const;
 
   void setRelation(const RigPtr& rig);
 
 private:
+
+  float m_scale;
 
   Vertices m_vertices;
   Indices m_indices;

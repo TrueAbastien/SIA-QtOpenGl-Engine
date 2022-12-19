@@ -14,8 +14,33 @@ void SkinMesh::ProcessPoly(Indices& indices, const Poly& p)
 
 // ------------------------------------------------------------------------------------------------
 SkinMesh::SkinMesh(const Vertices& vertices, const Indices& indices)
-  : m_vertices(vertices), m_indices(indices), m_relation(nullptr)
+  : m_scale(1.0f), m_vertices(vertices), m_indices(indices), m_relation(nullptr)
 {
+  const auto method = [&](QVector3D pos, QVector3D rot) -> QMatrix4x4
+  {
+    QMatrix4x4 m = {};
+    m.rotate(rot.x(), 1.0, 0.0, 0.0);
+    m.rotate(rot.y(), 0.0, 1.0, 0.0);
+    m.rotate(rot.z(), 0.0, 0.0, 1.0);
+    m.translate(pos);
+    m.scale(m_scale);
+    return m;
+  };
+  setMatrixConstruct(method);
+}
+
+// ------------------------------------------------------------------------------------------------
+void SkinMesh::setScale(float scale)
+{
+  m_scale = scale;
+
+  updateTransform();
+}
+
+// ------------------------------------------------------------------------------------------------
+float SkinMesh::scale() const
+{
+  return m_scale;
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -49,6 +74,12 @@ void SkinMesh::update(UpdateInfo infos)
 
 // ------------------------------------------------------------------------------------------------
 SkinMesh::Vertices SkinMesh::vertices() const
+{
+  return m_vertices;
+}
+
+// ------------------------------------------------------------------------------------------------
+SkinMesh::Vertices& SkinMesh::vertices()
 {
   return m_vertices;
 }

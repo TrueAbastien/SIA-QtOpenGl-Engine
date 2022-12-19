@@ -163,3 +163,9 @@ void Component::log(LogType type, const std::string& message)
     logMethod(type, message);
   }
 }
+
+// ------------------------------------------------------------------------------------------------
+void Component::updateTransform()
+{
+  m_localToParent = m_matrixMethod(m_localPosition, m_localRotation);
+}

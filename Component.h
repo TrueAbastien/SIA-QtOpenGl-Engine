@@ -68,6 +68,8 @@ protected:
 
     void log(LogType type, const std::string& message);
 
+    void updateTransform();
+
 protected:
 
     QString m_name;
