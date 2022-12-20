@@ -54,7 +54,7 @@ QMatrix4x4 Component::localToWorld() const
   if (m_parent == nullptr)
     return m_localToParent;
 
-  return m_parent->localToParent() * m_localToParent;
+  return m_parent->localToWorld() * m_localToParent;
 }
 
 // ------------------------------------------------------------------------------------------------

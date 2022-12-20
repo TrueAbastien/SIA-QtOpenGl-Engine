@@ -18,7 +18,7 @@ void computeJointNode(MeshRigRelation::JointMap& data, const Component::Pointer&
   // Compute Child
   for (const auto& child : target->children())
   {
-    if (!target.dynamicCast<Joint>().isNull())
+    if (!child.dynamicCast<Joint>().isNull())
     {
       computeJointNode(data, child, tr * child->localToParent());
     }
@@ -64,7 +64,7 @@ void MeshRigRelation::computeHomeData(const QSharedPointer<JointRenderer>& body,
 
     for (auto& weight : weights)
     {
-      weight.localPosition = m_homeData[weight.joint].worldToLocal * vWorldPos;
+      weight.localPosition = m_homeData.value(weight.joint).worldToLocal * vWorldPos;
     }
   }
 }
@@ -88,7 +88,7 @@ void MeshRigRelation::updatePosition(std::vector<VertexData_Colored>& vertices,
     for (const auto& data : m_weights[ii])
     {
       QMatrix4x4 tr = data.joint->localToWorld();
-      pos += data.weight * tr * data.localPosition;
+      pos += (tr * data.localPosition) * data.weight;
     }
 
     vertices[ii].position = worldToLocal * pos;
