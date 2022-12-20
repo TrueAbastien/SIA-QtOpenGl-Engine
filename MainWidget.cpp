@@ -935,9 +935,11 @@ void MainWidget::makeSkin()
   {
     auto relation = QSharedPointer<MeshRigRelation>::create();
 
+    const auto data = relation->computeHomeData(root);
+
     relation->setWeightData(*weights);
 
-    relation->computeHomeData(root, skin->vertices(), skin->localToWorld());
+    relation->setupWeight(data, skin->vertices(), skin->localToWorld());
 
     skin->setRelation(relation);
   }

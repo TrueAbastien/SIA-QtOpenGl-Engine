@@ -12,6 +12,7 @@ void computeJointNode(MeshRigRelation::JointMap& data, const Component::Pointer&
   MeshRigRelation::JointInfo info;
   {
     info.worldToLocal = tr.inverted();
+    info.worldOrigin = tr * QVector3D(0, 0, 0);
   }
   data.insert(target, info);
 
@@ -26,25 +27,96 @@ void computeJointNode(MeshRigRelation::JointMap& data, const Component::Pointer&
 }
 
 // ------------------------------------------------------------------------------------------------
+MeshRigRelation::JointMap MeshRigRelation::computeHomeData(const QSharedPointer<JointRenderer>& body) const
+{
+  if (body.isNull())
+  {
+    return MeshRigRelation::JointMap();
+  }
+
+  JointMap result;
+  computeJointNode(result, body, body->localToWorld());
+
+  return result;
+}
+
+// ------------------------------------------------------------------------------------------------
 void MeshRigRelation::setWeightData(const VerticesWeight& weights)
 {
   m_weights = weights;
 }
 
 // ------------------------------------------------------------------------------------------------
-void MeshRigRelation::computeHomeData(const QSharedPointer<JointRenderer>& body,
-                                      const std::vector<VertexData_Colored>& vertices,
-                                      const QMatrix4x4& skin_localToWorld)
+void MeshRigRelation::computeWeightData(const JointMap& joints,
+                                        const std::vector<VertexData_Colored>& vertices,
+                                        const QMatrix4x4& skin_localToWorld)
 {
-  if (body.isNull())
+  if (joints.isEmpty())
   {
     return;
   }
 
-  // Home Data
-  m_homeData.clear();
-  computeJointNode(m_homeData, body, body->localToWorld());
+  m_weights.clear();
+  QMatrix4x4 skin_WorldToLocal = skin_localToWorld.inverted();
 
+  // Copy Joints Map
+  JointMap skinLocalJoints;
+  for (auto it = joints.cbegin(); it != joints.cend(); ++it)
+  {
+    JointInfo info = it.value();
+    {
+      info.worldOrigin = skin_WorldToLocal * info.worldOrigin;
+    }
+    skinLocalJoints.insert(it.key(), info);
+  }
+
+  size_t size = vertices.size();
+  m_weights.resize(size);
+
+  // Find Best Weight
+  for (size_t ii = 0; ii < size; ++ii)
+  {
+    auto& weights = m_weights[ii];
+
+    // Find Best Point
+    Component::Pointer joint = nullptr;
+    float dist = FLT_MAX;
+
+    const auto vtx = vertices[ii];
+    for (auto it = skinLocalJoints.cbegin(); it != skinLocalJoints.cend(); ++it)
+    {
+      QVector3D vtxToJoint = it.value().worldOrigin - vtx.position;
+
+      float dot = QVector3D::dotProduct(vtxToJoint, -vtx.normal);
+      if (dot > 0)
+      {
+        float norm = vtxToJoint.lengthSquared();
+        if (norm < dist)
+        {
+          dist = norm;
+          joint = it.key();
+        }
+      }
+    }
+
+    // Add Best Joint
+    if (joint != nullptr)
+    {
+      WeightData data;
+      {
+        data.weight = 1.0f;
+        data.joint = joint;
+      }
+      weights.push_back(data);
+    }
+  }
+}
+
+// ------------------------------------------------------------------------------------------------
+void MeshRigRelation::setupWeight(const JointMap& joints,
+                                  const std::vector<VertexData_Colored>& vertices,
+                                  const QMatrix4x4& skin_localToWorld)
+{
   if (m_weights.isEmpty())
   {
     return;
@@ -64,7 +136,7 @@ void MeshRigRelation::computeHomeData(const QSharedPointer<JointRenderer>& body,
 
     for (auto& weight : weights)
     {
-      weight.localPosition = m_homeData.value(weight.joint).worldToLocal * vWorldPos;
+      weight.localPosition = joints.value(weight.joint).worldToLocal * vWorldPos;
     }
   }
 }
