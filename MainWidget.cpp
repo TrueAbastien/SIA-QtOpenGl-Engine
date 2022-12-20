@@ -909,7 +909,8 @@ void MainWidget::makeSkin()
   }
 
   // Load Weights
-  FileReader::WeightResult weights;
+  FileReader::WeightResult weights = nullptr;
+  [&]()
   {
     QString fileName = QFileDialog::getOpenFileName(this, tr("Open Weight"), "", tr("Weight Files (*.txt)"));
     if (fileName.isEmpty())
@@ -927,9 +928,8 @@ void MainWidget::makeSkin()
     if (weights.isNull())
     {
       internalLog(ERROR_, "Weight couldn't be loaded...");
-      return;
     }
-  }
+  }();
 
   // Compute & Assignation
   {
@@ -937,7 +937,14 @@ void MainWidget::makeSkin()
 
     const auto data = relation->computeHomeData(root);
 
-    relation->setWeightData(*weights);
+    if (weights != nullptr)
+    {
+      relation->setWeightData(*weights);
+    }
+    else
+    {
+      relation->computeWeightData(data, skin->vertices(), skin->localToWorld());
+    }
 
     relation->setupWeight(data, skin->vertices(), skin->localToWorld());
 

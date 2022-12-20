@@ -80,7 +80,7 @@ void MeshRigRelation::computeWeightData(const JointMap& joints,
 
     // Find Best Point
     Component::Pointer joint = nullptr;
-    float dist = FLT_MAX;
+    float factor = FLT_MAX;
 
     const auto vtx = vertices[ii];
     for (auto it = skinLocalJoints.cbegin(); it != skinLocalJoints.cend(); ++it)
@@ -88,12 +88,12 @@ void MeshRigRelation::computeWeightData(const JointMap& joints,
       QVector3D vtxToJoint = it.value().worldOrigin - vtx.position;
 
       float dot = QVector3D::dotProduct(vtxToJoint, -vtx.normal);
-      if (dot > 0)
+      if (dot >= 0.0f)
       {
-        float norm = vtxToJoint.lengthSquared();
-        if (norm < dist)
+        float f = vtxToJoint.lengthSquared();
+        if (f < factor)
         {
-          dist = norm;
+          factor = f;
           joint = it.key();
         }
       }
