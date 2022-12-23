@@ -23,11 +23,7 @@ void AnimationController::start()
     m_timer = new QElapsedTimer();
   }
 
-  if (m_timer->isValid())
-  {
-    m_pausedTime = 0.0f;
-  }
-
+  m_pausedTime = 0.0f;
   m_timer->start();
 }
 
@@ -39,8 +35,15 @@ void AnimationController::pause()
     return;
   }
 
-  m_pausedTime = time();
-  m_timer->invalidate();
+  if (m_timer->isValid())
+  {
+    m_pausedTime = time();
+    m_timer->invalidate();
+  }
+  else
+  {
+    m_timer->start();
+  }
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -69,4 +72,11 @@ float AnimationController::time() const
   }
 
   return m_pausedTime + ((float) m_timer->elapsed()) / 1'000.0f;
+}
+
+// ------------------------------------------------------------------------------------------------
+void AnimationController::setTime(double value)
+{
+  float t = this->time();
+  m_pausedTime += ((float) value) - t;
 }

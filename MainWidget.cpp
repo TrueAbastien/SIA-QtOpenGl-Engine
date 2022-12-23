@@ -206,9 +206,14 @@ QWidget* MainWidget::makeControls()
       // Value
       {
         QDoubleSpinBox* spinBox = new QDoubleSpinBox;
-        spinBox->setReadOnly(true);
-        spinBox->setButtonSymbols(QAbstractSpinBox::NoButtons);
-        connect(this, &MainWidget::animationTimeChanged, spinBox, &QDoubleSpinBox::setValue);
+        const auto func = [=](double value)
+        {
+          spinBox->blockSignals(true);
+          spinBox->setValue(value);
+          spinBox->blockSignals(false);
+        };
+        connect(this, &MainWidget::animationTimeChanged, func);
+        connect(spinBox, SIGNAL(valueChanged(double)), &animController, SLOT(setTime(double)));
         timeHL->addWidget(spinBox);
       }
 

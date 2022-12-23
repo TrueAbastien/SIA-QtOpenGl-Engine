@@ -6,8 +6,10 @@
 #include <QElapsedTimer>
 
 
-class AnimationController final
+class AnimationController final : public QObject
 {
+  Q_OBJECT;
+
 public:
 
   AnimationController();
@@ -21,6 +23,10 @@ public:
 
   // In seconds
   float time() const;
+
+public slots:
+
+  void setTime(double value);
 
 private:
 
