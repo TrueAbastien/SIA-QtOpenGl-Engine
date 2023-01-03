@@ -25,6 +25,7 @@ SOURCES += \
     MainWidget.cpp \
     MeshEditWindow.cpp \
     MeshRigRelation.cpp \
+    MTAnimatorPlug.cpp \
     MTFrame.cpp \
     Renderable.cpp \
     Scene.cpp \
@@ -50,6 +51,7 @@ HEADERS += \
     MainWidget.h \
     MeshEditWindow.h \
     MeshRigRelation.h \
+    MTAnimatorPlug.h \
     MTFrame.h \
     Renderable.h \
     Scene.h \

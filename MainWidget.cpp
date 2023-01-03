@@ -36,7 +36,8 @@ CustomDebug::LogMethod CustomDebug::log = {};
 MainWidget::MainWidget() :
   isCameraMoving(false),
   isCameraRotating(false),
-  logger(nullptr)
+  logger(nullptr),
+  previousTime(0.0f)
 {
   resetCamera();
 
@@ -221,6 +222,7 @@ QWidget* MainWidget::makeControls()
         };
         connect(this, &MainWidget::animationTimeChanged, func);
         connect(spinBox, SIGNAL(valueChanged(double)), &animController, SLOT(setTime(double)));
+        spinBox->setMaximum(3600.0);
         timeHL->addWidget(spinBox);
       }
 
@@ -640,7 +642,7 @@ void MainWidget::paintGL()
     float animTime = animController.time();
     UpdateInfo infos;
     {
-      infos.dt = 0.1f; // TODO
+      infos.dt = animTime - previousTime; // TO CHECK
       infos.animationTime = animTime,
       infos.parentToScreen = projection * view;
       infos.parentToWorld = QMatrix4x4();
@@ -648,6 +650,8 @@ void MainWidget::paintGL()
       infos.material = material;
     }
     scene->update(infos);
+
+    previousTime = animTime;
 
     emit animationTimeChanged(animTime);
 }
@@ -773,7 +777,7 @@ void MainWidget::loadMT()
     return;
   }
 
-  result->setLocalPosition(QVector3D(0, 0, 5)); // TEMP
+  result->setLocalPosition(QVector3D(0, 2, 0)); // TEMP
 
   QString name = getFileName(fileName);
   auto parent = createComponent<AxisCorrector>(name, AxisCorrector::Mode::Y_to_Z);

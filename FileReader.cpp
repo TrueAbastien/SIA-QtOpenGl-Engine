@@ -1,6 +1,7 @@
 #include "FileReader.h"
 
 #include "AnimatorPlug.h"
+#include "MTAnimatorPlug.h"
 
 #include <QRandomGenerator>
 
@@ -668,23 +669,23 @@ FileReader::MTResult FileReader::readMT(const QString& filePath)
   };
   const auto readFrames = [&]()
   {
-    auto anim = QSharedPointer<AnimatorPlug>::create();
+    auto anim = QSharedPointer<MTAnimatorPlug>::create();
     static const float dt = 1.0f / 120;
 
     int it = 0;
     while (verifyPacket())
     {
-      // Read Global Acc.
+      // Skip Global Acc.
       QVector3D acc;
       {
         float x, y, z;
         next(x);
         next(y);
         next(z);
-        acc = {x,y,z};
+        acc = {x,y,z - 9.80665f};
       }
 
-      // Skip Local Acc.
+      // Read Local Acc.
       {
         float _;
         next(_);
@@ -706,14 +707,26 @@ FileReader::MTResult FileReader::readMT(const QString& filePath)
 
       // Add Keyframes
       float time = dt * (++it);
-      /*for (int ii = 0; ii < 3; ++ii)
+      for (int ii = 0; ii < 3; ++ii)
       {
-        anim->addKeyFrame((AnimatorPlug::PropertyType) ii, time, )
-      }*/
+        anim->addKeyFrame((AnimatorPlug::PropertyType) ii, time, acc[ii]);
+      }
       for (int jj = 0; jj < 3; ++jj)
       {
         anim->addKeyFrame((AnimatorPlug::PropertyType) (jj + 3), time, rot[jj]);
       }
+
+      // Set Matrix Construction
+      const auto method = [](QVector3D pos, QVector3D rot) -> QMatrix4x4
+      {
+        QMatrix4x4 m = {};
+        m.translate(pos);
+        m.rotate(rot.x(), 1.0, 0.0, 0.0);
+        m.rotate(rot.y(), 0.0, 1.0, 0.0);
+        m.rotate(rot.z(), 0.0, 0.0, 1.0);
+        return m;
+      };
+      result->setMatrixConstruct(method);
     }
 
     result->addChildren(anim);

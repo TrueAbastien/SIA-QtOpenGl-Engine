@@ -102,6 +102,7 @@ private:
     Scene* scene;
     AnimationController animController;
     GlobalMaterial material;
+    float previousTime;
 
     QMatrix4x4 projection;
     QTextEdit* logger;
