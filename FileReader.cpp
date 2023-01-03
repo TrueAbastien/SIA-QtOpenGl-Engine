@@ -609,6 +609,7 @@ FileReader::MTResult FileReader::readMT(const QString& filePath)
 
   // Data
   auto result = MTResult::create();
+  int previousPacket = -1;
   //
 
   // Utilities
@@ -641,13 +642,88 @@ FileReader::MTResult FileReader::readMT(const QString& filePath)
     return r;
   };
 
-  // Read
-  //
+  // Convert
+  const auto quaternionToEuler = [](QVector4D quat) -> QVector3D
+  {
+    float x, y, z;
+    QQuaternion q(quat);
+    q.getEulerAngles(&x, &y, &z);
+    return QVector3D(x, y, z);
+  };
+
+  // Construct
+  const auto skipHeader = [&]()
+  {
+    // See to refactor this if need be
+    while (skip() != "Quat_q3");
+  };
+  const auto verifyPacket = [&]() -> bool
+  {
+    int packet; next(packet);
+    if (previousPacket >= 0 && previousPacket + 1 != packet)
+      return false;
+
+    previousPacket = packet;
+    return true;
+  };
+  const auto readFrames = [&]()
+  {
+    auto anim = QSharedPointer<AnimatorPlug>::create();
+    static const float dt = 1.0f / 120;
+
+    int it = 0;
+    while (verifyPacket())
+    {
+      // Read Global Acc.
+      QVector3D acc;
+      {
+        float x, y, z;
+        next(x);
+        next(y);
+        next(z);
+        acc = {x,y,z};
+      }
+
+      // Skip Local Acc.
+      {
+        float _;
+        next(_);
+        next(_);
+        next(_);
+      }
+
+      // Read Quaternion
+      QVector4D quat;
+      {
+        float a, b, c, d;
+        next(a);
+        next(b);
+        next(c);
+        next(d);
+        quat = {a,b,c,d};
+      }
+      QVector3D rot = quaternionToEuler(quat);
+
+      // Add Keyframes
+      float time = dt * (++it);
+      /*for (int ii = 0; ii < 3; ++ii)
+      {
+        anim->addKeyFrame((AnimatorPlug::PropertyType) ii, time, )
+      }*/
+      for (int jj = 0; jj < 3; ++jj)
+      {
+        anim->addKeyFrame((AnimatorPlug::PropertyType) (jj + 3), time, rot[jj]);
+      }
+    }
+
+    result->addChildren(anim);
+  };
 
   // Algorithm
   try
   {
-    //
+    skipHeader();
+    readFrames();
   }
   catch (...)
   {
