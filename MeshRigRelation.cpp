@@ -59,15 +59,25 @@ void MeshRigRelation::computeWeightData(const JointMap& joints,
   m_weights.clear();
   QMatrix4x4 skin_WorldToLocal = skin_localToWorld.inverted();
 
-  // Copy Joints Map
-  JointMap skinLocalJoints;
+  // Construct Joints List
+  using JointPair = QPair<Component::Pointer, JointInfo>;
+  QVector<JointPair> skinLocalJoints;
   for (auto it = joints.cbegin(); it != joints.cend(); ++it)
   {
-    JointInfo info = it.value();
+    const auto parent = it.key();
+
+    // Middle Points
+    for (const auto& child : parent->children())
     {
-      info.worldOrigin = skin_WorldToLocal * info.worldOrigin;
+      const auto data = joints.value(child);
+
+      JointInfo info = it.value();
+      {
+        QVector3D middlePoint = info.worldOrigin + 0.5f * (data.worldOrigin - info.worldOrigin);
+        info.worldOrigin = skin_WorldToLocal * middlePoint;
+      }
+      skinLocalJoints.append(JointPair(parent, info));
     }
-    skinLocalJoints.insert(it.key(), info);
   }
 
   size_t size = vertices.size();
@@ -81,21 +91,34 @@ void MeshRigRelation::computeWeightData(const JointMap& joints,
     // Find Best Point
     Component::Pointer joint = nullptr;
     float factor = FLT_MAX;
+    bool positiveSpace = false;
 
     const auto vtx = vertices[ii];
     for (auto it = skinLocalJoints.cbegin(); it != skinLocalJoints.cend(); ++it)
     {
-      QVector3D vtxToJoint = it.value().worldOrigin - vtx.position;
+      QVector3D vtxToJoint = it->second.worldOrigin - vtx.position;
 
       float dot = QVector3D::dotProduct(vtxToJoint, -vtx.normal);
-      if (dot >= 0.0f)
+      bool posSpace = (dot > 0.0f);
+
+      // Now in Positive Space
+      if (posSpace && !positiveSpace)
       {
-        float f = vtxToJoint.lengthSquared();
-        if (f < factor)
-        {
-          factor = f;
-          joint = it.key();
-        }
+        positiveSpace = true;
+        factor = FLT_MAX;
+      }
+
+      // Ensure Same Space
+      if (posSpace != positiveSpace)
+      {
+        continue;
+      }
+
+      float f = vtxToJoint.lengthSquared();
+      if (f < factor)
+      {
+        factor = f;
+        joint = it->first;
       }
     }
 
