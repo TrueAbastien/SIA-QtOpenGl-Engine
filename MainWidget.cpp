@@ -92,6 +92,13 @@ QMenuBar* MainWidget::makeMenu()
       menu->addAction(action);
     }
 
+    // Load MT Action
+    {
+      QAction* action = new QAction("Load MT");
+      connect(action, &QAction::triggered, this, &MainWidget::loadMT);
+      menu->addAction(action);
+    }
+
     root->addMenu(menu);
   }
 
@@ -746,6 +753,32 @@ void MainWidget::loadOFF()
   auto parent = createComponent<AxisCorrector>(name, AxisCorrector::Mode::Y_to_Z);
   parent->addChildren(result);
   
+  internalLog(INFO, name.toStdString() + " successfully loaded !");
+
+  scene->addChildren(parent);
+}
+
+// ------------------------------------------------------------------------------------------------
+void MainWidget::loadMT()
+{
+  QString fileName = QFileDialog::getOpenFileName(this, tr("Open MT"), "", tr("MT Files (*.txt)"));
+  if (fileName.isEmpty())
+  {
+    return;
+  }
+
+  auto result = FileReader::readMT(fileName);
+  if (result == nullptr)
+  {
+    return;
+  }
+
+  result->setLocalPosition(QVector3D(0, 0, 5)); // TEMP
+
+  QString name = getFileName(fileName);
+  auto parent = createComponent<AxisCorrector>(name, AxisCorrector::Mode::Y_to_Z);
+  parent->addChildren(result);
+
   internalLog(INFO, name.toStdString() + " successfully loaded !");
 
   scene->addChildren(parent);
