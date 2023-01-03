@@ -65,16 +65,34 @@ void MeshRigRelation::computeWeightData(const JointMap& joints,
   for (auto it = joints.cbegin(); it != joints.cend(); ++it)
   {
     const auto parent = it.key();
+    const auto children = parent->children();
 
     // Middle Points
-    for (const auto& child : parent->children())
+    int childCount = 0;
+    for (const auto& child : children)
     {
+      if (!joints.contains(child))
+      {
+        continue;
+      }
+
       const auto data = joints.value(child);
+      childCount++;
 
       JointInfo info = it.value();
       {
         QVector3D middlePoint = info.worldOrigin + 0.5f * (data.worldOrigin - info.worldOrigin);
         info.worldOrigin = skin_WorldToLocal * middlePoint;
+      }
+      skinLocalJoints.append(JointPair(parent, info));
+    }
+
+    // Direct Point
+    if (childCount == 0)
+    {
+      JointInfo info = it.value();
+      {
+        info.worldOrigin = skin_WorldToLocal * info.worldOrigin;
       }
       skinLocalJoints.append(JointPair(parent, info));
     }
@@ -91,28 +109,11 @@ void MeshRigRelation::computeWeightData(const JointMap& joints,
     // Find Best Point
     Component::Pointer joint = nullptr;
     float factor = FLT_MAX;
-    bool positiveSpace = false;
 
     const auto vtx = vertices[ii];
     for (auto it = skinLocalJoints.cbegin(); it != skinLocalJoints.cend(); ++it)
     {
       QVector3D vtxToJoint = it->second.worldOrigin - vtx.position;
-
-      float dot = QVector3D::dotProduct(vtxToJoint, -vtx.normal);
-      bool posSpace = (dot > 0.0f);
-
-      // Now in Positive Space
-      if (posSpace && !positiveSpace)
-      {
-        positiveSpace = true;
-        factor = FLT_MAX;
-      }
-
-      // Ensure Same Space
-      if (posSpace != positiveSpace)
-      {
-        continue;
-      }
 
       float f = vtxToJoint.lengthSquared();
       if (f < factor)
