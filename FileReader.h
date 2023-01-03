@@ -4,6 +4,7 @@
 #include "JointRenderer.h"
 #include "SkinMesh.h"
 #include "MeshRigRelation.h"
+#include "MTFrame.h"
 
 class FileReader final
 {
@@ -28,6 +29,8 @@ public:
     OFFResult skin;
   };
 
+  using MTResult = QSharedPointer<MTFrame>;
+
 public:
 
   static BVHResult readBVH(const QString& filePath, const BVHParameters& params);
@@ -35,4 +38,6 @@ public:
   static OFFResult readOFF(const QString& filePath, const OFFParameters& params);
 
   static WeightResult readWeight(const QString& filePath, const WeightParameters& params);
+
+  static MTResult readMT(const QString& filePath);
 };

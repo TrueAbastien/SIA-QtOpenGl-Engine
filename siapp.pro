@@ -25,6 +25,7 @@ SOURCES += \
     MainWidget.cpp \
     MeshEditWindow.cpp \
     MeshRigRelation.cpp \
+    MTFrame.cpp \
     Renderable.cpp \
     Scene.cpp \
     SkinMesh.cpp \
@@ -49,6 +50,7 @@ HEADERS += \
     MainWidget.h \
     MeshEditWindow.h \
     MeshRigRelation.h \
+    MTFrame.h \
     Renderable.h \
     Scene.h \
     SkinMesh.h \

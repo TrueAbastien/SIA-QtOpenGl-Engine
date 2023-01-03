@@ -597,3 +597,62 @@ FileReader::WeightResult FileReader::readWeight(const QString& filePath, const W
   *r = result;
   return r;
 }
+
+// ------------------------------------------------------------------------------------------------
+FileReader::MTResult FileReader::readMT(const QString& filePath)
+{
+  auto file = std::ifstream(filePath.toStdString());
+  if (!file.is_open())
+  {
+    return nullptr;
+  }
+
+  // Data
+  auto result = MTResult::create();
+  //
+
+  // Utilities
+  const auto lassert = [](bool cond)
+  {
+#ifdef _DEBUG
+    assert(cond);
+#else
+    if (!cond) throw false;
+#endif
+  };
+  const auto next = [&](auto& value)
+  {
+    file >> std::skipws >> value;
+  };
+  const auto skip = [&]()-> std::string
+  {
+    std::string val; next(val);
+    return val;
+  };
+  const auto upper = [](std::string s) -> std::string
+  {
+    std::string r;
+
+    std::transform(s.begin(), s.end(), std::back_inserter(r), [](char c)
+                   {
+                     return std::toupper(c);
+                   });
+
+    return r;
+  };
+
+  // Read
+  //
+
+  // Algorithm
+  try
+  {
+    //
+  }
+  catch (...)
+  {
+    return nullptr;
+  }
+
+  return result;
+}
