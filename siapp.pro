@@ -16,6 +16,7 @@ SOURCES += \
     ColoredRenderable.cpp \
     Component.cpp \
     Cube.cpp \
+    DiagSplit.cpp \
     FactoryFloor.cpp \
     FileReader.cpp \
     FileWriter.cpp \
@@ -42,6 +43,7 @@ HEADERS += \
     ColoredRenderable.h \
     Component.h \
     Cube.h \
+    DiagSplit.h \
     FactoryFloor.h \
     FileReader.h \
     FileWriter.h \
