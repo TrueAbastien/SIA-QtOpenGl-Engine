@@ -25,8 +25,10 @@ SOURCES += \
     MainWidget.cpp \
     MeshEditWindow.cpp \
     MeshRigRelation.cpp \
+    MTAnimation.cpp \
     MTAnimatorPlug.cpp \
     MTFrame.cpp \
+    MTSetupWindow.cpp \
     Renderable.cpp \
     Scene.cpp \
     SkinMesh.cpp \
@@ -51,8 +53,10 @@ HEADERS += \
     MainWidget.h \
     MeshEditWindow.h \
     MeshRigRelation.h \
+    MTAnimation.h \
     MTAnimatorPlug.h \
     MTFrame.h \
+    MTSetupWindow.h \
     Renderable.h \
     Scene.h \
     SkinMesh.h \

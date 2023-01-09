@@ -777,7 +777,10 @@ void MainWidget::loadMT()
     return;
   }
 
-  result->setLocalPosition(QVector3D(0, 2, 0)); // TEMP
+  // TEMP //
+  int mtCount = find_if<MTFrame>().size();
+  result->setLocalPosition(QVector3D(0, 2, 2 * mtCount));
+  // TEMP //
 
   QString name = getFileName(fileName);
   auto parent = createComponent<AxisCorrector>(name, AxisCorrector::Mode::Y_to_Z);

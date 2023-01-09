@@ -675,22 +675,10 @@ FileReader::MTResult FileReader::readMT(const QString& filePath)
     int it = 0;
     while (verifyPacket())
     {
-      // Skip Global Acc.
-      QVector3D acc;
-      {
-        float x, y, z;
-        next(x);
-        next(y);
-        next(z);
-        acc = {x,y,z - 9.80665f};
-      }
-
-      // Read Local Acc.
+      // Skip All Acc.
       {
         float _;
-        next(_);
-        next(_);
-        next(_);
+        for (int a = 0; a < 6; ++a) next(_);
       }
 
       // Read Quaternion

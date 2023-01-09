@@ -1,10 +1,12 @@
 #include "MTAnimatorPlug.h"
 
+#include "MTAnimation.h"
+
 // ------------------------------------------------------------------------------------------------
 MTAnimatorPlug::MTAnimatorPlug()
   : m_parentAcceleration(QVector3D()), m_parentVelocity(QVector3D())
 {
-  m_animation = QSharedPointer<Animation>::create();
+  m_animation = QSharedPointer<MTAnimation>::create();
   static const float dt = 1.0f / 120;
 
   // Position
