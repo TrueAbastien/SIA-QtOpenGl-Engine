@@ -707,10 +707,10 @@ FileReader::MTResult FileReader::readMT(const QString& filePath)
 
       // Add Keyframes
       float time = dt * (++it);
-      for (int ii = 0; ii < 3; ++ii)
+      /*for (int ii = 0; ii < 3; ++ii)
       {
         anim->addKeyFrame((AnimatorPlug::PropertyType) ii, time, acc[ii]);
-      }
+      }*/
       for (int jj = 0; jj < 3; ++jj)
       {
         anim->addKeyFrame((AnimatorPlug::PropertyType) (jj + 3), time, rot[jj]);
