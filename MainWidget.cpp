@@ -990,6 +990,8 @@ void MainWidget::makeSkin()
 
     relation->setupWeight(data, skin->vertices(), skin->localToWorld());
 
+    relation->setupColor(data, skin->vertices());
+
     skin->setRelation(relation);
   }
 
@@ -1036,6 +1038,7 @@ void MainWidget::stopAnimation()
 void MainWidget::clearScene()
 {
   scene->clear();
+  animController.stop();
 
   // Basic Scene
   {

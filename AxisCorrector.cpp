@@ -23,7 +23,7 @@ void AxisCorrector::init()
 }
 
 // ------------------------------------------------------------------------------------------------
-void AxisCorrector::update(UpdateInfo info)
+void AxisCorrector::update(UpdateInfo)
 {
 }
 

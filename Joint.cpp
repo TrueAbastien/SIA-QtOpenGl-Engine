@@ -7,7 +7,7 @@ void Joint::init()
 }
 
 // ------------------------------------------------------------------------------------------------
-void Joint::update(UpdateInfo infos)
+void Joint::update(UpdateInfo)
 {
 }
 

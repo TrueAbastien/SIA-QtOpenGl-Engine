@@ -151,7 +151,7 @@ void Component::notifyParent(Notification notif)
 }
 
 // ------------------------------------------------------------------------------------------------
-void Component::listenChild(Notification notif)
+void Component::listenChild(Notification)
 {
 }
 

@@ -7,7 +7,7 @@ void constructOverChildren(const Component* root, const QMatrix4x4& model,
   VertexData_Wired parent_vtx;
   {
     parent_vtx.position = model * QVector3D(0, 0, 0);
-    parent_vtx.color = QVector3D(0, 0.8, 0);
+    parent_vtx.color = QVector3D(0, 0.8f, 0);
   }
   GLushort parent_idx = vts.size();
 
@@ -24,7 +24,7 @@ void constructOverChildren(const Component* root, const QMatrix4x4& model,
     VertexData_Wired child_vtx;
     {
       child_vtx.position = newModel * QVector3D(0, 0, 0);
-      child_vtx.color = QVector3D(0.8, 0, 0);
+      child_vtx.color = QVector3D(0.8f, 0, 0);
     }
 
     ids.push_back(parent_idx);

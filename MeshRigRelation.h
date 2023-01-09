@@ -15,6 +15,7 @@ public:
   {
     QMatrix4x4 worldToLocal;
     QVector3D worldOrigin;
+    QVector3D color;
   };
   using JointMap = QMap<Component::Pointer, JointInfo>;
 
@@ -46,6 +47,10 @@ public:
   void setupWeight(const JointMap& joints,
                    const std::vector<VertexData_Colored>& vertices,
                    const QMatrix4x4& skin_localToWorld);
+
+  // Step 3-bis (optional)
+  void setupColor(const JointMap& joints,
+                  std::vector<VertexData_Colored>& vertices);
 
   // Step 4 (to Update)
   void updatePosition(std::vector<VertexData_Colored>& vertices,

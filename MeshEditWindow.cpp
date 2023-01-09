@@ -213,7 +213,7 @@ void MeshEditWindow::setSkinMesh(const MeshPtr& mesh)
 }
 
 // ------------------------------------------------------------------------------------------------
-void MeshEditWindow::closeEvent(QCloseEvent* e)
+void MeshEditWindow::closeEvent(QCloseEvent*)
 {
   cancel();
 

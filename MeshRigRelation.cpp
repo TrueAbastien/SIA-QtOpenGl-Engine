@@ -1,7 +1,31 @@
 #include "MeshRigRelation.h"
+#include <QRandomGenerator>
 
 // ------------------------------------------------------------------------------------------------
-void computeJointNode(MeshRigRelation::JointMap& data, const Component::Pointer& target, const QMatrix4x4& tr)
+QVector3D randomColor(float seed)
+{
+    float h = fmod(seed, 360.0);
+    float s = 0.8f;
+    float v = 0.6f;
+    float C = s * v;
+    float X = C * (1 - abs(fmod(h / 60.0, 2) - 1));
+    float m = v - C;
+    QVector3D r;
+
+    if (h < 60)       r = {C, X, 0};
+    else if (h < 120) r = {X, C, 0};
+    else if (h < 180) r = {0, C, X};
+    else if (h < 240) r = {0, X, C};
+    else if (h < 300) r = {X, 0, C};
+    else              r = {C, 0, X};
+
+    for (int ii = 0; ii < 3; ++ii) r[ii] += m;
+
+    return r;
+};
+
+// ------------------------------------------------------------------------------------------------
+void computeJointNode(MeshRigRelation::JointMap& data, const Component::Pointer& target, const QMatrix4x4& tr, QRandomGenerator& gen)
 {
   if (target.isNull()) return;
 
@@ -13,6 +37,7 @@ void computeJointNode(MeshRigRelation::JointMap& data, const Component::Pointer&
   {
     info.worldToLocal = tr.inverted();
     info.worldOrigin = tr * QVector3D(0, 0, 0);
+    info.color = randomColor(gen.generateDouble() * 360.0f);
   }
   data.insert(target, info);
 
@@ -21,7 +46,7 @@ void computeJointNode(MeshRigRelation::JointMap& data, const Component::Pointer&
   {
     if (!child.dynamicCast<Joint>().isNull())
     {
-      computeJointNode(data, child, tr * child->localToParent());
+      computeJointNode(data, child, tr * child->localToParent(), gen);
     }
   }
 }
@@ -35,7 +60,8 @@ MeshRigRelation::JointMap MeshRigRelation::computeHomeData(const QSharedPointer<
   }
 
   JointMap result;
-  computeJointNode(result, body, body->localToWorld());
+  QRandomGenerator gen;
+  computeJointNode(result, body, body->localToWorld(), gen);
 
   return result;
 }
@@ -99,12 +125,12 @@ void MeshRigRelation::computeWeightData(const JointMap& joints,
   }
 
   size_t size = vertices.size();
-  m_weights.resize(size);
+  m_weights.resize((int) size);
 
   // Find Best Weight
   for (size_t ii = 0; ii < size; ++ii)
   {
-    auto& weights = m_weights[ii];
+    auto& weights = m_weights[(int) ii];
 
     // Find Best Point
     Component::Pointer joint = nullptr;
@@ -156,12 +182,39 @@ void MeshRigRelation::setupWeight(const JointMap& joints,
   for (size_t ii = 0; ii < size; ++ii)
   {
     QVector3D vWorldPos = skin_localToWorld * vertices[ii].position;
-    auto& weights = m_weights[ii];
+    auto& weights = m_weights[(int) ii];
 
     for (auto& weight : weights)
     {
       weight.localPosition = joints.value(weight.joint).worldToLocal * vWorldPos;
     }
+  }
+}
+
+// ------------------------------------------------------------------------------------------------
+void MeshRigRelation::setupColor(const JointMap& joints, std::vector<VertexData_Colored>& vertices)
+{
+  if (m_weights.isEmpty())
+  {
+    return;
+  }
+
+  size_t size = vertices.size();
+  if (size != m_weights.size())
+  {
+    return;
+  }
+
+  // Colors
+  for (size_t ii = 0; ii < size; ++ii)
+  {
+    QVector3D color = QVector3D(0, 0, 0);
+    for (const auto& weight : m_weights[(int) ii])
+    {
+      color += weight.weight * joints.value(weight.joint).color;
+    }
+
+    vertices[ii].color = color;
   }
 }
 
@@ -181,7 +234,7 @@ void MeshRigRelation::updatePosition(std::vector<VertexData_Colored>& vertices,
   {
     QVector3D pos;
 
-    for (const auto& data : m_weights[ii])
+    for (const auto& data : m_weights[(int) ii])
     {
       QMatrix4x4 tr = data.joint->localToWorld();
       pos += (tr * data.localPosition) * data.weight;
