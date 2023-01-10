@@ -77,7 +77,7 @@ MTSetupWindow::MTSetupWindow(QWidget* parent, LogMethod logMethod) :
 
       // Name
       {
-        QPushButton* button = new QPushButton("Apply");
+        QPushButton* button = new QPushButton("Load");
         connect(button, &QPushButton::pressed, this, &MTSetupWindow::loadMapping);
         mapping->addWidget(button);
       }
@@ -111,6 +111,8 @@ void MTSetupWindow::loadMapping()
     return;
   }
 
+  log(LogType::INFO, "'" + fileName.toStdString() + "' read successfully !");
+
   JointMap joints;
   fillJointMap(joints, m_body);
 
@@ -128,7 +130,7 @@ void MTSetupWindow::loadMapping()
       params.samplingRate = 60;
     }
 
-    auto result = FileReader::readMT(fileName, params);
+    auto result = FileReader::readMT(path, params);
     if (result == nullptr)
     {
       log(LogType::ERROR_, "Couldn't read Tracker for '" + name.toStdString() + "' in '" + path.toStdString() + "'...");
@@ -136,7 +138,9 @@ void MTSetupWindow::loadMapping()
     }
 
     result->init();
+
+    log(LogType::INFO, "'" + path.toStdString() + "' for '" + name.toStdString() + "' read successfully !");
   }
 
-  log(LogType::INFO, "'" + fileName.toStdString() + "' read successfully !");
+  log(LogType::INFO, "Mapping finished !");
 }
