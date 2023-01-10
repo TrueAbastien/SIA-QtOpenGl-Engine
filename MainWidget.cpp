@@ -57,9 +57,14 @@ MainWidget::MainWidget() :
   };
 #endif
 
+  const auto logMethod = [&](LogType type, const std::string& message)
+  {
+    internalLog(type, message);
+  };
+
   // Sub-Windows
   meshEditWindow = new MeshEditWindow(this);
-  setupMTWindow = new MTSetupWindow(this);
+  setupMTWindow = new MTSetupWindow(this, logMethod);
 }
 
 // ------------------------------------------------------------------------------------------------

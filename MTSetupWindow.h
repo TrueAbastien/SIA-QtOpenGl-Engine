@@ -12,14 +12,12 @@ class MTSetupWindow : public QDialog
 
 public:
 
-  using Tracker = FileReader::MTResult;
-  using TrackerVec = QVector<Tracker>;
-
   using Body = FileReader::BVHResult;
+  using JointMap = QMap<QString, Component::Pointer>;
 
 public:
 
-  MTSetupWindow(QWidget* parent);
+  MTSetupWindow(QWidget* parent, LogMethod logMethod);
 
 public:
 
@@ -27,7 +25,7 @@ public:
 
 public slots:
 
-  void loadTracker();
+  void loadMapping();
 
 signals:
 
@@ -35,6 +33,9 @@ signals:
 
 private:
 
+  LogMethod log;
+
+private:
+
   Body m_body;
-  TrackerVec m_trackers;
 };

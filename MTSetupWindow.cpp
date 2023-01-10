@@ -10,10 +10,32 @@
 #include <QPushButton>
 #include <QFileDialog>
 
+// ------------------------------------------------------------------------------------------------
+void fillJointMap(MTSetupWindow::JointMap& joints, const Component::Pointer& parent)
+{
+  if (parent.dynamicCast<Joint>().isNull() && parent.dynamicCast<JointRenderer>().isNull())
+  {
+    return;
+  }
+
+  QString name = parent->name();
+  if (joints.contains(name))
+  {
+    return;
+  }
+
+  joints.insert(name, parent);
+
+  for (const auto& child : parent->children())
+  {
+    fillJointMap(joints, child);
+  }
+}
 
 // ------------------------------------------------------------------------------------------------
-MTSetupWindow::MTSetupWindow(QWidget* parent) :
-  QDialog(parent)
+MTSetupWindow::MTSetupWindow(QWidget* parent, LogMethod logMethod) :
+  QDialog(parent),
+  log(logMethod)
 {
   setWindowTitle("MT Setup");
 
@@ -42,31 +64,22 @@ MTSetupWindow::MTSetupWindow(QWidget* parent) :
       }
     }
 
-    // Buttons
+    // Mapping
     {
-      QHBoxLayout* buttons = new QHBoxLayout;
-      root->addLayout(buttons);
+      QHBoxLayout* mapping = new QHBoxLayout;
+      root->addLayout(mapping);
 
-      // Save
+      // Label
       {
-        QPushButton* button = new QPushButton("Save");
-        //connect(button, &QPushButton::pressed, this, &MeshEditWindow::save);
-        //connect(this, &MeshEditWindow::unedited, button, &QPushButton::setEnabled);
-        buttons->addWidget(button);
+        QLabel* label = new QLabel("Mapping");
+        mapping->addWidget(label);
       }
 
-      // Apply
+      // Name
       {
         QPushButton* button = new QPushButton("Apply");
-        //connect(button, &QPushButton::pressed, this, &MeshEditWindow::apply);
-        buttons->addWidget(button);
-      }
-
-      // Cancel
-      {
-        QPushButton* button = new QPushButton("Cancel");
-        //connect(button, &QPushButton::pressed, this, &MeshEditWindow::cancel);
-        buttons->addWidget(button);
+        connect(button, &QPushButton::pressed, this, &MTSetupWindow::loadMapping);
+        mapping->addWidget(button);
       }
     }
   }
@@ -83,27 +96,47 @@ void MTSetupWindow::setBody(const Body& body)
 }
 
 // ------------------------------------------------------------------------------------------------
-void MTSetupWindow::loadTracker()
+void MTSetupWindow::loadMapping()
 {
-  QString fileName = QFileDialog::getOpenFileName(this, tr("Open MT"), "", tr("MT Files (*.txt)"));
+  QString fileName = QFileDialog::getOpenFileName(this, tr("Open Mapping"), "", tr("Mapping Files (*.txt)"));
   if (fileName.isEmpty())
   {
     return;
   }
 
-  // TODO: find 'limb' to attach to
-
-  FileReader::MTParameters params;
+  auto mapping = FileReader::readMTMapping(fileName);
+  if (mapping.isNull())
   {
-    params.parent = nullptr; // TODO
-    params.samplingRate = 60;
-  }
-
-  auto result = FileReader::readMT(fileName, params);
-  if (result == nullptr)
-  {
+    log(LogType::ERROR_, "Couldn't read Mapping in '" + fileName.toStdString() + "'...");
     return;
   }
 
-  // TODO: add & list trackers
+  JointMap joints;
+  fillJointMap(joints, m_body);
+
+  for (const QString& name : joints.keys())
+  {
+    QString path = mapping->value(name, "");
+    if (path.isEmpty())
+    {
+      continue;
+    }
+
+    FileReader::MTParameters params;
+    {
+      params.parent = joints[name];
+      params.samplingRate = 60;
+    }
+
+    auto result = FileReader::readMT(fileName, params);
+    if (result == nullptr)
+    {
+      log(LogType::ERROR_, "Couldn't read Tracker for '" + name.toStdString() + "' in '" + path.toStdString() + "'...");
+      return;
+    }
+
+    result->init();
+  }
+
+  log(LogType::INFO, "'" + fileName.toStdString() + "' read successfully !");
 }

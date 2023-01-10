@@ -6,6 +6,8 @@
 #include "MeshRigRelation.h"
 #include "MTAnimatorPlug.h"
 
+#include <QMap>
+
 class FileReader final
 {
 public:
@@ -36,6 +38,8 @@ public:
     int samplingRate;
   };
 
+  using MTMappingResult = QSharedPointer<QMap<QString, QString>>;
+
 public:
 
   static BVHResult readBVH(const QString& filePath, const BVHParameters& params);
@@ -45,4 +49,6 @@ public:
   static WeightResult readWeight(const QString& filePath, const WeightParameters& params);
 
   static MTResult readMT(const QString& filePath, const MTParameters& params);
+
+  static MTMappingResult readMTMapping(const QString& filePath);
 };

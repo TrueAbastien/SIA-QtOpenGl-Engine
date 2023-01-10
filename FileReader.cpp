@@ -3,6 +3,8 @@
 #include "AnimatorPlug.h"
 
 #include <QRandomGenerator>
+#include <QFileInfo>
+#include <QDir>
 
 #include <fstream>
 #include <functional>
@@ -732,6 +734,110 @@ FileReader::MTResult FileReader::readMT(const QString& filePath, const MTParamet
   {
     skipHeader();
     readFrames();
+  }
+  catch (...)
+  {
+    return nullptr;
+  }
+
+  return result;
+}
+
+// ------------------------------------------------------------------------------------------------
+FileReader::MTMappingResult FileReader::readMTMapping(const QString& filePath)
+{
+  auto file = std::ifstream(filePath.toStdString());
+  if (!file.is_open())
+  {
+    return nullptr;
+  }
+
+  // Data
+  auto result = MTMappingResult::create();
+  int trackerCount;
+  QString prefix;
+
+  // Utilities
+  const auto lassert = [](bool cond)
+  {
+#ifdef _DEBUG
+    assert(cond);
+#else
+    if (!cond) throw false;
+#endif
+  };
+  const auto next = [&](auto& value)
+  {
+    file >> std::skipws >> value;
+  };
+  const auto skip = [&]()-> std::string
+  {
+    std::string val; next(val);
+    return val;
+  };
+  const auto upper = [](std::string s) -> std::string
+  {
+    std::string r;
+
+    std::transform(s.begin(), s.end(), std::back_inserter(r), [](char c)
+                   {
+                     return std::toupper(c);
+                   });
+
+    return r;
+  };
+
+  // Compute
+  const auto computePrefix = [&]()
+  {
+    QFileInfo fileInfo(filePath);
+    QString directory = fileInfo.dir().absolutePath();
+    prefix = directory + "/";
+  };
+
+  // Read
+  const auto readHeader = [&]()
+  {
+    // Prefix
+    {
+      std::string name; next(name);
+      prefix.append(QString::fromStdString(name));
+    }
+
+    // Count
+    {
+      next(trackerCount);
+    }
+  };
+  const auto readContent = [&]()
+  {
+    for (int ii = 0; ii < trackerCount; ++ii)
+    {
+      // Path
+      QString path;
+      {
+        std::string suffix; next(suffix);
+        path = prefix + QString::fromStdString(suffix) + ".txt";
+      }
+
+      // Name
+      QString name;
+      {
+        std::string v; next(v);
+        name = QString::fromStdString(v);
+      }
+
+      result->insert(name, path);
+    }
+  };
+
+  // Algorithm
+  try
+  {
+    computePrefix();
+
+    readHeader();
+    readContent();
   }
   catch (...)
   {
