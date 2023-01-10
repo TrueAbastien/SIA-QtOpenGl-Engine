@@ -676,7 +676,7 @@ FileReader::MTResult FileReader::readMT(const QString& filePath, const MTParamet
   };
   const auto readFrames = [&]()
   {
-    static const float dt = 1.0f / 120;
+    static const float dt = 1.0f / params.samplingRate;
 
     int it = 0;
     while (verifyPacket())

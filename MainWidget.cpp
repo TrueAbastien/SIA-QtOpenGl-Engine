@@ -784,6 +784,7 @@ void MainWidget::loadMT()
   FileReader::MTParameters params;
   {
     params.parent = frame;
+    params.samplingRate = 120;
   }
 
   auto result = FileReader::readMT(fileName, params);

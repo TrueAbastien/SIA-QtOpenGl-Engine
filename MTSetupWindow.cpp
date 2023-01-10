@@ -216,6 +216,7 @@ void MTSetupWindow::loadTracker()
   FileReader::MTParameters params;
   {
     params.parent = nullptr; // TODO
+    params.samplingRate = 60;
   }
 
   auto result = FileReader::readMT(fileName, params);

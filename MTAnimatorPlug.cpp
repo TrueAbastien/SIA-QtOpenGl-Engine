@@ -7,7 +7,6 @@ MTAnimatorPlug::MTAnimatorPlug()
   : m_parentAcceleration(QVector3D()), m_parentVelocity(QVector3D())
 {
   m_animation = QSharedPointer<MTAnimation>::create();
-  static const float dt = 1.0f / 120;
 
   // Position
   for (int ii = 0; ii < 3; ++ii)

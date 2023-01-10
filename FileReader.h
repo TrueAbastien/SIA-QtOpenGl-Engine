@@ -33,6 +33,7 @@ public:
   struct MTParameters
   {
     Component::Pointer parent;
+    int samplingRate;
   };
 
 public:
