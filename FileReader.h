@@ -36,6 +36,7 @@ public:
   {
     Component::Pointer parent;
     int samplingRate;
+    bool overrideMatrixMethod;
   };
 
   using MTMappingResult = QSharedPointer<QMap<QString, QString>>;

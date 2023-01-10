@@ -717,16 +717,19 @@ FileReader::MTResult FileReader::readMT(const QString& filePath, const MTParamet
     params.parent->addChildren(result);
 
     // Set Matrix Construction
-    const auto method = [](QVector3D pos, QVector3D rot) -> QMatrix4x4
+    if (params.overrideMatrixMethod)
     {
-      QMatrix4x4 m = {};
-      m.translate(pos);
-      m.rotate(rot.x(), 1.0, 0.0, 0.0);
-      m.rotate(rot.y(), 0.0, 1.0, 0.0);
-      m.rotate(rot.z(), 0.0, 0.0, 1.0);
-      return m;
-    };
-    params.parent->setMatrixConstruct(method);
+      const auto method = [](QVector3D pos, QVector3D rot) -> QMatrix4x4
+      {
+        QMatrix4x4 m = {};
+        m.translate(pos);
+        m.rotate(rot.x(), 1.0, 0.0, 0.0);
+        m.rotate(rot.y(), 0.0, 1.0, 0.0);
+        m.rotate(rot.z(), 0.0, 0.0, 1.0);
+        return m;
+      };
+      params.parent->setMatrixConstruct(method);
+    }
   };
 
   // Algorithm

@@ -2,27 +2,27 @@ HIERARCHY
 ROOT PELV
 {
 	OFFSET 0.000000 1.080197 0.000000
-	CHANNELS 6 Xposition Yposition Zposition Zrotation Yrotation Xrotation
+	CHANNELS 6 Xposition Yposition Zposition Xrotation Yrotation Zrotation
 	JOINT l_hip
 	{
 		OFFSET 0.001000 0.000000 0.000000
-		CHANNELS 3 Zrotation Yrotation Xrotation
+		CHANNELS 3 Xrotation Yrotation Zrotation
 		JOINT ULEGL
 		{
 			OFFSET 0.070711 -0.070711 0.000000
-			CHANNELS 3 Zrotation Yrotation Xrotation
+			CHANNELS 3 Xrotation Yrotation Zrotation
 			JOINT LLEGL
 			{
 				OFFSET 0.000000 -0.500000 0.000000
-				CHANNELS 3 Zrotation Yrotation Xrotation
+				CHANNELS 3 Xrotation Yrotation Zrotation
 				JOINT FOOTL
 				{
 					OFFSET 0.000000 -0.468450 0.000000
-					CHANNELS 3 Zrotation Yrotation Xrotation
+					CHANNELS 3 Xrotation Yrotation Zrotation
 					JOINT l_toes
 					{
 						OFFSET 0.000004 -0.034818 0.129941
-						CHANNELS 3 Zrotation Yrotation Xrotation
+						CHANNELS 3 Xrotation Yrotation Zrotation
 						End l_toes_End
 						{
 							OFFSET 0.000000 0.000000 0.100000
@@ -35,23 +35,23 @@ ROOT PELV
 	JOINT r_hip
 	{
 		OFFSET 0.001000 0.000000 0.000000
-		CHANNELS 3 Zrotation Yrotation Xrotation
+		CHANNELS 3 Xrotation Yrotation Zrotation
 		JOINT ULEGR
 		{
 			OFFSET -0.070711 -0.070711 0.000000
-			CHANNELS 3 Zrotation Yrotation Xrotation
+			CHANNELS 3 Xrotation Yrotation Zrotation
 			JOINT LLEGR
 			{
 				OFFSET 0.000000 -0.500000 -0.000000
-				CHANNELS 3 Zrotation Yrotation Xrotation
+				CHANNELS 3 Xrotation Yrotation Zrotation
 				JOINT FOOTR
 				{
 					OFFSET 0.000000 -0.468450 0.000000
-					CHANNELS 3 Zrotation Yrotation Xrotation
+					CHANNELS 3 Xrotation Yrotation Zrotation
 					JOINT r_toes
 					{
 						OFFSET 0.000006 -0.034818 0.129941
-						CHANNELS 3 Zrotation Yrotation Xrotation
+						CHANNELS 3 Xrotation Yrotation Zrotation
 						End r_toes_End
 						{
 							OFFSET 0.000000 -0.000000 0.100000
