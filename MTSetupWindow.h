@@ -29,6 +29,10 @@ public slots:
 
   void loadTracker();
 
+signals:
+
+  void bodyChanged(const QString&);
+
 private:
 
   Body m_body;
