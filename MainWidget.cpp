@@ -10,6 +10,7 @@
 #include "FactoryFloor.h"
 #include "FileReader.h"
 #include "AxisCorrector.h"
+#include "Frame.h"
 
 #include <QMouseEvent>
 #include <QVBoxLayout>
@@ -58,6 +59,7 @@ MainWidget::MainWidget() :
 
   // Sub-Windows
   meshEditWindow = new MeshEditWindow(this);
+  setupMTWindow = new MTSetupWindow(this);
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -111,6 +113,13 @@ QMenuBar* MainWidget::makeMenu()
     {
       QAction* action = new QAction("Edit Mesh");
       connect(action, &QAction::triggered, this, &MainWidget::openMeshEdit);
+      menu->addAction(action);
+    }
+
+    // MT Setup Action
+    {
+      QAction* action = new QAction("MT Setup");
+      connect(action, &QAction::triggered, this, &MainWidget::openMTSetup);
       menu->addAction(action);
     }
 
@@ -771,20 +780,26 @@ void MainWidget::loadMT()
     return;
   }
 
-  auto result = FileReader::readMT(fileName);
+  auto frame = createComponent<Frame>("Frame");
+  FileReader::MTParameters params;
+  {
+    params.parent = frame;
+  }
+
+  auto result = FileReader::readMT(fileName, params);
   if (result == nullptr)
   {
     return;
   }
 
   // TEMP //
-  int mtCount = find_if<MTFrame>().size();
-  result->setLocalPosition(QVector3D(0, 2, 2 * mtCount));
+  int mtCount = find_if<MTAnimatorPlug>().size();
+  frame->setLocalPosition(QVector3D(0, 2, 2 * mtCount));
   // TEMP //
 
   QString name = getFileName(fileName);
   auto parent = createComponent<AxisCorrector>(name, AxisCorrector::Mode::Y_to_Z);
-  parent->addChildren(result);
+  parent->addChildren(frame);
 
   internalLog(INFO, name.toStdString() + " successfully loaded !");
 
@@ -854,6 +869,71 @@ void MainWidget::openMeshEdit()
   // Oepn Mesh Edit
   meshEditWindow->setSkinMesh(skin);
   meshEditWindow->show();
+}
+
+// ------------------------------------------------------------------------------------------------
+void MainWidget::openMTSetup()
+{
+  if (setupMTWindow->isVisible())
+  {
+    internalLog(DEBUG, "MT Setup Window is already opened...");
+    return;
+  }
+
+  const auto naming = [](const Component::Pointer& ptr) -> QString
+  {
+    if (ptr.isNull()) return "";
+    const Component* parent = ptr->parent();
+    if (parent == nullptr) return ptr->name();
+    return parent->name();
+  };
+
+  // Pick JointRenderer
+  QSharedPointer<JointRenderer> body;
+  {
+    const auto& items = find_if<JointRenderer>();
+    if (items.isEmpty())
+    {
+      internalLog(ERROR_, "No Body found...");
+      return;
+    }
+
+    QString name;
+    {
+      // Create SkinMesh List
+      QStringList names(0);
+      const auto func = [&](const QSharedPointer<JointRenderer>& jr) -> QString
+      {
+        return naming(jr);
+      };
+      std::transform(items.begin(), items.end(), std::back_inserter(names), func);
+
+      // Create Dialog
+      bool ok;
+      name = QInputDialog::getItem(this, "Select Body", "Body", names, 0, false, &ok);
+      if (!ok)
+      {
+        return;
+      }
+    }
+
+    const auto pred = [&](const QSharedPointer<JointRenderer>& jr) -> bool
+    {
+      return naming(jr) == name;
+    };
+    const auto& item = std::find_if(items.begin(), items.end(), pred);
+    if (item == items.end())
+    {
+      internalLog(ERROR_, "Body couldn't be found...");
+      return;
+    }
+
+    body = *item;
+  }
+
+  // Oepn MT Setup
+  setupMTWindow->setBody(body);
+  setupMTWindow->show();
 }
 
 // ------------------------------------------------------------------------------------------------

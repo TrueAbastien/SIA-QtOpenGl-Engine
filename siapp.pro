@@ -20,6 +20,7 @@ SOURCES += \
     FileReader.cpp \
     FileWriter.cpp \
     Floor.cpp \
+    Frame.cpp \
     Joint.cpp \
     JointRenderer.cpp \
     MainWidget.cpp \
@@ -27,7 +28,6 @@ SOURCES += \
     MeshRigRelation.cpp \
     MTAnimation.cpp \
     MTAnimatorPlug.cpp \
-    MTFrame.cpp \
     MTSetupWindow.cpp \
     Renderable.cpp \
     Scene.cpp \
@@ -48,6 +48,7 @@ HEADERS += \
     FileReader.h \
     FileWriter.h \
     Floor.h \
+    Frame.h \
     Joint.h \
     JointRenderer.h \
     MainWidget.h \
@@ -55,7 +56,6 @@ HEADERS += \
     MeshRigRelation.h \
     MTAnimation.h \
     MTAnimatorPlug.h \
-    MTFrame.h \
     MTSetupWindow.h \
     Renderable.h \
     Scene.h \

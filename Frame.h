@@ -2,7 +2,7 @@
 
 #include "WiredRenderable.h"
 
-class MTFrame : public WiredRenderable
+class Frame : public WiredRenderable
 {
 public:
 

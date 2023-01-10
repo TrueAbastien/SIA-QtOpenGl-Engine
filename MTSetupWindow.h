@@ -15,9 +15,15 @@ public:
   using Tracker = FileReader::MTResult;
   using TrackerVec = QVector<Tracker>;
 
+  using Body = FileReader::BVHResult;
+
 public:
 
   MTSetupWindow(QWidget* parent);
+
+public:
+
+  void setBody(const Body& body);
 
 public slots:
 
@@ -25,12 +31,6 @@ public slots:
 
 private:
 
-  void addTracker(const Tracker& tracker);
-
-  QStringList trackerList(int excluding) const;
-
-private:
-
-  QLayout* m_listingLayout = nullptr;
+  Body m_body;
   TrackerVec m_trackers;
 };

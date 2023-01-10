@@ -197,6 +197,12 @@ MTSetupWindow::MTSetupWindow(QWidget* parent) :
 }
 
 // ------------------------------------------------------------------------------------------------
+void MTSetupWindow::setBody(const Body& body)
+{
+  m_body = body;
+}
+
+// ------------------------------------------------------------------------------------------------
 void MTSetupWindow::loadTracker()
 {
   QString fileName = QFileDialog::getOpenFileName(this, tr("Open MT"), "", tr("MT Files (*.txt)"));
@@ -205,22 +211,18 @@ void MTSetupWindow::loadTracker()
     return;
   }
 
-  auto result = FileReader::readMT(fileName);
+  // TODO: find 'limb' to attach to
+
+  FileReader::MTParameters params;
+  {
+    params.parent = nullptr; // TODO
+  }
+
+  auto result = FileReader::readMT(fileName, params);
   if (result == nullptr)
   {
     return;
   }
 
-  QString name = getFileName(fileName);
-  auto parent = createComponent<AxisCorrector>(name, AxisCorrector::Mode::Y_to_Z);
-  parent->addChildren(result);
-
-  internalLog(INFO, name.toStdString() + " successfully loaded !");
-
-  scene->addChildren(parent);
-}
-
-// ------------------------------------------------------------------------------------------------
-void MTSetupWindow::addTracker(const Tracker& tracker)
-{
+  // TODO: add & list trackers
 }

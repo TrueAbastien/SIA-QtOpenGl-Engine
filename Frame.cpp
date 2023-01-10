@@ -1,7 +1,7 @@
-#include "MTFrame.h"
+#include "Frame.h"
 
 // ------------------------------------------------------------------------------------------------
-void MTFrame::init()
+void Frame::init()
 {
   WiredRenderable::init();
 
@@ -47,7 +47,7 @@ void MTFrame::init()
 }
 
 // ------------------------------------------------------------------------------------------------
-void MTFrame::update(UpdateInfo infos)
+void Frame::update(UpdateInfo infos)
 {
   WiredRenderable::update(infos);
 

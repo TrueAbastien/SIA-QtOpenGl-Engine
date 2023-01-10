@@ -4,7 +4,7 @@
 #include "JointRenderer.h"
 #include "SkinMesh.h"
 #include "MeshRigRelation.h"
-#include "MTFrame.h"
+#include "MTAnimatorPlug.h"
 
 class FileReader final
 {
@@ -29,7 +29,11 @@ public:
     OFFResult skin;
   };
 
-  using MTResult = QSharedPointer<MTFrame>;
+  using MTResult = QSharedPointer<MTAnimatorPlug>;
+  struct MTParameters
+  {
+    Component::Pointer parent;
+  };
 
 public:
 
@@ -39,5 +43,5 @@ public:
 
   static WeightResult readWeight(const QString& filePath, const WeightParameters& params);
 
-  static MTResult readMT(const QString& filePath);
+  static MTResult readMT(const QString& filePath, const MTParameters& params);
 };

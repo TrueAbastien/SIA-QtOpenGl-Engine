@@ -1,7 +1,6 @@
 #include "FileReader.h"
 
 #include "AnimatorPlug.h"
-#include "MTAnimatorPlug.h"
 
 #include <QRandomGenerator>
 
@@ -196,8 +195,8 @@ FileReader::BVHResult FileReader::readBVH(const QString& filePath, const BVHPara
     lassert(upper(skip()) == "HIERARCHY");
     readHierarchy();
 
-    lassert(upper(token) == "MOTION");
-    readMotion();
+    if (upper(token) == "MOTION")
+      readMotion();
   }
   catch (...)
   {
@@ -217,20 +216,23 @@ FileReader::BVHResult FileReader::readBVH(const QString& filePath, const BVHPara
       joint->setLocalPosition(jt->offset * params.scale);
 
       // Animation
-      auto anim = QSharedPointer<AnimatorPlug>::create();
-      for (const auto& dof : jt->dofs)
+      if (!jt->dofs.empty())
       {
-        float mult = ((int) dof.type < (int) DofType::RotationX)
-          ? params.scale
-          : 1.0f;
-
-        const auto& kfs = dof.keyframes;
-        for (size_t ii = 0; ii < kfs.size(); ++ii)
+        auto anim = QSharedPointer<AnimatorPlug>::create();
+        for (const auto& dof : jt->dofs)
         {
-          anim->addKeyFrame(dof.type, ii * dt, kfs[ii] * mult);
+          float mult = ((int) dof.type < (int) DofType::RotationX)
+            ? params.scale
+            : 1.0f;
+
+          const auto& kfs = dof.keyframes;
+          for (size_t ii = 0; ii < kfs.size(); ++ii)
+          {
+            anim->addKeyFrame(dof.type, ii * dt, kfs[ii] * mult);
+          }
         }
+        joint->addChildren(anim);
       }
-      joint->addChildren(anim);
 
       // Matrix Order
       {
@@ -600,8 +602,13 @@ FileReader::WeightResult FileReader::readWeight(const QString& filePath, const W
 }
 
 // ------------------------------------------------------------------------------------------------
-FileReader::MTResult FileReader::readMT(const QString& filePath)
+FileReader::MTResult FileReader::readMT(const QString& filePath, const MTParameters& params)
 {
+  if (params.parent.isNull())
+  {
+    return nullptr;
+  }
+
   auto file = std::ifstream(filePath.toStdString());
   if (!file.is_open())
   {
@@ -669,7 +676,6 @@ FileReader::MTResult FileReader::readMT(const QString& filePath)
   };
   const auto readFrames = [&]()
   {
-    auto anim = QSharedPointer<MTAnimatorPlug>::create();
     static const float dt = 1.0f / 120;
 
     int it = 0;
@@ -701,23 +707,24 @@ FileReader::MTResult FileReader::readMT(const QString& filePath)
       }*/
       for (int jj = 0; jj < 3; ++jj)
       {
-        anim->addKeyFrame((AnimatorPlug::PropertyType) (jj + 3), time, rot[jj]);
+        result->addKeyFrame((AnimatorPlug::PropertyType) (jj + 3), time, rot[jj]);
       }
-
-      // Set Matrix Construction
-      const auto method = [](QVector3D pos, QVector3D rot) -> QMatrix4x4
-      {
-        QMatrix4x4 m = {};
-        m.translate(pos);
-        m.rotate(rot.x(), 1.0, 0.0, 0.0);
-        m.rotate(rot.y(), 0.0, 1.0, 0.0);
-        m.rotate(rot.z(), 0.0, 0.0, 1.0);
-        return m;
-      };
-      result->setMatrixConstruct(method);
     }
 
-    result->addChildren(anim);
+    // Setup Parenting
+    params.parent->addChildren(result);
+
+    // Set Matrix Construction
+    const auto method = [](QVector3D pos, QVector3D rot) -> QMatrix4x4
+    {
+      QMatrix4x4 m = {};
+      m.translate(pos);
+      m.rotate(rot.x(), 1.0, 0.0, 0.0);
+      m.rotate(rot.y(), 0.0, 1.0, 0.0);
+      m.rotate(rot.z(), 0.0, 0.0, 1.0);
+      return m;
+    };
+    params.parent->setMatrixConstruct(method);
   };
 
   // Algorithm

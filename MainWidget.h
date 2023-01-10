@@ -4,6 +4,7 @@
 #include "Scene.h"
 #include "AnimationController.h"
 #include "MeshEditWindow.h"
+#include "MTSetupWindow.h"
 
 #include <QOpenGLWidget>
 #include <QOpenGLFunctions>
@@ -59,6 +60,7 @@ public slots:
   void loadMT();
 
   void openMeshEdit();
+  void openMTSetup();
 
   void makeSkin();
   void resetCamera();
@@ -118,6 +120,7 @@ private:
 
     // Tool Sub-Windows
     MeshEditWindow* meshEditWindow;
+    MTSetupWindow* setupMTWindow;
 };
 
 // ------------------------------------------------------------------------------------------------
