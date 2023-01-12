@@ -120,12 +120,12 @@ FileReader::BVHResult FileReader::readBVH(const QString& filePath, const BVHPara
 
       for (int ii = 0; ii < n; ++ii)
       {
+        AnimationData& anim = joint->dofs[ii];
+
         for (int jj = 0; jj < 3; ++jj)
         {
           std::string symbol; next(symbol);
           symbol = upper(symbol);
-
-          AnimationData& anim = joint->dofs[ii];
 
           // Position
           if (symbol == "XPOSITION")
@@ -214,17 +214,19 @@ FileReader::BVHResult FileReader::readBVH(const QString& filePath, const BVHPara
     {
       for (auto& jt : joints)
       {
-        auto& anim = jt->dofs;
+        auto& anims = jt->dofs;
 
-        for (size_t jj = 0; jj < anim.size(); ++jj)
+        for (size_t jj = 0; jj < anims.size(); ++jj)
         {
+          auto& anim = anims[jj];
+
           QVector3D res;
           for (int kk = 0; kk < 3; ++kk)
           {
             float val; next(val);
-            res[kk] = val;
+            res[anim.ordering[kk]] = val;
           }
-          anim[jj].keyframes.push_back(res);
+          anim.keyframes.push_back(res);
         }
       }
     }
