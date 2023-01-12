@@ -1,10 +1,10 @@
 #include "MTAnimation.h"
 
 // ------------------------------------------------------------------------------------------------
-float MTAnimation::interpolateValue(const KeyFrame* a, const KeyFrame* b, float) const
+QQuaternion MTAnimation::interpolateValue(const KeyFrame* a, const KeyFrame* b, float) const
 {
   if (a == nullptr && b == nullptr)
-    return 0.0f;
+    return QQuaternion();
 
   else if (a == nullptr)
     return b->value;

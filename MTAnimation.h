@@ -2,7 +2,9 @@
 
 #include "Animation.h"
 
-class MTAnimation final : public Animation
+#include <QQuaternion>
+
+class MTAnimation final : public Animation<QQuaternion>
 {
 public:
 
@@ -10,5 +12,5 @@ public:
 
 protected:
 
-  float interpolateValue(const KeyFrame* a, const KeyFrame* b, float time) const override;
+  QQuaternion interpolateValue(const KeyFrame* a, const KeyFrame* b, float time) const override;
 };

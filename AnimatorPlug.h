@@ -1,25 +1,13 @@
 
 #pragma once
 
-#include "Component.h"
-#include "Animation.h"
+#include "AnimatorPlugBase.h"
 
-class AnimatorPlug : public Component
+class AnimatorPlug : public AnimatorPlugBase<QVector3D>
 {
 public:
 
-  enum PropertyType
-  {
-    PositionX = 0,
-    PositionY,
-    PositionZ,
-
-    RotationX,
-    RotationY,
-    RotationZ,
-
-    __COUNT__
-  };
+  using AnimationType = Animation<QVector3D>;
 
 public:
 
@@ -28,11 +16,4 @@ public:
 public:
 
   void init() override;
-  void update(UpdateInfo infos) override;
-
-  void addKeyFrame(const PropertyType& type, float time, float value);
-
-protected:
-
-  QSharedPointer<Animation> m_animation;
 };

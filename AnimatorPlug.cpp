@@ -2,18 +2,16 @@
 
 // ------------------------------------------------------------------------------------------------
 AnimatorPlug::AnimatorPlug()
-  : m_animation(QSharedPointer<Animation>::create())
 {
+  m_animation = QSharedPointer<Animation<QVector3D>>::create();
+
   // Position
-  for (int ii = 0; ii < 3; ++ii)
   {
-    Animation::Property prop;
+    AnimationType::Property prop;
     {
-      prop.setter = [=](float value)
+      prop.setter = [=](QVector3D value)
       {
-        QVector3D pos = m_parent->localPosition();
-        pos[ii] = value;
-        m_parent->setLocalPosition(pos);
+        m_parent->setLocalPosition(value);
       };
       prop.keyFrames = {};
     }
@@ -21,15 +19,12 @@ AnimatorPlug::AnimatorPlug()
   }
 
   // Rotation
-  for (int jj = 0; jj < 3; ++jj)
   {
-    Animation::Property prop;
+    AnimationType::Property prop;
     {
-      prop.setter = [=](float value)
+      prop.setter = [=](QVector3D value)
       {
-        QVector3D rot = m_parent->localRotation();
-        rot[jj] = value;
-        m_parent->setLocalRotation(rot);
+        m_parent->setLocalRotation(value);
       };
       prop.keyFrames = {};
     }
@@ -43,44 +38,26 @@ void AnimatorPlug::init()
   if (m_parent == nullptr)
     return;
 
-  // Position
   QVector3D currPos = m_parent->localPosition();
-  for (int ii = 0; ii < 3; ++ii)
+  QVector3D currRot = m_parent->localRotation();
+
+  // Position
   {
-    Animation::KeyFrame kf;
+    AnimationType::KeyFrame kf;
     {
       kf.time = 0.0f;
-      kf.value = currPos[ii];
+      kf.value = currPos;
     }
-    m_animation->addKeyFrame(ii, kf);
+    m_animation->addKeyFrame(0, kf);
   }
 
   // Rotation
-  QVector3D currRot = m_parent->localRotation();
-  for (int jj = 0; jj < 3; ++jj)
   {
-    Animation::KeyFrame kf;
+    AnimationType::KeyFrame kf;
     {
       kf.time = 0.0f;
-      kf.value = currRot[jj];
+      kf.value = currRot;
     }
-    m_animation->addKeyFrame(jj + 3, kf);
+    m_animation->addKeyFrame(1, kf);
   }
-}
-
-// ------------------------------------------------------------------------------------------------
-void AnimatorPlug::update(UpdateInfo infos)
-{
-  m_animation->updateProperties(infos.animationTime);
-}
-
-// ------------------------------------------------------------------------------------------------
-void AnimatorPlug::addKeyFrame(const PropertyType& type, float time, float value)
-{
-  Animation::KeyFrame kf;
-  {
-    kf.time = time;
-    kf.value = value;
-  }
-  m_animation->addKeyFrame((int) type, kf);
 }

@@ -12,11 +12,18 @@
 #include <numeric>
 
 // ------------------------------------------------------------------------------------------------
-using DofType = AnimatorPlug::PropertyType;
+enum DofType
+{
+  Position = 0,
+  Rotation,
+
+  __COUNT__
+};
 struct AnimationData
 {
-  std::vector<float> keyframes;
+  std::vector<QVector3D> keyframes;
   DofType type;
+  int ordering[3] = {0,1,2};
 };
 struct JointData
 {
@@ -108,28 +115,55 @@ FileReader::BVHResult FileReader::readBVH(const QString& filePath, const BVHPara
     {
       lassert(upper(skip()) == "CHANNELS");
 
-      int n; next(n);
+      int n; next(n); n /= 3;
       joint->dofs = std::vector<AnimationData>(n);
 
       for (int ii = 0; ii < n; ++ii)
       {
-        std::string symbol; next(symbol);
-        symbol = upper(symbol);
+        for (int jj = 0; jj < 3; ++jj)
+        {
+          std::string symbol; next(symbol);
+          symbol = upper(symbol);
 
-        AnimationData& anim = joint->dofs[ii];
+          AnimationData& anim = joint->dofs[ii];
 
-        // Position
-        if (symbol == "XPOSITION") anim.type = DofType::PositionX;
-        else if (symbol == "YPOSITION") anim.type = DofType::PositionY;
-        else if (symbol == "ZPOSITION") anim.type = DofType::PositionZ;
+          // Position
+          if (symbol == "XPOSITION")
+          {
+            anim.ordering[jj] = 0;
+            anim.type = DofType::Position;
+          }
+          else if (symbol == "YPOSITION")
+          {
+            anim.ordering[jj] = 1;
+            anim.type = DofType::Position;
+          }
+          else if (symbol == "ZPOSITION")
+          {
+            anim.ordering[jj] = 2;
+            anim.type = DofType::Position;
+          }
 
-        // Rotation
-        else if (symbol == "XROTATION") anim.type = DofType::RotationX;
-        else if (symbol == "YROTATION") anim.type = DofType::RotationY;
-        else if (symbol == "ZROTATION") anim.type = DofType::RotationZ;
+          // Rotation
+          else if (symbol == "XROTATION")
+          {
+            anim.ordering[jj] = 0;
+            anim.type = DofType::Rotation;
+          }
+          else if (symbol == "YROTATION")
+          {
+            anim.ordering[jj] = 1;
+            anim.type = DofType::Rotation;
+          }
+          else if (symbol == "ZROTATION")
+          {
+            anim.ordering[jj] = 2;
+            anim.type = DofType::Rotation;
+          }
 
-        // Error
-        else lassert(false);
+          // Error
+          else lassert(false);
+        }
       }
     }
 
@@ -184,8 +218,13 @@ FileReader::BVHResult FileReader::readBVH(const QString& filePath, const BVHPara
 
         for (size_t jj = 0; jj < anim.size(); ++jj)
         {
-          float val; next(val);
-          anim[jj].keyframes.push_back(val);
+          QVector3D res;
+          for (int kk = 0; kk < 3; ++kk)
+          {
+            float val; next(val);
+            res[kk] = val;
+          }
+          anim[jj].keyframes.push_back(res);
         }
       }
     }
@@ -223,7 +262,7 @@ FileReader::BVHResult FileReader::readBVH(const QString& filePath, const BVHPara
         auto anim = QSharedPointer<AnimatorPlug>::create();
         for (const auto& dof : jt->dofs)
         {
-          float mult = ((int) dof.type < (int) DofType::RotationX)
+          float mult = (dof.type == DofType::Position)
             ? params.scale
             : 1.0f;
 
@@ -267,28 +306,36 @@ FileReader::BVHResult FileReader::readBVH(const QString& filePath, const BVHPara
           }
         };
 
-        // Indexors
-        std::vector<int> indexor(6);
-        std::iota(indexor.begin(), indexor.end(), 0);
-
         // Instructions
         std::vector<MatrixInstruction> rotInst, posInst;
-        const auto insert = [&](int i)
+        const auto insert = [&](int i, DofType type)
         {
-          if (i < 3) posInst.push_back(__instructions[i]);
-          else rotInst.push_back(__instructions[i]);
+          if (type == DofType::Position) posInst.push_back(__instructions[i]);
+          else if (type == DofType::Rotation) rotInst.push_back(__instructions[i + 3]);
         };
-        for (const auto& dof : jt->dofs)
-        {
-          int index = (int) dof.type;
-          indexor.erase(std::remove(indexor.begin(), indexor.end(), index), indexor.end());
 
-          insert(index);
-        }
-        for (const auto& index : indexor)
+        // Construction
+        const auto& dofs = jt->dofs;
+        const auto find = [&](DofType type)
         {
-          insert(index);
-        }
+          const auto pred = [&](AnimationData ad) -> bool
+          {
+            return ad.type == type;
+          };
+          return std::find_if(dofs.begin(), dofs.end(), pred);
+        };
+        const auto construct = [&](DofType type)
+        {
+          const auto& dof = find(type);
+          bool contains = (dof != dofs.end());
+
+          for (int ii = 0; ii < 3; ++ii)
+          {
+            insert(contains ? dof->ordering[ii] : ii, type);
+          }
+        };
+        construct(DofType::Position);
+        construct(DofType::Rotation);
 
         // Method
         const auto method = [rotInst, posInst](QVector3D pos, QVector3D rot) -> QMatrix4x4
@@ -652,15 +699,6 @@ FileReader::MTResult FileReader::readMT(const QString& filePath, const MTParamet
     return r;
   };
 
-  // Convert
-  const auto quaternionToEuler = [](QVector4D quat) -> QVector3D
-  {
-    float x, y, z;
-    QQuaternion q(quat);
-    q.getEulerAngles(&x, &y, &z);
-    return QVector3D(x, y, z);
-  };
-
   // Construct
   const auto skipHeader = [&]()
   {
@@ -699,18 +737,10 @@ FileReader::MTResult FileReader::readMT(const QString& filePath, const MTParamet
         next(d);
         quat = {a,b,c,d};
       }
-      QVector3D rot = quaternionToEuler(quat);
 
       // Add Keyframes
       float time = dt * (++it);
-      /*for (int ii = 0; ii < 3; ++ii)
-      {
-        anim->addKeyFrame((AnimatorPlug::PropertyType) ii, time, acc[ii]);
-      }*/
-      for (int jj = 0; jj < 3; ++jj)
-      {
-        result->addKeyFrame((AnimatorPlug::PropertyType) (jj + 3), time, rot[jj]);
-      }
+      result->addKeyFrame(0, time, QQuaternion(quat));
     }
 
     // Setup Parenting

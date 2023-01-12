@@ -2,7 +2,7 @@
 
 #include "AnimatorPlug.h"
 
-class MTAnimatorPlug : public AnimatorPlug
+class MTAnimatorPlug : public AnimatorPlugBase<QQuaternion>
 {
 public:
 
@@ -11,10 +11,4 @@ public:
 public:
 
   void init() override;
-  void update(UpdateInfo infos) override;
-
-protected:
-
-  QVector3D m_parentAcceleration;
-  QVector3D m_parentVelocity;
 };
