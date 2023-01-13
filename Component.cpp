@@ -2,6 +2,17 @@
 #include "Component.h"
 
 // ------------------------------------------------------------------------------------------------
+QVector3D rotationMod(const QVector3D& rot)
+{
+  static constexpr float max = 360.0f;
+
+  QVector3D res;
+  for (int ii = 0; ii < 3; ++ii)
+    res[ii] = fmodf(rot[ii], max);
+  return res;
+}
+
+// ------------------------------------------------------------------------------------------------
 Component::Component() :
     m_name(QString("New Item")),
     m_localPosition(QVector3D()),
@@ -133,6 +144,35 @@ void Component::copy(const Pointer& pointer)
 void Component::setMatrixConstruct(const MatrixConstruct& method)
 {
   m_matrixMethod = method;
+}
+
+// ------------------------------------------------------------------------------------------------
+void Component::setAbsolutePosition(const QVector3D& pos)
+{
+  setLocalToParent(pos - getAbsolutePosition() + m_localPosition, m_localRotation);
+}
+
+// ------------------------------------------------------------------------------------------------
+QVector3D Component::getAbsolutePosition() const
+{
+  return localToWorld() * QVector3D(0, 0, 0);
+}
+
+// ------------------------------------------------------------------------------------------------
+void Component::setAbsoluteRotation(const QVector3D& rot)
+{
+  setLocalToParent(m_localPosition, rotationMod(rot - getAbsoluteRotation() + m_localRotation));
+}
+
+// ------------------------------------------------------------------------------------------------
+QVector3D Component::getAbsoluteRotation() const
+{
+  if (m_parent != nullptr)
+  {
+    return rotationMod(m_parent->getAbsoluteRotation() + m_localRotation);
+  }
+
+  return m_localRotation;
 }
 
 // ------------------------------------------------------------------------------------------------

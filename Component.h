@@ -59,6 +59,12 @@ public:
 
     void setMatrixConstruct(const MatrixConstruct& method);
 
+    void setAbsolutePosition(const QVector3D& pos);
+    QVector3D getAbsolutePosition() const;
+
+    void setAbsoluteRotation(const QVector3D& rot);
+    QVector3D getAbsoluteRotation() const;
+
 protected:
 
     void setParent(Component* parent);

@@ -17,7 +17,7 @@ MTAnimatorPlug::MTAnimatorPlug()
         value.getEulerAngles(&x, &y, &z);
         rot = {x,y,z};
       }
-      m_parent->setLocalRotation(rot);
+      m_parent->setAbsoluteRotation(rot);
     };
     prop.keyFrames = {};
   }
