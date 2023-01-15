@@ -32,6 +32,7 @@ public:
 
   void addProperty(const Property& prop);
   Property getProperty(int index) const;
+  Property& property(int index);
   void clearProperties();
 
   void addKeyFrame(int index, const KeyFrame& kf);
@@ -62,6 +63,16 @@ inline typename Animation<T>::Property Animation<T>::getProperty(int index) cons
     return Property();
 
   return m_properties.at(index);
+}
+
+// ------------------------------------------------------------------------------------------------
+template<typename T>
+inline typename Animation<T>::Property& Animation<T>::property(int index)
+{
+  if (index < 0 || index >= m_properties.size())
+    return m_properties.front();
+
+  return m_properties[index];
 }
 
 // ------------------------------------------------------------------------------------------------

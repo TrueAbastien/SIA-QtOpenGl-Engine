@@ -28,6 +28,7 @@ SOURCES += \
     MeshRigRelation.cpp \
     MTAnimation.cpp \
     MTAnimatorPlug.cpp \
+    MTBody.cpp \
     MTSetupWindow.cpp \
     Renderable.cpp \
     Scene.cpp \
@@ -57,6 +58,7 @@ HEADERS += \
     MeshRigRelation.h \
     MTAnimation.h \
     MTAnimatorPlug.h \
+    MTBody.h \
     MTSetupWindow.h \
     Renderable.h \
     Scene.h \

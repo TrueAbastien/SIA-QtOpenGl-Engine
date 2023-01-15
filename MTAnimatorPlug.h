@@ -11,4 +11,8 @@ public:
 public:
 
   void init() override;
+
+private:
+
+  QQuaternion m_originalRotation;
 };

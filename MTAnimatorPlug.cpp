@@ -14,7 +14,7 @@ MTAnimatorPlug::MTAnimatorPlug()
       QVector3D rot;
       {
         float x, y, z;
-        value.getEulerAngles(&x, &y, &z);
+        value.getEulerAngles(&z, &y, &x);
         rot = {x,y,z};
       }
       m_parent->setAbsoluteRotation(rot);
@@ -30,10 +30,18 @@ void MTAnimatorPlug::init()
   if (m_parent == nullptr)
     return;
 
-  MTAnimation::KeyFrame kf;
+  auto& kfs = m_animation->property(0).keyFrames;
+  m_originalRotation = kfs.front().value;
+
+  for (auto& kf : kfs)
+  {
+    kf.value -= m_originalRotation;
+  }
+
+  /*MTAnimation::KeyFrame kf;
   {
     kf.time = 0.0f;
     kf.value = QQuaternion();
   }
-  m_animation->addKeyFrame(0, kf);
+  m_animation->addKeyFrame(0, kf);*/
 }
