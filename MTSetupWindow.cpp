@@ -13,18 +13,16 @@
 // ------------------------------------------------------------------------------------------------
 void fillJointMap(MTSetupWindow::JointMap& joints, const Component::Pointer& parent)
 {
-  if (parent.dynamicCast<Joint>().isNull() && parent.dynamicCast<JointRenderer>().isNull())
+  if (!parent.dynamicCast<Joint>().isNull())
   {
-    return;
-  }
+    QString name = parent->name();
+    if (joints.contains(name))
+    {
+      return;
+    }
 
-  QString name = parent->name();
-  if (joints.contains(name))
-  {
-    return;
+    joints.insert(name, parent);
   }
-
-  joints.insert(name, parent);
 
   for (const auto& child : parent->children())
   {
@@ -92,10 +90,13 @@ void MTSetupWindow::setBody(const BodyReference& body)
 
   m_body = BodyTracked::create(body);
 
+  auto item = QSharedPointer<AxisCorrector>::create(AxisCorrector::Mode::Y_to_Z);
+  item->addChildren(m_body);
+
   emit bodyChanged(body->parent()->name());
 
   // Add new Body & Remove JoitnRenderer
-  body->parent()->parent()->addChildren(m_body);
+  body->parent()->parent()->addChildren(item);
   body->parent()->detachFromParent();
 }
 

@@ -3,7 +3,7 @@
 // ------------------------------------------------------------------------------------------------
 QMatrix4x4 compositeModel(const QVector3D& worldRotation, const QMatrix4x4& model, const QVector3D& localPosition)
 {
-  QVector3D worldPosition = model * localPosition;
+  QVector3D worldPosition = model * QVector3D(0, 0, 0) + localPosition;
 
   const auto method = [](QVector3D pos, QVector3D rot) -> QMatrix4x4
   {
@@ -53,7 +53,7 @@ void constructOverChildren(const Component* parent, const QMatrix4x4& model,
     VertexData_Wired child_vtx;
     {
       child_vtx.position = newModel * QVector3D(0, 0, 0);
-      child_vtx.color = QVector3D(0.8f, 0.8f, 0);
+      child_vtx.color = QVector3D(0.8f, 0.4f, 0);
     }
 
     ids.push_back(parent_idx);
