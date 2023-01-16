@@ -4,6 +4,7 @@
 
 // ------------------------------------------------------------------------------------------------
 MTAnimatorPlug::MTAnimatorPlug()
+  : m_originalRotation{}
 {
   m_animation = QSharedPointer<MTAnimation>::create();
 
@@ -26,9 +27,10 @@ void MTAnimatorPlug::init()
 
   auto& kfs = m_animation->property(0).keyFrames;
   m_originalRotation = kfs.front().value;
+}
 
-  for (auto& kf : kfs)
-  {
-    kf.value -= m_originalRotation;
-  }
+// ------------------------------------------------------------------------------------------------
+QVector3D MTAnimatorPlug::originalRotation() const
+{
+  return m_originalRotation;
 }

@@ -3,12 +3,24 @@
 #include "MTAnimatorPlug.h"
 
 // ------------------------------------------------------------------------------------------------
-bool isDrivingMT(const Component::Pointer& comp)
+QMatrix3x3 rotationMatrix(const QVector3D& rot)
+{
+  QMatrix4x4 m = {};
+  m.rotate(rot.x(), 1.0, 0.0, 0.0);
+  m.rotate(rot.y(), 0.0, 1.0, 0.0);
+  m.rotate(rot.z(), 0.0, 0.0, 1.0);
+  return m.normalMatrix();
+}
+
+// ------------------------------------------------------------------------------------------------
+bool isDrivingMT(const Component::Pointer& comp, QMatrix3x3& invORot)
 {
   for (const auto& child : comp->children())
   {
-    if (!child.dynamicCast<MTAnimatorPlug>().isNull())
+    auto item = child.dynamicCast<MTAnimatorPlug>();
+    if (!item.isNull())
     {
+      invORot = rotationMatrix(item->originalRotation()).transposed();
       return true;
     }
   }
@@ -17,21 +29,21 @@ bool isDrivingMT(const Component::Pointer& comp)
 }
 
 // ------------------------------------------------------------------------------------------------
-QMatrix4x4 compositeModel(const QVector3D& worldRotation, const QMatrix4x4& model, const QVector3D& localPosition)
+QMatrix4x4 compositeModel(const QVector3D& worldRotation, const QMatrix4x4& model, const QMatrix3x3& invORot, const QVector3D& localPosition)
 {
   QVector3D worldPosition = model * QVector3D(0, 0, 0) + localPosition;
 
-  const auto method = [](QVector3D pos, QVector3D rot) -> QMatrix4x4
-  {
-    QMatrix4x4 m = {};
-    m.rotate(rot.x(), 1.0, 0.0, 0.0);
-    m.rotate(rot.y(), 0.0, 1.0, 0.0);
-    m.rotate(rot.z(), 0.0, 0.0, 1.0);
-    m.translate(pos);
-    return m;
-  };
+  QMatrix4x4 permute(
+    1, 0, 0, 0,
+    0, 0, 1, 0,
+    0, 1, 0, 0,
+    0, 0, 0, 1
+  );
 
-  return method(worldPosition, worldRotation);
+  QMatrix4x4 m(invORot * rotationMatrix(worldRotation));
+  m.translate(permute * worldPosition);
+
+  return m;
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -89,7 +101,8 @@ void updateOverChildren(const Component* parent, const QMatrix4x4& model,
   auto jt = map[parent->name()];
   jt->setLocalPosition(model * QVector3D(0, 0, 0));
 
-  bool isDriving = isDrivingMT(jt);
+  QMatrix3x3 invORot;
+  bool isDriving = isDrivingMT(jt, invORot);
 
   // Update Children
   for (const auto& child : parent->children())
@@ -98,7 +111,7 @@ void updateOverChildren(const Component* parent, const QMatrix4x4& model,
     if (child.isNull() || child.dynamicCast<Joint>().isNull()) continue;
 
     QMatrix4x4 newModel = isDriving ?
-      compositeModel(jt->localRotation(), model, child->localPosition()) :
+      compositeModel(jt->localRotation(), model, invORot, child->localPosition()) :
       model * child->localToParent();
     vts[++jointIndex].position = newModel * QVector3D(0, 0, 0);
 

@@ -12,6 +12,8 @@ public:
 
   void init() override;
 
+  QVector3D originalRotation() const;
+
 private:
 
   QVector3D m_originalRotation;

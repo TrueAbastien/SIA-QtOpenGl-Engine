@@ -1135,6 +1135,11 @@ void MainWidget::clearScene()
     {
       scene->addChildren(createComponent<FactoryFloor>("Floor"));
     }
+
+    // World Frame
+    {
+      scene->addChildren(createComponent<Frame>("World"));
+    }
   }
 
   update();
