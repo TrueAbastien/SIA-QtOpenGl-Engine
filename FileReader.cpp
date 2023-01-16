@@ -5,6 +5,7 @@
 #include <QRandomGenerator>
 #include <QFileInfo>
 #include <QDir>
+#include <QtMath>
 
 #include <fstream>
 #include <functional>
@@ -701,6 +702,20 @@ FileReader::MTResult FileReader::readMT(const QString& filePath, const MTParamet
     return r;
   };
 
+  // Convert
+  const auto toEuler = [](const QVector4D& q) -> QVector3D
+  {
+    float phi = qAtan2(2 * q[2] * q[3] + 2 * q[0] * q[1],
+                       2 * q[0] * q[0] + 2 * q[3] * q[3] - 1);
+
+    float theta = -qAsin(2 * q[1] * q[3] - 2 * q[0] * q[2]);
+
+    float psi = qAtan2(2 * q[1] * q[2] + 2 * q[0] * q[3],
+                       2 * q[0] * q[0] + 2 * q[1] * q[1] - 1);
+
+    return QVector3D(phi, theta, psi) * RAD2DEG;
+  };
+
   // Construct
   const auto skipHeader = [&]()
   {
@@ -730,38 +745,23 @@ FileReader::MTResult FileReader::readMT(const QString& filePath, const MTParamet
       }
 
       // Read Quaternion
-      QVector4D quat;
+      QVector3D rot;
       {
         float a, b, c, d;
         next(a);
         next(b);
         next(c);
         next(d);
-        quat = {a,b,c,d};
+        rot = toEuler({a, b, c, d});
       }
 
       // Add Keyframes
       float time = dt * (++it);
-      result->addKeyFrame(0, time, QQuaternion(quat));
+      result->addKeyFrame(0, time, rot);
     }
 
     // Setup Parenting
     params.parent->addChildren(result);
-
-    // Set Matrix Construction
-    if (params.overrideMatrixMethod)
-    {
-      const auto method = [](QVector3D pos, QVector3D rot) -> QMatrix4x4
-      {
-        QMatrix4x4 m = {};
-        m.translate(pos);
-        m.rotate(rot.x(), 1.0, 0.0, 0.0);
-        m.rotate(rot.y(), 0.0, 1.0, 0.0);
-        m.rotate(rot.z(), 0.0, 0.0, 1.0);
-        return m;
-      };
-      params.parent->setMatrixConstruct(method);
-    }
   };
 
   // Algorithm

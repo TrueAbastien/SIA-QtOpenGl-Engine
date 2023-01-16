@@ -1,5 +1,21 @@
 #include "MTBody.h"
 
+#include "MTAnimatorPlug.h"
+
+// ------------------------------------------------------------------------------------------------
+bool isDrivingMT(const Component::Pointer& comp)
+{
+  for (const auto& child : comp->children())
+  {
+    if (!child.dynamicCast<MTAnimatorPlug>().isNull())
+    {
+      return true;
+    }
+  }
+
+  return false;
+}
+
 // ------------------------------------------------------------------------------------------------
 QMatrix4x4 compositeModel(const QVector3D& worldRotation, const QMatrix4x4& model, const QVector3D& localPosition)
 {
@@ -73,13 +89,17 @@ void updateOverChildren(const Component* parent, const QMatrix4x4& model,
   auto jt = map[parent->name()];
   jt->setLocalPosition(model * QVector3D(0, 0, 0));
 
+  bool isDriving = isDrivingMT(jt);
+
   // Update Children
   for (const auto& child : parent->children())
   {
     // Ensure Child is joint
     if (child.isNull() || child.dynamicCast<Joint>().isNull()) continue;
 
-    QMatrix4x4 newModel = compositeModel(jt->localRotation(), model, child->localPosition());
+    QMatrix4x4 newModel = isDriving ?
+      compositeModel(jt->localRotation(), model, child->localPosition()) :
+      model * child->localToParent();
     vts[++jointIndex].position = newModel * QVector3D(0, 0, 0);
 
     updateOverChildren(child.get(), newModel, vts, map, jointIndex);

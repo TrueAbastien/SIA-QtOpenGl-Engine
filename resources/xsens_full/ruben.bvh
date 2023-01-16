@@ -73,7 +73,7 @@ ROOT PELV
 			{
 				OFFSET 0.000000 0.104219 0.000000
 				CHANNELS 3 Zrotation Yrotation Xrotation
-				JOINT spine4
+				JOINT STERN
 				{
 					OFFSET 0.000000 0.104218 -0.000000
 					CHANNELS 3 Zrotation Yrotation Xrotation

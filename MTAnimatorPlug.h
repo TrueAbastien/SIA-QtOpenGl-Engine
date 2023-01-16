@@ -2,7 +2,7 @@
 
 #include "AnimatorPlug.h"
 
-class MTAnimatorPlug : public AnimatorPlugBase<QQuaternion>
+class MTAnimatorPlug : public AnimatorPlugBase<QVector3D>
 {
 public:
 
@@ -14,5 +14,5 @@ public:
 
 private:
 
-  QQuaternion m_originalRotation;
+  QVector3D m_originalRotation;
 };

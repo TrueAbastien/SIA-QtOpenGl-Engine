@@ -11,6 +11,8 @@
 #define M_PI 3.14159265358979323846f  /* pi */
 #define ROT_EPS 0.001f
 
+#define RAD2DEG (180.0f / M_PI)
+
 #ifdef _DEBUG
 struct CustomDebug final
 {

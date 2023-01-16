@@ -9,15 +9,9 @@ MTAnimatorPlug::MTAnimatorPlug()
 
   MTAnimation::Property prop;
   {
-    prop.setter = [=](QQuaternion value)
+    prop.setter = [=](QVector3D value)
     {
-      QVector3D rot;
-      {
-        float x, y, z;
-        value.getEulerAngles(&z, &y, &x);
-        rot = {x,y,z};
-      }
-      m_parent->setAbsoluteRotation(rot);
+      m_parent->setLocalRotation(value);
     };
     prop.keyFrames = {};
   }
@@ -37,11 +31,4 @@ void MTAnimatorPlug::init()
   {
     kf.value -= m_originalRotation;
   }
-
-  /*MTAnimation::KeyFrame kf;
-  {
-    kf.time = 0.0f;
-    kf.value = QQuaternion();
-  }
-  m_animation->addKeyFrame(0, kf);*/
 }

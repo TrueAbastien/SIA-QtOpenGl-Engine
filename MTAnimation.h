@@ -4,7 +4,7 @@
 
 #include <QQuaternion>
 
-class MTAnimation final : public Animation<QQuaternion>
+class MTAnimation final : public Animation<QVector3D>
 {
 public:
 
@@ -12,5 +12,5 @@ public:
 
 protected:
 
-  QQuaternion interpolateValue(const KeyFrame* a, const KeyFrame* b, float time) const override;
+  QVector3D interpolateValue(const KeyFrame* a, const KeyFrame* b, float time) const override;
 };

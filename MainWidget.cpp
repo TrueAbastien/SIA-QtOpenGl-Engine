@@ -790,7 +790,6 @@ void MainWidget::loadMT()
   {
     params.parent = frame;
     params.samplingRate = 120;
-    params.overrideMatrixMethod = true;
   }
 
   auto result = FileReader::readMT(fileName, params);

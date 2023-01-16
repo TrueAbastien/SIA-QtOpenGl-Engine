@@ -133,7 +133,6 @@ void MTSetupWindow::loadMapping()
     {
       params.parent = joints[name];
       params.samplingRate = 60;
-      params.overrideMatrixMethod = true;
     }
 
     auto result = FileReader::readMT(path, params);
