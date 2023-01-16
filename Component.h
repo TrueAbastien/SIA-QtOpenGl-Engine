@@ -51,7 +51,11 @@ public:
     virtual void addChildren(const Pointer& child);
     QVector<Pointer> children() const;
     Pointer child(int index) const; 
+
     const Component* parent() const;
+    Component* parent();
+
+    void detachFromParent();
 
     void setLogger(LogMethod method);
 
@@ -59,11 +63,15 @@ public:
 
     void setMatrixConstruct(const MatrixConstruct& method);
 
+    // TODO: verify this
     void setAbsolutePosition(const QVector3D& pos);
     QVector3D getAbsolutePosition() const;
 
+    // TODO: verify this, also
     void setAbsoluteRotation(const QVector3D& rot);
     QVector3D getAbsoluteRotation() const;
+
+    UID id() const;
 
 protected:
 
@@ -78,6 +86,7 @@ protected:
 
 protected:
 
+    UID m_uid;
     QString m_name;
 
     QVector3D m_localPosition;

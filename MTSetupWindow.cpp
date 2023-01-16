@@ -86,13 +86,17 @@ MTSetupWindow::MTSetupWindow(QWidget* parent, LogMethod logMethod) :
 }
 
 // ------------------------------------------------------------------------------------------------
-void MTSetupWindow::setBody(const Body& body)
+void MTSetupWindow::setBody(const BodyReference& body)
 {
   if (body.isNull()) return;
 
-  m_body = body;
+  m_body = BodyTracked::create(body);
 
   emit bodyChanged(body->parent()->name());
+
+  // Add new Body & Remove JoitnRenderer
+  body->parent()->parent()->addChildren(m_body);
+  body->parent()->detachFromParent();
 }
 
 // ------------------------------------------------------------------------------------------------

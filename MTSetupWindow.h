@@ -2,6 +2,8 @@
 
 #include "Structs.h"
 #include "FileReader.h"
+#include "MTBody.h"
+#include "Scene.h"
 
 #include <QDialog>
 #include <QCloseEvent>
@@ -12,7 +14,9 @@ class MTSetupWindow : public QDialog
 
 public:
 
-  using Body = FileReader::BVHResult;
+  using BodyReference = FileReader::BVHResult;
+  using BodyTracked = QSharedPointer<MTBody>;
+
   using JointMap = QMap<QString, Component::Pointer>;
 
 public:
@@ -21,7 +25,7 @@ public:
 
 public:
 
-  void setBody(const Body& body);
+  void setBody(const BodyReference& body);
 
 public slots:
 
@@ -37,5 +41,5 @@ private:
 
 private:
 
-  Body m_body;
+  BodyTracked m_body;
 };

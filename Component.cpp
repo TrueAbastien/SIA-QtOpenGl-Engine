@@ -1,6 +1,10 @@
 
 #include "Component.h"
 
+#include <algorithm>
+
+static UID __uid = 0;
+
 // ------------------------------------------------------------------------------------------------
 QVector3D rotationMod(const QVector3D& rot)
 {
@@ -14,6 +18,7 @@ QVector3D rotationMod(const QVector3D& rot)
 
 // ------------------------------------------------------------------------------------------------
 Component::Component() :
+    m_uid(++__uid),
     m_name(QString("New Item")),
     m_localPosition(QVector3D()),
     m_localRotation(QVector3D()),
@@ -121,6 +126,41 @@ const Component* Component::parent() const
 }
 
 // ------------------------------------------------------------------------------------------------
+Component* Component::parent()
+{
+  return m_parent;
+}
+
+// ------------------------------------------------------------------------------------------------
+void Component::detachFromParent()
+{
+  if (m_parent == nullptr)
+  {
+    return;
+  }
+
+  auto& children = m_parent->m_children;
+
+  int index = 0;
+  for (; index < children.size(); ++index)
+  {
+    if (children[index]->id() == m_uid)
+    {
+      break;
+    }
+  }
+
+  if (index == children.size())
+  {
+    return;
+  }
+
+  children.remove(index);
+
+  m_parent = nullptr;
+}
+
+// ------------------------------------------------------------------------------------------------
 void Component::setLogger(LogMethod method)
 {
   logMethod = method;
@@ -173,6 +213,12 @@ QVector3D Component::getAbsoluteRotation() const
   }
 
   return m_localRotation;
+}
+
+// ------------------------------------------------------------------------------------------------
+UID Component::id() const
+{
+  return m_uid;
 }
 
 // ------------------------------------------------------------------------------------------------

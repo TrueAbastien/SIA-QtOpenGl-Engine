@@ -67,3 +67,5 @@ enum LogType
 };
 
 using LogMethod = std::function<void(LogType, const std::string&)>;
+
+using UID = unsigned long long;

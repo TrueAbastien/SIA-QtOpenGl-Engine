@@ -25,7 +25,7 @@ void constructOverChildren(const Component* parent, const QMatrix4x4& model,
   VertexData_Wired parent_vtx;
   {
     parent_vtx.position = model * QVector3D(0, 0, 0);
-    parent_vtx.color = QVector3D(0, 0.8f, 0);
+    parent_vtx.color = QVector3D(0, 0, 0.8f);
   }
   GLushort parent_idx = vts.size();
 
@@ -53,7 +53,7 @@ void constructOverChildren(const Component* parent, const QMatrix4x4& model,
     VertexData_Wired child_vtx;
     {
       child_vtx.position = newModel * QVector3D(0, 0, 0);
-      child_vtx.color = QVector3D(0.8f, 0, 0);
+      child_vtx.color = QVector3D(0.8f, 0.8f, 0);
     }
 
     ids.push_back(parent_idx);
@@ -79,7 +79,7 @@ void updateOverChildren(const Component* parent, const QMatrix4x4& model,
     // Ensure Child is joint
     if (child.isNull() || child.dynamicCast<Joint>().isNull()) continue;
 
-    QMatrix4x4 newModel = compositeModel(jt->localRotation(), model, parent->localPosition());
+    QMatrix4x4 newModel = compositeModel(jt->localRotation(), model, child->localPosition());
     vts[++jointIndex].position = newModel * QVector3D(0, 0, 0);
 
     updateOverChildren(child.get(), newModel, vts, map, jointIndex);
