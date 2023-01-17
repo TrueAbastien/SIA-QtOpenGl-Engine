@@ -14,6 +14,7 @@
 #include <QBasicTimer>
 #include <QMenuBar>
 #include <QTextEdit>
+#include <QDropEvent>
 
 
 class MainWidget : public QOpenGLWidget, protected QOpenGLFunctions
@@ -41,6 +42,9 @@ protected:
     void wheelEvent(QWheelEvent* e) override;
     void keyPressEvent(QKeyEvent* e) override;
     void timerEvent(QTimerEvent *e) override;
+
+    void dragEnterEvent(QDragEnterEvent* e) override;
+    void dropEvent(QDropEvent* e) override;
 
     void initializeGL() override;
     void resizeGL(int w, int h) override;
@@ -87,6 +91,11 @@ private:
   QMatrix4x4 updateView();
 
   QString getFileName(const QString& filePath) const;
+
+  void openFile(const QString& filePath);
+  void openBVH(const QString& filePath, const FileReader::BVHParameters& params);
+  void openOFF(const QString& filePath, const FileReader::OFFParameters& params);
+  //
 
   template <typename T>
   using ComponentPredicate = std::function<bool(const QSharedPointer<T>&)>;

@@ -25,6 +25,7 @@
 #include <QSlider>
 #include <QScrollArea>
 #include <QSizePolicy>
+#include <QMimeData>
 
 #include <cmath>
 
@@ -40,6 +41,8 @@ MainWidget::MainWidget() :
   logger(nullptr),
   previousTime(0.0f)
 {
+  setAcceptDrops(true);
+
   resetCamera();
 
   // Material
@@ -608,6 +611,35 @@ void MainWidget::timerEvent(QTimerEvent *)
 }
 
 // ------------------------------------------------------------------------------------------------
+void MainWidget::dragEnterEvent(QDragEnterEvent* e)
+{
+  const QMimeData* mimeData = e->mimeData();
+
+  if (mimeData->hasUrls())
+  {
+    e->acceptProposedAction();
+  }
+}
+
+// ------------------------------------------------------------------------------------------------
+void MainWidget::dropEvent(QDropEvent* e)
+{
+  const QMimeData* mimeData = e->mimeData();
+
+  if (mimeData->hasUrls())
+  {
+    QList<QUrl> urlList = mimeData->urls();
+
+    for (int ii = 0; ii < urlList.size() && ii < 32; ++ii)
+    {
+      openFile(urlList.at(ii).toLocalFile());
+    }
+
+    e->acceptProposedAction();
+  }
+}
+
+// ------------------------------------------------------------------------------------------------
 void MainWidget::initializeGL()
 {
     initializeOpenGLFunctions();
@@ -725,19 +757,7 @@ void MainWidget::loadBVH()
     params.scale = 1e-2f * scale;
   }
 
-  auto result = FileReader::readBVH(fileName, params);
-  if (result == nullptr)
-  {
-    return;
-  }
-
-  QString name = getFileName(fileName);
-  auto parent = createComponent<AxisCorrector>(name, AxisCorrector::Mode::Y_to_Z);
-  parent->addChildren(result);
-
-  internalLog(INFO, name.toStdString() + " successfully loaded !");
-
-  scene->addChildren(parent);
+  openBVH(fileName, params);
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -761,19 +781,7 @@ void MainWidget::loadOFF()
     params.scale = 1e-2f * scale;
   }
 
-  auto result = FileReader::readOFF(fileName, params);
-  if (result == nullptr)
-  {
-    return;
-  }
-
-  QString name = getFileName(fileName);
-  auto parent = createComponent<AxisCorrector>(name, AxisCorrector::Mode::Y_to_Z);
-  parent->addChildren(result);
-  
-  internalLog(INFO, name.toStdString() + " successfully loaded !");
-
-  scene->addChildren(parent);
+  openOFF(fileName, params);
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -1215,4 +1223,75 @@ QString MainWidget::getFileName(const QString& filePath) const
   QFileInfo fileInfo(filePath);
   QString fileName = fileInfo.fileName();
   return fileName.left(fileName.indexOf('.'));
+}
+
+// ------------------------------------------------------------------------------------------------
+void MainWidget::openFile(const QString& filePath)
+{
+  QString ext;
+  {
+    QFileInfo fileInfo(filePath);
+    QString fileName = fileInfo.fileName();
+    ext = fileName.right(3).toLower();
+  }
+
+  // BVH Handler
+  if (ext == "bvh")
+  {
+    FileReader::BVHParameters params;
+    {
+      params.scale = 1.0f;
+    }
+
+    openBVH(filePath, params);
+  }
+
+  // OFF Handler
+  else if (ext == "off")
+  {
+    FileReader::OFFParameters params;
+    {
+      params.scale = 1.0f;
+    }
+
+    openOFF(filePath, params);
+  }
+
+  // TODO?
+}
+
+// ------------------------------------------------------------------------------------------------
+void MainWidget::openBVH(const QString& filePath, const FileReader::BVHParameters& params)
+{
+  auto result = FileReader::readBVH(filePath, params);
+  if (result == nullptr)
+  {
+    return;
+  }
+
+  QString name = getFileName(filePath);
+  auto parent = createComponent<AxisCorrector>(name, AxisCorrector::Mode::Y_to_Z);
+  parent->addChildren(result);
+
+  internalLog(INFO, name.toStdString() + " successfully loaded !");
+
+  scene->addChildren(parent);
+}
+
+// ------------------------------------------------------------------------------------------------
+void MainWidget::openOFF(const QString& filePath, const FileReader::OFFParameters& params)
+{
+  auto result = FileReader::readOFF(filePath, params);
+  if (result == nullptr)
+  {
+    return;
+  }
+
+  QString name = getFileName(filePath);
+  auto parent = createComponent<AxisCorrector>(name, AxisCorrector::Mode::Y_to_Z);
+  parent->addChildren(result);
+
+  internalLog(INFO, name.toStdString() + " successfully loaded !");
+
+  scene->addChildren(parent);
 }
