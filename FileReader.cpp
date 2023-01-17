@@ -714,7 +714,6 @@ FileReader::MTResult FileReader::readMT(const QString& filePath, const MTParamet
                        2 * q[0] * q[0] + 2 * q[1] * q[1] - 1);
 
     return QVector3D(phi, theta, psi) * RAD2DEG;
-    //return QVector3D(phi, psi, theta) * RAD2DEG;
   };
 
   // Construct
