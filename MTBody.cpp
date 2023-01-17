@@ -19,17 +19,9 @@ QMatrix3x3 rotationMatrix(const QVector3D& rot)
 }
 
 // ------------------------------------------------------------------------------------------------
-QVector3D positionVector(const QMatrix4x4& model, const QVector3D& pos)
+QVector3D positionVector(const QMatrix4x4& model)
 {
-  /*QMatrix4x4 permute(
-    1, 0, 0, 0,
-    0, 0, 1, 0,
-    0, 1, 0, 0,
-    0, 0, 0, 1
-  );
-
-  return permute * model * pos;*/
-  return model * pos;
+  return model * QVector3D(0, 0, 0);
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -51,12 +43,15 @@ bool isDrivingMT(const Component::Pointer& comp, QMatrix3x3& invORot)
 // ------------------------------------------------------------------------------------------------
 QMatrix4x4 compositeModel(const QVector3D& worldRotation, const QMatrix4x4& model, const QMatrix3x3& invORot, const QVector3D& localPosition)
 {
-  QVector3D worldPosition = model * QVector3D(0, 0, 0) + localPosition;
+  QVector4D worldTranslate = model * QVector4D(localPosition, 0);
+  QVector3D worldPosition = model * QVector3D(0, 0, 0) + worldTranslate.toVector3D();
 
-  QMatrix4x4 m(rotationMatrix(worldRotation) * invORot);
-  m.translate(worldPosition);
+  QMatrix4x4 p;
+  p.translate(worldPosition);
 
-  return m;
+  QMatrix4x4 r(rotationMatrix(worldRotation) * invORot);
+
+  return p * r;
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -65,7 +60,7 @@ void constructOverChildren(const Component* parent, const QMatrix4x4& model,
 {
   VertexData_Wired parent_vtx;
   {
-    parent_vtx.position = positionVector(model, QVector3D(0, 0, 0));
+    parent_vtx.position = positionVector(model);
     parent_vtx.color = QVector3D(0, 0, 0.8f);
   }
   GLushort parent_idx = vts.size();
@@ -76,7 +71,7 @@ void constructOverChildren(const Component* parent, const QMatrix4x4& model,
   {
     auto jt = QSharedPointer<Joint>::create();
     jt->setName(parent->name());
-    jt->setLocalPosition(positionVector(model, QVector3D(0, 0, 0)));
+    jt->setLocalPosition(positionVector(model));
     body->addChildren(jt);
 
     // Map Binding
@@ -93,7 +88,7 @@ void constructOverChildren(const Component* parent, const QMatrix4x4& model,
 
     VertexData_Wired child_vtx;
     {
-      child_vtx.position = positionVector(newModel, QVector3D(0, 0, 0));
+      child_vtx.position = positionVector(newModel);
       child_vtx.color = QVector3D(0.8f, 0.4f, 0);
     }
 
@@ -106,16 +101,16 @@ void constructOverChildren(const Component* parent, const QMatrix4x4& model,
 }
 
 // ------------------------------------------------------------------------------------------------
-void updateOverChildren(const Component* parent, const QMatrix4x4& model, const QMatrix3x3& permute,
+void updateOverChildren(const Component* parent, const QMatrix4x4& model,
   JointRenderer::Vertices& vts, const MTBody::BodyMap& map, int& jointIndex)
 {
   auto jt = map[parent->name()];
 
-  QMatrix3x3 invORot = permute;
+  QMatrix3x3 invORot;
   bool isDriving = isDrivingMT(jt, invORot);
 
-  vts[++jointIndex].position = positionVector(model, QVector3D(0, 0, 0));
-  jt->setLocalPosition(positionVector(model, QVector3D(0, 0, 0)));
+  vts[++jointIndex].position = positionVector(model);
+  jt->setLocalPosition(positionVector(model));
 
   // Update Children
   for (const auto& child : parent->children())
@@ -126,9 +121,9 @@ void updateOverChildren(const Component* parent, const QMatrix4x4& model, const 
     QMatrix4x4 newModel = isDriving ?
       compositeModel(jt->localRotation(), model, invORot, child->localPosition()) :
       model * child->localToParent();
-    vts[++jointIndex].position = positionVector(newModel, QVector3D(0, 0, 0));
+    vts[++jointIndex].position = positionVector(newModel);
 
-    updateOverChildren(child.get(), newModel, invORot, vts, map, jointIndex);
+    updateOverChildren(child.get(), newModel, vts, map, jointIndex);
   }
 }
 
@@ -165,7 +160,7 @@ void MTBody::updatePositions()
 {
   int jtIndex = -1;
 
-  updateOverChildren(m_body.get(), QMatrix4x4(), QMatrix3x3(), m_vertices, m_bodyMap, jtIndex);
+  updateOverChildren(m_body.get(), QMatrix4x4(), m_vertices, m_bodyMap, jtIndex);
 
   // Update Buffers Infos
   Renderable::updateVertices<VertexData_Wired>(m_vertices.data(), m_vertices.size());

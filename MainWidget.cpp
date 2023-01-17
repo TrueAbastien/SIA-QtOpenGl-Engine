@@ -1138,7 +1138,7 @@ void MainWidget::clearScene()
 
     // World Frame
     {
-      scene->addChildren(createComponent<Frame>("World"));
+      //scene->addChildren(createComponent<Frame>("World"));
     }
   }
 
