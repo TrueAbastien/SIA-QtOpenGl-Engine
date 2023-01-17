@@ -13,10 +13,8 @@ public:
   void init() override;
 
   QVector3D originalRotation() const;
-  QVector3D currentRotation() const;
 
 private:
 
   QVector3D m_originalRotation;
-  QVector3D m_currentRotation;
 };
