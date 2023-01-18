@@ -43,14 +43,17 @@ bool isDrivingMT(const Component::Pointer& comp, QMatrix3x3& invORot)
 // ------------------------------------------------------------------------------------------------
 QMatrix4x4 compositeModel(const QVector3D& worldRotation, const QMatrix4x4& model, const QMatrix3x3& invORot, const QVector3D& localPosition)
 {
-  QVector3D worldPosition = model * localPosition;
+  QVector3D worldPosition = model * QVector3D(0, 0, 0);
 
   QMatrix4x4 p;
   p.translate(worldPosition);
 
   QMatrix4x4 r(rotationMatrix(worldRotation) * invORot);
 
-  return p * r;
+  QMatrix4x4 t = p * r;
+  t.translate(localPosition);
+
+  return t;
 }
 
 // ------------------------------------------------------------------------------------------------

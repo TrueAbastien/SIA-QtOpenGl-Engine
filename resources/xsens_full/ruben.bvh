@@ -21,11 +21,11 @@ ROOT PELV
 					CHANNELS 3 Xrotation Yrotation Zrotation
 					JOINT l_toes
 					{
-						OFFSET 0.000004 0.129941 -0.034818
+						OFFSET 0.000004 -0.129941 -0.034818
 						CHANNELS 3 Xrotation Yrotation Zrotation
 						End l_toes_End
 						{
-							OFFSET 0.000000 0.100000 0.000000
+							OFFSET 0.000000 -0.100000 0.000000
 						}
 					}
 				}
@@ -42,7 +42,7 @@ ROOT PELV
 			CHANNELS 3 Xrotation Yrotation Zrotation
 			JOINT LLEGR
 			{
-				OFFSET 0.000000 -0.000000 -0.500000
+				OFFSET 0.000000 0.000000 -0.500000
 				CHANNELS 3 Xrotation Yrotation Zrotation
 				JOINT FOOTR
 				{
@@ -50,11 +50,11 @@ ROOT PELV
 					CHANNELS 3 Xrotation Yrotation Zrotation
 					JOINT r_toes
 					{
-						OFFSET 0.000006 0.129941 -0.034818
+						OFFSET 0.000006 -0.129941 -0.034818
 						CHANNELS 3 Xrotation Yrotation Zrotation
 						End r_toes_End
 						{
-							OFFSET 0.000000 0.100000 -0.000000
+							OFFSET 0.000000 -0.100000 -0.000000
 						}
 					}
 				}
@@ -75,7 +75,7 @@ ROOT PELV
 				CHANNELS 3 Zrotation Yrotation Xrotation
 				JOINT STERN
 				{
-					OFFSET 0.000000 -0.000000 0.104218
+					OFFSET 0.000000 0.000000 0.104218
 					CHANNELS 3 Zrotation Yrotation Xrotation
 					JOINT neck1
 					{
@@ -83,7 +83,7 @@ ROOT PELV
 						CHANNELS 3 Zrotation Yrotation Xrotation
 						JOINT neck2
 						{
-							OFFSET 0.000000 -0.000000 0.057500
+							OFFSET 0.000000 0.000000 0.057500
 							CHANNELS 3 Zrotation Yrotation Xrotation
 							JOINT HEAD
 							{
@@ -91,7 +91,7 @@ ROOT PELV
 								CHANNELS 3 Zrotation Yrotation Xrotation
 								End head_End
 								{
-									OFFSET 0.000000 -0.000000 0.114997
+									OFFSET 0.000000 0.000000 0.114997
 								}
 							}
 						}
@@ -102,15 +102,15 @@ ROOT PELV
 						CHANNELS 3 Zrotation Yrotation Xrotation
 						JOINT UARML
 						{
-							OFFSET 0.178478 -0.009820 0.038507
+							OFFSET 0.178478 0.009820 0.038507
 							CHANNELS 3 Zrotation Yrotation Xrotation
 							JOINT FARML
 							{
-								OFFSET 0.308490 -0.000000 0.000000
+								OFFSET 0.308490 0.000000 0.000000
 								CHANNELS 3 Zrotation Yrotation Xrotation
 								JOINT HANDL
 								{
-									OFFSET 0.303203 -0.000000 0.000000
+									OFFSET 0.303203 0.000000 0.000000
 									CHANNELS 3 Zrotation Yrotation Xrotation
 									End l_hand_End
 									{
@@ -126,7 +126,7 @@ ROOT PELV
 						CHANNELS 3 Zrotation Yrotation Xrotation
 						JOINT UARMR
 						{
-							OFFSET -0.181126 -0.010766 0.022609
+							OFFSET -0.181126 0.010766 0.022609
 							CHANNELS 3 Zrotation Yrotation Xrotation
 							JOINT FARMR
 							{
