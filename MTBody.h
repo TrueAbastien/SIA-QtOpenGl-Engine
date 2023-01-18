@@ -3,7 +3,7 @@
 
 #include "JointRenderer.h"
 
-class MTBody final : public WiredRenderable
+class MTBody final : public BodyBase
 {
 public:
 

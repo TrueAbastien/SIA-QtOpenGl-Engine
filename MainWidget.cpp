@@ -11,6 +11,7 @@
 #include "FileReader.h"
 #include "AxisCorrector.h"
 #include "Frame.h"
+#include "BodyBase.h"
 
 #include <QMouseEvent>
 #include <QVBoxLayout>
@@ -812,7 +813,7 @@ void MainWidget::loadMT()
   // TEMP //
 
   QString name = getFileName(fileName);
-  auto parent = createComponent<AxisCorrector>(name, AxisCorrector::Mode::Y_to_Z);
+  auto parent = createComponent<AxisCorrector>(name, AxisCorrector::Mode::Y_Z);
   parent->addChildren(frame);
 
   internalLog(INFO, name.toStdString() + " successfully loaded !");
@@ -961,38 +962,38 @@ void MainWidget::makeSkin()
     return parent->name();
   };
 
-  // Pick JointRenderer
-  QSharedPointer<JointRenderer> root;
+  // Pick Body
+  Component::Pointer body;
   {
-    const auto& items = find_if<JointRenderer>();
+    const auto& items = find_if<BodyBase>();
     if (items.isEmpty())
     {
-      internalLog(ERROR_, "No BVH found...");
+      internalLog(ERROR_, "No Body found...");
       return;
     }
 
     QString name;
     {
-      // Create JointRenderer List
+      // Create Body List
       QStringList names(0);
-      const auto func = [&](const QSharedPointer<JointRenderer>& jr) -> QString
+      const auto func = [&](const QSharedPointer<BodyBase>& bb) -> QString
       {
-        return naming(jr);
+        return naming(bb);
       };
       std::transform(items.begin(), items.end(), std::back_inserter(names), func);
 
       // Create Dialog
       bool ok;
-      name = QInputDialog::getItem(this, "Select BVH", "BVH", names, 0, false, &ok);
+      name = QInputDialog::getItem(this, "Select Body", "Body", names, 0, false, &ok);
       if (!ok)
       {
         return;
       }
     }
 
-    const auto pred = [&](const QSharedPointer<JointRenderer>& jr) -> bool
+    const auto pred = [&](const QSharedPointer<BodyBase>& bb) -> bool
     {
-      return naming(jr) == name;
+      return naming(bb) == name;
     };
     const auto& item = std::find_if(items.begin(), items.end(), pred);
     if (item == items.end())
@@ -1001,7 +1002,7 @@ void MainWidget::makeSkin()
       return;
     }
 
-    root = *item;
+    body = *item;
   }
 
   // Pick SkinMesh
@@ -1059,7 +1060,7 @@ void MainWidget::makeSkin()
 
     FileReader::WeightParameters params;
     {
-      params.root = root;
+      params.body = body;
       params.skin = skin;
     }
 
@@ -1074,7 +1075,7 @@ void MainWidget::makeSkin()
   {
     auto relation = QSharedPointer<MeshRigRelation>::create();
 
-    const auto data = relation->computeHomeData(root);
+    const auto data = relation->computeHomeData(body);
 
     if (weights != nullptr)
     {
@@ -1270,7 +1271,7 @@ void MainWidget::openBVH(const QString& filePath, const FileReader::BVHParameter
   }
 
   QString name = getFileName(filePath);
-  auto parent = createComponent<AxisCorrector>(name, AxisCorrector::Mode::Y_to_Z);
+  auto parent = createComponent<AxisCorrector>(name, AxisCorrector::Mode::Y_Z);
   parent->addChildren(result);
 
   internalLog(INFO, name.toStdString() + " successfully loaded !");
@@ -1288,7 +1289,7 @@ void MainWidget::openOFF(const QString& filePath, const FileReader::OFFParameter
   }
 
   QString name = getFileName(filePath);
-  auto parent = createComponent<AxisCorrector>(name, AxisCorrector::Mode::Y_to_Z);
+  auto parent = createComponent<AxisCorrector>(name, AxisCorrector::Mode::Y_Z);
   parent->addChildren(result);
 
   internalLog(INFO, name.toStdString() + " successfully loaded !");

@@ -1,6 +1,7 @@
 #include "FileReader.h"
 
 #include "AnimatorPlug.h"
+#include "MTBody.h"
 
 #include <QRandomGenerator>
 #include <QFileInfo>
@@ -496,7 +497,7 @@ FileReader::OFFResult FileReader::readOFF(const QString& filePath, const OFFPara
 // ------------------------------------------------------------------------------------------------
 FileReader::WeightResult FileReader::readWeight(const QString& filePath, const WeightParameters& params)
 {
-  if (params.root.isNull() || params.skin.isNull())
+  if (params.body.isNull() || params.skin.isNull())
   {
     return nullptr;
   }
@@ -550,7 +551,7 @@ FileReader::WeightResult FileReader::readWeight(const QString& filePath, const W
   };
   const auto findJoints = [&]()
   {
-    std::vector<Component::Pointer> nextJoints = {params.root}, curr(0);
+    std::vector<Component::Pointer> nextJoints = {params.body}, curr(0);
     int iter = 0;
 
     // Iterative Search
@@ -568,6 +569,9 @@ FileReader::WeightResult FileReader::readWeight(const QString& filePath, const W
             nextJoints.push_back(child);
           }
         }
+
+        // Skip MTBody (exception unhandled)
+        if (!jt.dynamicCast<MTBody>().isNull()) continue;
 
         jointMap.insert(jt->name(), jt);
       }

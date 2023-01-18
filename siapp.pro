@@ -42,6 +42,7 @@ HEADERS += \
     AnimatorPlug.h \
     AnimatorPlugBase.h \
     AxisCorrector.h \
+    BodyBase.h \
     Box.h \
     ColoredRenderable.h \
     Component.h \

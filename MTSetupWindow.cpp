@@ -90,10 +90,16 @@ void MTSetupWindow::setBody(const BodyReference& body)
 
   m_body = BodyTracked::create(body);
 
-  emit bodyChanged(body->parent()->name());
+  const auto name = body->parent()->name();
+
+  auto parent = QSharedPointer<AxisCorrector>::create(AxisCorrector::Mode::None);
+  parent->setName(name);
+  parent->addChildren(m_body);
+
+  emit bodyChanged(name);
 
   // Add new Body & Remove JoitnRenderer
-  body->parent()->parent()->addChildren(m_body);
+  body->parent()->parent()->addChildren(parent);
   body->parent()->detachFromParent();
 }
 

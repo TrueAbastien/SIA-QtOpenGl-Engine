@@ -27,7 +27,7 @@ public:
   using WeightResult = QSharedPointer<MeshRigRelation::VerticesWeight>;
   struct WeightParameters
   {
-    BVHResult root;
+    Component::Pointer body;
     OFFResult skin;
   };
 

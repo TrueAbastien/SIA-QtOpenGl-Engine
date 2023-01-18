@@ -4,7 +4,7 @@
 AxisCorrector::AxisCorrector(Mode mode)
   : m_mode(mode)
 {
-  if (mode == Mode::Y_to_Z || mode == Mode::Z_to_Y)
+  if (mode == Mode::Y_Z)
   {
     m_localToParent = QMatrix4x4(
       1, 0, 0, 0,
@@ -14,7 +14,10 @@ AxisCorrector::AxisCorrector(Mode mode)
     );
   }
 
-  //
+  else
+  {
+    m_localToParent = QMatrix4x4();
+  }
 }
 
 // ------------------------------------------------------------------------------------------------

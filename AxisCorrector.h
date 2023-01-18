@@ -9,8 +9,8 @@ public:
 
   enum Mode
   {
-    Y_to_Z = 0,
-    Z_to_Y
+    None = 0,
+    Y_Z
   };
 
 public:

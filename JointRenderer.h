@@ -2,10 +2,10 @@
 #pragma once
 
 #include "Joint.h"
-#include "WiredRenderable.h"
+#include "BodyBase.h"
 
 
-class JointRenderer final : public WiredRenderable
+class JointRenderer final : public BodyBase
 {
 public:
 
