@@ -35,7 +35,7 @@ public:
 public:
 
   // Step 1
-  JointMap computeHomeData(const QSharedPointer<JointRenderer>& body) const;
+  JointMap computeHomeData(const Component::Pointer& body) const;
 
   // Step 2
   void setWeightData(const VerticesWeight& weights);

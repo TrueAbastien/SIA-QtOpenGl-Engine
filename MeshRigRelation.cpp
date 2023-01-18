@@ -52,7 +52,7 @@ void computeJointNode(MeshRigRelation::JointMap& data, const Component::Pointer&
 }
 
 // ------------------------------------------------------------------------------------------------
-MeshRigRelation::JointMap MeshRigRelation::computeHomeData(const QSharedPointer<JointRenderer>& body) const
+MeshRigRelation::JointMap MeshRigRelation::computeHomeData(const Component::Pointer& body) const
 {
   if (body.isNull())
   {
