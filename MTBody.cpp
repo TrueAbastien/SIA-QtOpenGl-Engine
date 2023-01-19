@@ -168,6 +168,33 @@ void MTBody::update(UpdateInfo infos)
 }
 
 // ------------------------------------------------------------------------------------------------
+MTBody::Hierarchy::Pointer MTBody::computeHierarchy() const
+{
+  if (m_body.isNull())
+  {
+    return nullptr;
+  }
+
+  auto result = m_body->computeHierarchy();
+
+  // Convert for MT Body
+  Hierarchy::Node::Vector next = { result->root()};
+  while (!next.isEmpty())
+  {
+    auto curr = std::move(next);
+    next.clear();
+
+    for (const auto& e : curr)
+    {
+      e->joint = m_bodyMap[e->joint->name()].get();
+      next.append(e->children);
+    }
+  }
+
+  return result;
+}
+
+// ------------------------------------------------------------------------------------------------
 void MTBody::updatePositions()
 {
   int jtIndex = -1;

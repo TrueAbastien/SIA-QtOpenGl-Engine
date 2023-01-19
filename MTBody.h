@@ -21,6 +21,8 @@ public:
 
   void init() override;
   void update(UpdateInfo infos) override;
+  
+  Hierarchy::Pointer computeHierarchy() const override;
 
 private:
 

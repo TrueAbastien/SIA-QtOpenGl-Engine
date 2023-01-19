@@ -19,6 +19,8 @@ public:
 
   void addChildren(const Pointer& child) override;
 
+  Hierarchy::Pointer computeHierarchy() const override;
+
 protected:
 
   void listenChild(Notification notif) override;

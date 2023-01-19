@@ -81,6 +81,31 @@ void JointRenderer::addChildren(const Pointer& child)
 }
 
 // ------------------------------------------------------------------------------------------------
+void iterateHierarchy(
+  const Component* joint,
+  const JointRenderer::Hierarchy::Node::Pointer& parent,
+  JointRenderer::Hierarchy::Pointer& hierarchy)
+{
+  auto node = hierarchy->createNode(joint, parent);
+
+  for (const auto& child : joint->children())
+  {
+    if (!child.dynamicCast<Joint>().isNull())
+    {
+      iterateHierarchy(child.get(), node, hierarchy);
+    }
+  }
+}
+JointRenderer::Hierarchy::Pointer JointRenderer::computeHierarchy() const
+{
+  auto result = Hierarchy::Pointer::create();
+
+  iterateHierarchy(this, nullptr, result);
+
+  return result;
+}
+
+// ------------------------------------------------------------------------------------------------
 void JointRenderer::listenChild(Notification notif)
 {
   if (notif == Notification::CHILD_ADDED)
