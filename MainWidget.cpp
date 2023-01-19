@@ -963,7 +963,7 @@ void MainWidget::makeSkin()
   };
 
   // Pick Body
-  Component::Pointer body;
+  QSharedPointer<BodyBase> body;
   {
     const auto& items = find_if<BodyBase>();
     if (items.isEmpty())

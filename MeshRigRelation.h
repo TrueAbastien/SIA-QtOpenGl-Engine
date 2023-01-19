@@ -17,11 +17,11 @@ public:
     QVector3D worldOrigin;
     QVector3D color;
   };
-  using JointMap = QMap<Component::Pointer, JointInfo>;
+  using JointMap = QMap<BodyBase::Hierarchy::Node::Pointer, JointInfo>;
 
   struct WeightData
   {
-    Component::Pointer joint;
+    BodyBase::Hierarchy::Node::Pointer node;
     float weight;
     QVector3D localPosition;
   };
@@ -35,7 +35,7 @@ public:
 public:
 
   // Step 1
-  JointMap computeHomeData(const Component::Pointer& body) const;
+  JointMap computeHomeData(const QSharedPointer<BodyBase>& body) const;
 
   // Step 2
   void setWeightData(const VerticesWeight& weights);

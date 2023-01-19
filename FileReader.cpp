@@ -509,10 +509,11 @@ FileReader::WeightResult FileReader::readWeight(const QString& filePath, const W
   }
 
   // Data
-  QMap<QString, Component::Pointer> jointMap;
+  BodyBase::Hierarchy::Pointer hierarchy = params.body->hierarchy();
+  QMap<QString, BodyBase::Hierarchy::Node::Pointer> nodeMap;
   MeshRigRelation::VerticesWeight result(0);
-  QVector<Component::Pointer> joints(0);
-  int nVertices, nJoints;
+  BodyBase::Hierarchy::Node::Vector nodes(0);
+  int nVertices, nNodes;
 
   // Utilities
   const auto lassert = [](bool cond)
@@ -551,7 +552,7 @@ FileReader::WeightResult FileReader::readWeight(const QString& filePath, const W
   };
   const auto findJoints = [&]()
   {
-    std::vector<Component::Pointer> nextJoints = {params.body}, curr(0);
+    std::vector<BodyBase::Hierarchy::Node::Pointer> nextJoints = {hierarchy->root()}, curr(0);
     int iter = 0;
 
     // Iterative Search
@@ -560,35 +561,29 @@ FileReader::WeightResult FileReader::readWeight(const QString& filePath, const W
       curr = std::move(nextJoints);
       nextJoints.clear();
 
-      for (const auto& jt : curr)
+      for (const auto& node : curr)
       {
-        for (const auto& child : jt->children())
+        for (const auto& child : node->children)
         {
-          if (!child.dynamicCast<Joint>().isNull())
-          {
-            nextJoints.push_back(child);
-          }
+          nextJoints.push_back(child);
         }
 
-        // Skip MTBody (exception unhandled)
-        if (!jt.dynamicCast<MTBody>().isNull()) continue;
-
-        jointMap.insert(jt->name(), jt);
+        nodeMap.insert(node->joint->name(), node);
       }
     }
 
-    nJoints = (int) jointMap.size();
+    nNodes = (int)nodeMap.size();
   };
 
   // Read
   const auto readJoints = [&]()
   {
     // Read Joint Names
-    QVector<QString> names(nJoints);
+    QVector<QString> names(nNodes);
     {
       lassert(upper(skip()) == "ID");
 
-      for (int ii = 0; ii < nJoints; ++ii)
+      for (int ii = 0; ii < nNodes; ++ii)
       {
         std::string name; next(name);
         names[ii] = QString::fromStdString(name);
@@ -597,17 +592,17 @@ FileReader::WeightResult FileReader::readWeight(const QString& filePath, const W
 
     // Organize Joint Order
     {
-      QVector<Component::Pointer> orderedJoints(nJoints);
+      QVector<BodyBase::Hierarchy::Node::Pointer> orderedNodes(nNodes);
 
-      for (int ii = 0; ii < nJoints; ++ii)
+      for (int ii = 0; ii < nNodes; ++ii)
       {
         QString name = names[ii];
-        lassert(jointMap.contains(name));
+        lassert(nodeMap.contains(name));
 
-        orderedJoints[ii] = jointMap.value(name);
+        orderedNodes[ii] = nodeMap.value(name);
       }
 
-      joints = std::move(orderedJoints);
+      nodes = std::move(orderedNodes);
     }
   };
   const auto readWeights = [&]()
@@ -623,14 +618,14 @@ FileReader::WeightResult FileReader::readWeight(const QString& filePath, const W
       auto& weights = result[index];
 
       // Weights
-      for (int jj = 0; jj < nJoints; ++jj)
+      for (int jj = 0; jj < nNodes; ++jj)
       {
         float weight; next(weight);
         if (weight < eps) continue;
 
         MeshRigRelation::WeightData data;
         {
-          data.joint = joints[jj];
+          data.node = nodes[jj];
           data.weight = weight;
         }
         weights.push_back(data);

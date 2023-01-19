@@ -155,6 +155,8 @@ void MTBody::init()
   WiredRenderable::initRenderable(
     m_vertices.data(), m_vertices.size(),
     m_indices.data(), m_indices.size());
+
+  resetHierarchy();
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -178,7 +180,7 @@ MTBody::Hierarchy::Pointer MTBody::computeHierarchy() const
   auto result = m_body->computeHierarchy();
 
   // Convert for MT Body
-  Hierarchy::Node::Vector next = { result->root()};
+  Hierarchy::Node::Vector next = { result->root() };
   while (!next.isEmpty())
   {
     auto curr = std::move(next);
