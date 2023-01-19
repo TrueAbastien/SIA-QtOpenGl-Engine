@@ -41,19 +41,29 @@ bool isDrivingMT(const Component::Pointer& comp, QMatrix3x3& invORot)
 }
 
 // ------------------------------------------------------------------------------------------------
-QMatrix4x4 compositeModel(const QVector3D& worldRotation, const QMatrix4x4& model, const QMatrix3x3& invORot, const QVector3D& localPosition)
+void computeJoint(
+  const Component::Pointer& joint,
+  const QVector3D& worldRotation,
+  const QMatrix4x4& model,
+  const QMatrix3x3& invORot,
+  const QVector3D& localPosition)
 {
   QVector3D worldPosition = model * QVector3D(0, 0, 0);
+
+  QMatrix4x4 r(rotationMatrix(worldRotation) * invORot);
 
   QMatrix4x4 p;
   p.translate(worldPosition);
 
-  QMatrix4x4 r(rotationMatrix(worldRotation) * invORot);
-
   QMatrix4x4 t = p * r;
   t.translate(localPosition);
 
-  return t;
+  const Component::MatrixConstruct method = [=](QVector3D, QVector3D)
+  {
+    return t;
+  };
+
+  joint->setMatrixConstruct(method);
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -120,9 +130,16 @@ void updateOverChildren(const Component* parent, const QMatrix4x4& model,
     // Ensure Child is joint
     if (child.isNull() || child.dynamicCast<Joint>().isNull()) continue;
 
-    QMatrix4x4 newModel = isDriving ?
-      compositeModel(jt->localRotation(), model, invORot, child->localPosition()) :
-      model * child->localToParent();
+    QMatrix4x4 newModel;
+    if (isDriving)
+    {
+      computeJoint(jt, jt->localRotation(), model, invORot, child->localPosition());
+      newModel = jt->localToParent();
+    }
+    else
+    {
+      newModel = model * child->localToParent();
+    }
     vts[++jointIndex].position = positionVector(newModel);
 
     updateOverChildren(child.get(), newModel, vts, map, jointIndex);

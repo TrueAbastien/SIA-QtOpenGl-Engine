@@ -184,6 +184,8 @@ void Component::copy(const Pointer& pointer)
 void Component::setMatrixConstruct(const MatrixConstruct& method)
 {
   m_matrixMethod = method;
+
+  setLocalToParent(m_localPosition, m_localRotation);
 }
 
 // ------------------------------------------------------------------------------------------------
