@@ -12,6 +12,7 @@ SOURCES += \
     AnimationController.cpp \
     AnimatorPlug.cpp \
     AxisCorrector.cpp \
+    BodyBase.cpp \
     Box.cpp \
     ColoredRenderable.cpp \
     Component.cpp \
