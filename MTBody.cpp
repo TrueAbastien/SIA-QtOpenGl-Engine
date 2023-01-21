@@ -197,6 +197,12 @@ MTBody::Hierarchy::Pointer MTBody::computeHierarchy() const
 }
 
 // ------------------------------------------------------------------------------------------------
+MTBody::Hierarchy::Pointer MTBody::originalHierarchy()
+{
+  return m_body->hierarchy();
+}
+
+// ------------------------------------------------------------------------------------------------
 void MTBody::updatePositions()
 {
   int jtIndex = -1;

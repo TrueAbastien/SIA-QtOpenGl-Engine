@@ -23,6 +23,7 @@ public:
   void update(UpdateInfo infos) override;
   
   Hierarchy::Pointer computeHierarchy() const override;
+  Hierarchy::Pointer originalHierarchy();
 
 private:
 

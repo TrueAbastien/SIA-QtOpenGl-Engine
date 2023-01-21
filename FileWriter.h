@@ -2,6 +2,7 @@
 #pragma once
 
 #include "SkinMesh.h"
+#include "MTBody.h"
 
 class FileWriter final
 {
@@ -15,4 +16,8 @@ public:
   };
 
   static bool writeOFF(const QString& filePath, const OFFInput& skin, const OFFParameters& params);
+
+  using MTInput = QSharedPointer<MTBody>;
+
+  static bool writeMTBody(const QString& filePath, const MTInput& body);
 };
