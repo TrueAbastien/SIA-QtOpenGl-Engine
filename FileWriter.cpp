@@ -141,31 +141,12 @@ bool FileWriter::writeMTBody(const QString& filePath, const MTInput& body, const
   // Convert
   const auto trToRot = [](const QMatrix3x3& r) -> QVector3D
   {
-    QVector3D v;
-
-    if (r(2, 0) < 1.0f)
-    {
-      if (r(2, 0) > -1.0f)
-      {
-        v[1] = qAsin(-r(2, 0));
-        v[2] = qAtan2(r(1, 0), r(0, 0));
-        v[0] = qAtan2(r(2, 1), r(2, 2));
-      }
-      else
-      {
-        v[1] = M_PI / 2.0f;
-        v[2] = -qAtan2(-r(1, 2), r(1, 1));
-        v[0] = 0;
-      }
-    }
-    else
-    {
-      v[1] = -M_PI / 2.0f;
-      v[2] = qAtan2(-r(1, 2), r(1, 1));
-      v[0] = 0;
-    }
-
-    return v * RAD2DEG;
+    float t = QVector2D(r(2, 1), r(2, 2)).length();
+    return QVector3D(
+      qAtan2(r(2, 1), r(2, 2)),
+      qAtan2(-r(2, 0), t),
+      qAtan2(r(1, 0), r(0, 0))
+    ) * RAD2DEG;
   };
   const auto rotToTr = [](const QVector3D& r) -> QMatrix3x3
   {
@@ -211,7 +192,7 @@ bool FileWriter::writeMTBody(const QString& filePath, const MTInput& body, const
     if (!isEnd)
     {
       tabs();
-      append("CHANNELS 3 Zrotation Yrotation Xrotation", true);
+      append("CHANNELS 3 Xrotation Yrotation Zrotation", true);
     }
 
     // Animation

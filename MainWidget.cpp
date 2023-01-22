@@ -112,6 +112,11 @@ QMenuBar* MainWidget::makeMenu()
       menu->addAction(action);
     }
 
+    // Separator
+    {
+      menu->addSeparator();
+    }
+
     // Save MT Action
     {
       QAction* action = new QAction("Save MT Body");
