@@ -141,12 +141,31 @@ bool FileWriter::writeMTBody(const QString& filePath, const MTInput& body, const
   // Convert
   const auto trToRot = [](const QMatrix3x3& r) -> QVector3D
   {
-    float t = QVector2D(r(2, 1), r(2, 2)).length();
-    return QVector3D(
-      qAtan2(r(2, 1), r(2, 2)),
-      qAtan2(-r(2, 0), t),
-      qAtan2(r(1, 0), r(0, 0))
-    ) * RAD2DEG;
+    QVector3D v;
+
+    if (r(2, 0) < 1.0f)
+    {
+      if (r(2, 0) > -1.0f)
+      {
+        v[1] = qAsin(-r(2, 0));
+        v[2] = qAtan2(r(1, 0), r(0, 0));
+        v[0] = qAtan2(r(2, 1), r(2, 2));
+      }
+      else
+      {
+        v[1] = M_PI / 2.0f;
+        v[2] = -qAtan2(-r(1, 2), r(1, 1));
+        v[0] = 0;
+      }
+    }
+    else
+    {
+      v[1] = -M_PI / 2.0f;
+      v[2] = qAtan2(-r(1, 2), r(1, 1));
+      v[0] = 0;
+    }
+
+    return v * RAD2DEG;
   };
   const auto rotToTr = [](const QVector3D& r) -> QMatrix3x3
   {
@@ -207,13 +226,25 @@ bool FileWriter::writeMTBody(const QString& filePath, const MTInput& body, const
       }
     }
 
-    if (animator.isNull()) return parentVec;
+    if (isEnd) return parentVec;
+
+    // Not Animated
+    std::vector<QVector3D> animation(0);
+    if (animator.isNull())
+    {
+      for (size_t ii = 0; ii < parentVec.size(); ++ii)
+      {
+        animation.push_back(QVector3D(0, 0, 0));
+      }
+
+      animations.push_back(animation);
+      return parentVec;
+    }
 
     // Transform Vec
     TransformVec result(0);
     const auto keyframes = animator->animation()->getProperty(0).keyFrames;
     bool isFirst = parentVec.size() != keyframes.size();
-    std::vector<QVector3D> animation(0);
     for (size_t ii = 0; ii < keyframes.size(); ++ii)
     {
       auto localRot = rotToTr(keyframes[ii].value) *
