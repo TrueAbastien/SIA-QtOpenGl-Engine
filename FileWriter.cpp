@@ -247,11 +247,8 @@ bool FileWriter::writeMTBody(const QString& filePath, const MTInput& body, const
     bool isFirst = parentVec.size() != keyframes.size();
     for (size_t ii = 0; ii < keyframes.size(); ++ii)
     {
-      auto v1 = animator->originalRotation();
-      auto v2 = trToRot(rotToTr(v1)); // DEBUG
-
-      auto localRot = rotToTr(keyframes[ii].value) *
-        rotToTr(animator->originalRotation()).transposed();
+      auto localRot = rotToTr(keyframes[ii].value)
+        * rotToTr(animator->originalRotation()).transposed();
 
       result.push_back(localRot);
 
