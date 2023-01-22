@@ -16,6 +16,7 @@ public:
   struct BVHParameters
   {
     float scale;
+    bool yzInverted;
   };
 
   using OFFResult = QSharedPointer<SkinMesh>;

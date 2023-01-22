@@ -761,9 +761,16 @@ void MainWidget::loadBVH()
     return;
   }
 
+  QString mode = QInputDialog::getItem(this, "Inverted YZ", "Mode", QStringList() << "None" << "Inverted", 0, false, &ok);
+  if (!ok)
+  {
+    return;
+  }
+
   FileReader::BVHParameters params;
   {
     params.scale = 1e-2f * scale;
+    params.yzInverted = (mode == "Inverted");
   }
 
   openBVH(fileName, params);
@@ -1324,6 +1331,7 @@ void MainWidget::openFile(const QString& filePath)
     FileReader::BVHParameters params;
     {
       params.scale = 1.0f;
+      params.yzInverted = false;
     }
 
     openBVH(filePath, params);
@@ -1353,7 +1361,8 @@ void MainWidget::openBVH(const QString& filePath, const FileReader::BVHParameter
   }
 
   QString name = getFileName(filePath);
-  auto parent = createComponent<AxisCorrector>(name, AxisCorrector::Mode::Y_Z);
+  auto parent = createComponent<AxisCorrector>(name,
+    params.yzInverted ? AxisCorrector::Mode::Y_Z : AxisCorrector::Mode::None);
   parent->addChildren(result);
 
   internalLog(INFO, name.toStdString() + " successfully loaded !");
