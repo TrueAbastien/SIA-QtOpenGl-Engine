@@ -203,6 +203,12 @@ MTBody::Hierarchy::Pointer MTBody::originalHierarchy()
 }
 
 // ------------------------------------------------------------------------------------------------
+MTBody::BodyMap MTBody::hierarchyMap() const
+{
+  return m_bodyMap;
+}
+
+// ------------------------------------------------------------------------------------------------
 void MTBody::updatePositions()
 {
   int jtIndex = -1;

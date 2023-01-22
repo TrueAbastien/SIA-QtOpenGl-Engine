@@ -25,6 +25,8 @@ public:
   Hierarchy::Pointer computeHierarchy() const override;
   Hierarchy::Pointer originalHierarchy();
 
+  BodyMap hierarchyMap() const;
+
 private:
 
   void updatePositions();

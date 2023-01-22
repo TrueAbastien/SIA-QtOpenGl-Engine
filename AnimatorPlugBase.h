@@ -17,6 +17,8 @@ public:
 
   void addKeyFrame(int typeIndex, float time, T value);
 
+  QSharedPointer<Animation<T>> animation() const;
+
 protected:
 
   QSharedPointer<Animation<T>> m_animation;
@@ -39,4 +41,11 @@ void AnimatorPlugBase<T>::addKeyFrame(int typeIndex, float time, T value)
     kf.value = value;
   }
   m_animation->addKeyFrame(typeIndex, kf);
+}
+
+// ------------------------------------------------------------------------------------------------
+template<typename T>
+inline QSharedPointer<Animation<T>> AnimatorPlugBase<T>::animation() const
+{
+  return m_animation;
 }

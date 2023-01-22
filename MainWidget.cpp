@@ -12,6 +12,7 @@
 #include "AxisCorrector.h"
 #include "Frame.h"
 #include "BodyBase.h"
+#include "FileWriter.h"
 
 #include <QMouseEvent>
 #include <QVBoxLayout>
@@ -108,6 +109,13 @@ QMenuBar* MainWidget::makeMenu()
     {
       QAction* action = new QAction("Load MT");
       connect(action, &QAction::triggered, this, &MainWidget::loadMT);
+      menu->addAction(action);
+    }
+
+    // Save MT Action
+    {
+      QAction* action = new QAction("Save MT Body");
+      connect(action, &QAction::triggered, this, &MainWidget::saveMTBody);
       menu->addAction(action);
     }
 
@@ -819,6 +827,80 @@ void MainWidget::loadMT()
   internalLog(INFO, name.toStdString() + " successfully loaded !");
 
   scene->addChildren(parent);
+}
+
+// ------------------------------------------------------------------------------------------------
+void MainWidget::saveMTBody()
+{
+  const auto naming = [](const Component::Pointer& ptr) -> QString
+  {
+    if (ptr.isNull()) return "";
+    const Component* parent = ptr->parent();
+    if (parent == nullptr) return ptr->name();
+    return parent->name();
+  };
+
+  // Pick Body
+  QSharedPointer<MTBody> body;
+  {
+    const auto& items = find_if<MTBody>();
+    if (items.isEmpty())
+    {
+      internalLog(ERROR_, "No Body found...");
+      return;
+    }
+
+    QString name;
+    {
+      // Create Body List
+      QStringList names(0);
+      const auto func = [&](const QSharedPointer<MTBody>& sm) -> QString
+      {
+        return naming(sm);
+      };
+      std::transform(items.begin(), items.end(), std::back_inserter(names), func);
+
+      // Create Dialog
+      bool ok;
+      name = QInputDialog::getItem(this, "Select Body", "Body", names, 0, false, &ok);
+      if (!ok)
+      {
+        return;
+      }
+    }
+
+    const auto pred = [&](const QSharedPointer<MTBody>& sm) -> bool
+    {
+      return naming(sm) == name;
+    };
+    const auto& item = std::find_if(items.begin(), items.end(), pred);
+    if (item == items.end())
+    {
+      internalLog(ERROR_, "Skin couldn't be found...");
+      return;
+    }
+
+    body = *item;
+  }
+
+  QString fileName = QFileDialog::getSaveFileName(this, tr("Save MTBody"), "", tr("MTBody Files (*.bvh)"));
+  if (fileName.isEmpty())
+  {
+    return;
+  }
+
+  FileWriter::MTParameters params;
+  {
+    params.sampleRate = 60;
+  }
+
+  if (!FileWriter::writeMTBody(fileName, body, params))
+  {
+    internalLog(ERROR_, body->name().toStdString() + " couldn't be saved...");
+    return;
+  }
+
+  internalLog(INFO, body->name().toStdString() + " successfully saved !");
 }
 
 // ------------------------------------------------------------------------------------------------
