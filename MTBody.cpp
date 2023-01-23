@@ -108,14 +108,22 @@ void constructOverChildren(const Component* parent, const QMatrix4x4& model,
 // ------------------------------------------------------------------------------------------------
 void updateOverChildren(const Component* parent, const QMatrix4x4& model,
                         JointRenderer::Vertices& vts, const MTBody::BodyMap& map,
-                        int& jointIndex, const QVector3D& offset)
+                        int& jointIndex, const QVector3D* offset)
 {
   auto jt = map[parent->name()];
+
+  const Component::MatrixConstruct method = [=](QVector3D, QVector3D)
+  {
+    QMatrix4x4 p = {};
+    p.translate(*offset);
+    return p * model;
+  };
+  jt->setMatrixConstruct(method);
 
   QMatrix3x3 invORot;
   bool isDriving = isDrivingMT(jt, invORot);
 
-  vts[++jointIndex].position = positionVector(model) + offset;
+  vts[++jointIndex].position = positionVector(model) + *offset;
 
   // Update Children
   for (const auto& child : parent->children())
@@ -126,13 +134,7 @@ void updateOverChildren(const Component* parent, const QMatrix4x4& model,
     QMatrix4x4 newModel = isDriving ?
       computeJoint(jt->localRotation(), model, invORot, child->localPosition()) :
       model * child->localToParent();
-    vts[++jointIndex].position = positionVector(newModel) + offset;
-
-    const Component::MatrixConstruct method = [=](QVector3D, QVector3D)
-    {
-      return newModel;
-    };
-    jt->setMatrixConstruct(method);
+    vts[++jointIndex].position = positionVector(newModel) + *offset;
 
     updateOverChildren(child.get(), newModel, vts, map, jointIndex, offset);
   }
@@ -268,7 +270,7 @@ void MTBody::updatePositions()
   Hierarchy::Node::Pointer c1, c2;
   QVector3D start = computeGlobalOffset(hierarchy()->root(), c1);
 
-  updateOverChildren(m_body.get(), QMatrix4x4(), m_vertices, m_bodyMap, jtIndex, m_offset);
+  updateOverChildren(m_body.get(), QMatrix4x4(), m_vertices, m_bodyMap, jtIndex, &m_offset);
 
   QVector3D end = computeGlobalOffset(hierarchy()->root(), c2);
   if (c1 == c2) m_offset += (start - end);
