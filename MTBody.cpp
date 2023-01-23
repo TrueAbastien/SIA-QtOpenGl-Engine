@@ -77,7 +77,6 @@ void constructOverChildren(const Component* parent, const QMatrix4x4& model,
   {
     auto jt = QSharedPointer<Joint>::create();
     jt->setName(parent->name());
-    jt->setLocalPosition(positionVector(model));
     body->addChildren(jt);
 
     // Map Binding
@@ -108,15 +107,15 @@ void constructOverChildren(const Component* parent, const QMatrix4x4& model,
 
 // ------------------------------------------------------------------------------------------------
 void updateOverChildren(const Component* parent, const QMatrix4x4& model,
-  JointRenderer::Vertices& vts, const MTBody::BodyMap& map, int& jointIndex)
+                        JointRenderer::Vertices& vts, const MTBody::BodyMap& map,
+                        int& jointIndex, const QVector3D& offset)
 {
   auto jt = map[parent->name()];
 
   QMatrix3x3 invORot;
   bool isDriving = isDrivingMT(jt, invORot);
 
-  vts[++jointIndex].position = positionVector(model);
-  jt->setLocalPosition(positionVector(model));
+  vts[++jointIndex].position = positionVector(model) + offset;
 
   // Update Children
   for (const auto& child : parent->children())
@@ -127,7 +126,7 @@ void updateOverChildren(const Component* parent, const QMatrix4x4& model,
     QMatrix4x4 newModel = isDriving ?
       computeJoint(jt->localRotation(), model, invORot, child->localPosition()) :
       model * child->localToParent();
-    vts[++jointIndex].position = positionVector(newModel);
+    vts[++jointIndex].position = positionVector(newModel) + offset;
 
     const Component::MatrixConstruct method = [=](QVector3D, QVector3D)
     {
@@ -135,8 +134,56 @@ void updateOverChildren(const Component* parent, const QMatrix4x4& model,
     };
     jt->setMatrixConstruct(method);
 
-    updateOverChildren(child.get(), newModel, vts, map, jointIndex);
+    updateOverChildren(child.get(), newModel, vts, map, jointIndex, offset);
   }
+}
+
+// ------------------------------------------------------------------------------------------------
+void iterateFindControl(const MTBody::Hierarchy::Node::Pointer& parent,
+                        MTBody::Hierarchy::Node::Pointer& result,
+                        float& minAcc)
+{
+  static const QStringList __controlNames = {"FOOTL", "FOOTR"};
+  const auto isControl = [](const MTBody::Hierarchy::Node::Pointer& node) -> bool
+  {
+    return __controlNames.contains(node->joint->name());
+  };
+
+  const auto getAcc = [](const MTBody::Hierarchy::Node::Pointer& node) -> float
+  {
+    return node->joint->localPosition().length();
+  };
+
+  // Verify Parent
+  if (isControl(parent))
+  {
+    float acc = getAcc(parent);
+    if (acc < minAcc)
+    {
+      minAcc = acc;
+      result = parent;
+    }
+  }
+
+  // Iterate Children
+  for (const auto& child : parent->children)
+  {
+    iterateFindControl(child, result, minAcc);
+  }
+}
+
+// ------------------------------------------------------------------------------------------------
+QVector3D computeGlobalOffset(const MTBody::Hierarchy::Node::Pointer& root, MTBody::Hierarchy::Node::Pointer& control)
+{
+  float minAcc = FLT_MAX;
+  iterateFindControl(root, control, minAcc);
+
+  if (control.isNull())
+  {
+    return QVector3D(0, 0, 0);
+  }
+
+  return control->joint->localToParent().column(3).toVector3D();
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -163,6 +210,11 @@ void MTBody::init()
 void MTBody::update(UpdateInfo infos)
 {
   WiredRenderable::update(infos);
+
+  if (infos.animationTime < 1.0f)
+  {
+    m_offset = QVector3D(0, 0, 0);
+  }
 
   updatePositions();
 
@@ -213,7 +265,13 @@ void MTBody::updatePositions()
 {
   int jtIndex = -1;
 
-  updateOverChildren(m_body.get(), QMatrix4x4(), m_vertices, m_bodyMap, jtIndex);
+  Hierarchy::Node::Pointer c1, c2;
+  QVector3D start = computeGlobalOffset(hierarchy()->root(), c1);
+
+  updateOverChildren(m_body.get(), QMatrix4x4(), m_vertices, m_bodyMap, jtIndex, m_offset);
+
+  QVector3D end = computeGlobalOffset(hierarchy()->root(), c2);
+  if (c1 == c2) m_offset += (start - end);
 
   // Update Buffers Infos
   Renderable::updateVertices<VertexData_Wired>(m_vertices.data(), m_vertices.size());

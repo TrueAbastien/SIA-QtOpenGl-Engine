@@ -38,4 +38,6 @@ private:
 
   Vertices m_vertices;
   Indices m_indices;
+
+  QVector3D m_offset;
 };

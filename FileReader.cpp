@@ -737,10 +737,20 @@ FileReader::MTResult FileReader::readMT(const QString& filePath, const MTParamet
     int it = 0;
     while (verifyPacket())
     {
-      // Skip All Acc.
+      // Skip Acc.
       {
         float _;
-        for (int a = 0; a < 6; ++a) next(_);
+        for (int a = 0; a < 3; ++a) next(_);
+      }
+
+      // Read Free Acc.
+      QVector3D acc;
+      {
+        float a, b, c;
+        next(a);
+        next(b);
+        next(c);
+        acc = {a,b,c};
       }
 
       // Read Quaternion
@@ -757,6 +767,7 @@ FileReader::MTResult FileReader::readMT(const QString& filePath, const MTParamet
       // Add Keyframes
       float time = dt * (++it);
       result->addKeyFrame(0, time, rot);
+      result->addKeyFrame(1, time, acc);
     }
 
     // Setup Parenting

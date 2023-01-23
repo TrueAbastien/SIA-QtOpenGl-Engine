@@ -8,15 +8,31 @@ MTAnimatorPlug::MTAnimatorPlug()
 {
   m_animation = QSharedPointer<MTAnimation>::create();
 
-  MTAnimation::Property prop;
+  // Rotation
   {
-    prop.setter = [&](QVector3D value)
+    MTAnimation::Property prop;
     {
-      m_parent->setLocalRotation(value);
-    };
-    prop.keyFrames = {};
+      prop.setter = [&](QVector3D value)
+      {
+        m_parent->setLocalRotation(value);
+      };
+      prop.keyFrames = {};
+    }
+    m_animation->addProperty(prop);
   }
-  m_animation->addProperty(prop);
+
+  // Position
+  {
+    MTAnimation::Property prop;
+    {
+      prop.setter = [&](QVector3D value)
+      {
+        m_parent->setLocalPosition(value);
+      };
+      prop.keyFrames = {};
+    }
+    m_animation->addProperty(prop);
+  }
 }
 
 // ------------------------------------------------------------------------------------------------
