@@ -8,7 +8,7 @@ MTAnimatorPlug::MTAnimatorPlug()
 {
   m_animation = QSharedPointer<MTAnimation>::create();
 
-  // Rotation
+  // Rotation (0)
   {
     MTAnimation::Property prop;
     {
@@ -21,13 +21,25 @@ MTAnimatorPlug::MTAnimatorPlug()
     m_animation->addProperty(prop);
   }
 
-  // Position
+  // Acceleration (1)
   {
     MTAnimation::Property prop;
     {
       prop.setter = [&](QVector3D value)
       {
         m_acceleration = value;
+      };
+      prop.keyFrames = {};
+    }
+    m_animation->addProperty(prop);
+  }
+
+  // Offset (2)
+  {
+    MTAnimation::Property prop;
+    {
+      prop.setter = [&](QVector3D)
+      {
       };
       prop.keyFrames = {};
     }

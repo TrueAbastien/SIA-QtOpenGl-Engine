@@ -2,6 +2,9 @@
 
 #include "MTAnimatorPlug.h"
 
+#define OFFSET_TIME_FLOOR (0.5f)
+#define OFFSET_TIME_STEP (1e-2f)
+
 // ------------------------------------------------------------------------------------------------
 QMatrix3x3 rotationMatrix(const QVector3D& rot)
 {
@@ -210,6 +213,31 @@ QVector3D computeGlobalOffset(const MTBody::Hierarchy::Node::Pointer& root, MTBo
 }
 
 // ------------------------------------------------------------------------------------------------
+void recordOffset(const MTBody::Hierarchy::Node::Pointer& root, const QVector3D& offset, float time)
+{
+  QSharedPointer<AnimatorPlug> animator;
+  for (const auto& child : root->joint->children())
+  {
+    animator = child.dynamicCast<AnimatorPlug>();
+    if (!animator.isNull()) break;
+  }
+
+  const auto pred = [&](const Animation<QVector3D>::KeyFrame& kf)
+  {
+    return time <= (kf.time - OFFSET_TIME_STEP);
+  };
+  const auto& vec = animator->animation()->getProperty(2).keyFrames;
+  const auto& it = std::find_if(vec.begin(), vec.end(), pred);
+
+  if (it != vec.end() && abs(it->time - time) <= OFFSET_TIME_STEP)
+  {
+    return;
+  }
+
+  animator->addKeyFrame(2, time, offset);
+}
+
+// ------------------------------------------------------------------------------------------------
 MTBody::MTBody(const Body& body)
   : m_body(body), m_vertices(0), m_indices(0)
 {
@@ -234,12 +262,17 @@ void MTBody::update(UpdateInfo infos)
 {
   WiredRenderable::update(infos);
 
-  if (infos.animationTime < 1.0f)
+  if (infos.animationTime < OFFSET_TIME_FLOOR)
   {
     m_offset = QVector3D(0, 0, 0);
   }
 
   updatePositions();
+
+  if (infos.animationTime >= OFFSET_TIME_FLOOR)
+  {
+    recordOffset(hierarchy()->root(), m_offset, infos.animationTime);
+  }
 
   WiredRenderable::updateRenderable(GL_LINES, m_indices.size());
 }
