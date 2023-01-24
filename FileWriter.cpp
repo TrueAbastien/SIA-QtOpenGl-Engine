@@ -89,7 +89,7 @@ bool FileWriter::writeOFF(const QString& filePath, const OFFInput& skin, const O
 // ------------------------------------------------------------------------------------------------
 using MTJoint = MTBody::Hierarchy::Node::Pointer;
 using TransformVec = std::vector<QMatrix3x3>;
-using WriteBegin = std::function<TransformVec(const std::string&, const MTJoint&, const TransformVec&, bool)>;
+using WriteBegin = std::function<TransformVec(const std::string&, const MTJoint&, const TransformVec&, bool, bool)>;
 using WriteEnd = std::function<void()>;
 
 void writeJoint(
@@ -99,7 +99,7 @@ void writeJoint(
   const WriteBegin& beginFunc,
   const WriteEnd& endFunc)
 {
-  auto parentVec = beginFunc(title, jt, trVec, jt->children.isEmpty());
+  auto parentVec = beginFunc(title, jt, trVec, jt->children.isEmpty(), jt->parent.isNull());
 
   for (const auto& child : jt->children)
   {
@@ -127,6 +127,8 @@ bool FileWriter::writeMTBody(const QString& filePath, const MTInput& body, const
   const auto bodyMap = body->hierarchyMap();
   std::vector<std::vector<QVector3D>> animations(0);
   int depth = 0;
+  QVector3D offset;
+  std::vector<QVector3D> offsets(0);
 
   // Utilities
   const auto append = [&](auto value, bool eol = false)
@@ -162,7 +164,8 @@ bool FileWriter::writeMTBody(const QString& filePath, const MTInput& body, const
     std::string title,
     const MTJoint& jt,
     const TransformVec& parentVec,
-    bool isEnd = false)
+    bool isEnd = false,
+    bool isRoot = false)
     -> TransformVec
   {
     // Title
@@ -192,7 +195,9 @@ bool FileWriter::writeMTBody(const QString& filePath, const MTInput& body, const
     if (!isEnd)
     {
       tabs();
-      append("CHANNELS 3 Xrotation Yrotation Zrotation", true);
+      append(isRoot ?
+             "CHANNELS 6 Xposition Yposition Zposition Xrotation Yrotation Zrotation" :
+             "CHANNELS 3 Xrotation Yrotation Zrotation", true);
     }
 
     // Animation
@@ -270,6 +275,17 @@ bool FileWriter::writeMTBody(const QString& filePath, const MTInput& body, const
     // Values
     for (size_t ii = 0; ii < animationCount; ++ii)
     {
+      // Offset
+      {
+        //const auto& o = offsets[ii];
+        const auto& o = QVector3D(); // TEMP
+
+        append(o[0]);
+        append(o[1]);
+        append(o[2]);
+      }
+
+      // Rotations
       for (size_t jj = 0; jj < animations.size(); ++jj)
       {
         bool isEnd = (jj == animations.size() - 1);
