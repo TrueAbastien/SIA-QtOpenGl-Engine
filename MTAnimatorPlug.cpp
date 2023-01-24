@@ -33,18 +33,6 @@ MTAnimatorPlug::MTAnimatorPlug()
     }
     m_animation->addProperty(prop);
   }
-
-  // Offset (2)
-  {
-    MTAnimation::Property prop;
-    {
-      prop.setter = [&](QVector3D)
-      {
-      };
-      prop.keyFrames = {};
-    }
-    m_animation->addProperty(prop);
-  }
 }
 
 // ------------------------------------------------------------------------------------------------

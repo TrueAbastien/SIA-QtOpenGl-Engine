@@ -233,6 +233,7 @@ QWidget* MainWidget::makeControls()
     }
 
     // Time Label
+    QDoubleSpinBox* timeSpinBox;
     {
       QHBoxLayout* timeHL = new QHBoxLayout;
 
@@ -244,20 +245,49 @@ QWidget* MainWidget::makeControls()
 
       // Value
       {
-        QDoubleSpinBox* spinBox = new QDoubleSpinBox;
+        timeSpinBox = new QDoubleSpinBox;
         const auto func = [=](double value)
         {
-          spinBox->blockSignals(true);
-          spinBox->setValue(value);
-          spinBox->blockSignals(false);
+          timeSpinBox->blockSignals(true);
+          timeSpinBox->setValue(value);
+          timeSpinBox->blockSignals(false);
         };
         connect(this, &MainWidget::animationTimeChanged, func);
-        connect(spinBox, SIGNAL(valueChanged(double)), &animController, SLOT(setTime(double)));
-        spinBox->setMaximum(3600.0);
-        timeHL->addWidget(spinBox);
+        connect(timeSpinBox, SIGNAL(valueChanged(double)), &animController, SLOT(setTime(double)));
+        timeSpinBox->setMaximum(3600.0);
+        timeSpinBox->setDecimals(3);
+        timeHL->addWidget(timeSpinBox);
       }
 
       animVL->addLayout(timeHL);
+    }
+
+    // Time Precision
+    {
+      QHBoxLayout* precHL = new QHBoxLayout;
+
+      // Label
+      {
+        QLabel* label = new QLabel("Precision:");
+        precHL->addWidget(label);
+      }
+
+      // Slider
+      {
+        QSlider* slider = new QSlider;
+        const auto func = [=](int value)
+        {
+          timeSpinBox->setSingleStep(std::pow(0.1, value));
+        };
+        connect(slider, &QSlider::valueChanged, func);
+        slider->setValue(0);
+        slider->setMinimum(0);
+        slider->setMaximum(3);
+        slider->setOrientation(Qt::Horizontal);
+        precHL->addWidget(slider);
+      }
+
+      animVL->addLayout(precHL);
     }
 
     box->setLayout(animVL);
