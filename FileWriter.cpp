@@ -122,13 +122,30 @@ bool FileWriter::writeMTBody(const QString& filePath, const MTInput& body, const
     return false;
   }
 
+  
+
   // Data
   const auto hierarchy = body->originalHierarchy();
   const auto bodyMap = body->hierarchyMap();
   std::vector<std::vector<QVector3D>> animations(0);
   int depth = 0;
-  QVector3D offset;
-  std::vector<QVector3D> offsets(0);
+
+  // Get Animation Frame Count
+  size_t frameCount = [&]() -> size_t
+  {
+    const auto& children = bodyMap[hierarchy->root()->joint->name()]->children();
+
+    QSharedPointer<MTAnimatorPlug> animator;
+    for (const auto& child : children)
+    {
+      animator = child.dynamicCast<MTAnimatorPlug>();
+      if (!animator.isNull()) break;
+    }
+
+    return animator->animation()->getProperty(0).keyFrames.size();
+  }();
+  std::vector<std::pair<float, QVector3D>> offsets(
+    frameCount, std::make_pair(FLT_MAX, QVector3D()));
 
   // Utilities
   const auto append = [&](auto value, bool eol = false)
@@ -227,6 +244,10 @@ bool FileWriter::writeMTBody(const QString& filePath, const MTInput& body, const
       return parentVec;
     }
 
+    static const QStringList __controlNames = { "FOOTR", "FOOTL" };
+    bool isControl = __controlNames.contains(jt->joint->name());
+    QVector3D offset = QVector3D(0, 0, 0);
+
     // Transform Vec
     TransformVec result(0);
     const auto keyframes = animator->animation()->getProperty(0).keyFrames;
@@ -241,6 +262,12 @@ bool FileWriter::writeMTBody(const QString& filePath, const MTInput& body, const
       if (!isFirst)
       {
         localRot = parentVec[ii].transposed() * localRot;
+      }
+
+      if (isControl)
+      {
+        auto& offset = offsets[ii];
+        float acc = 0.0f; // TODO: realizing it won't works...
       }
 
       animation.push_back(trToRot(localRot));
