@@ -14,7 +14,6 @@ MTAnimatorPlug::MTAnimatorPlug()
     {
       prop.setter = [&](QVector3D value)
       {
-        m_parent->setLocalRotation(value);
       };
       prop.keyFrames = {};
     }
@@ -27,7 +26,6 @@ MTAnimatorPlug::MTAnimatorPlug()
     {
       prop.setter = [&](QVector3D value)
       {
-        m_acceleration = value;
       };
       prop.keyFrames = {};
     }
@@ -51,10 +49,4 @@ void MTAnimatorPlug::init()
 QVector3D MTAnimatorPlug::originalRotation() const
 {
   return m_originalRotation;
-}
-
-// ------------------------------------------------------------------------------------------------
-QVector3D MTAnimatorPlug::acceleration() const
-{
-  return m_acceleration;
 }
