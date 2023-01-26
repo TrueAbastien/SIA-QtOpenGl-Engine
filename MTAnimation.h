@@ -1,10 +1,11 @@
 #pragma once
 
 #include "Animation.h"
+#include "MTAnimationData.h"
 
 #include <QQuaternion>
 
-class MTAnimation final : public Animation<QVector3D>
+class MTAnimation final : public Animation<MTAnimationData::JointFrame>
 {
 public:
 
@@ -12,5 +13,5 @@ public:
 
 protected:
 
-  QVector3D interpolateValue(const KeyFrame* a, const KeyFrame* b, float time) const override;
+  MTAnimationData::JointFrame interpolateValue(const KeyFrame* a, const KeyFrame* b, float time) const override;
 };

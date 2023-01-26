@@ -653,21 +653,16 @@ FileReader::WeightResult FileReader::readWeight(const QString& filePath, const W
 }
 
 // ------------------------------------------------------------------------------------------------
-FileReader::MTResult FileReader::readMT(const QString& filePath, const MTParameters& params)
+FileReader::MTResult FileReader::readMT(const QString& filePath)
 {
-  if (params.parent.isNull())
-  {
-    return nullptr;
-  }
-
   auto file = std::ifstream(filePath.toStdString());
   if (!file.is_open())
   {
-    return nullptr;
+    return MTResult();
   }
 
   // Data
-  auto result = MTResult::create();
+  auto result = MTResult();
   int previousPacket = -1;
   //
 
@@ -732,8 +727,6 @@ FileReader::MTResult FileReader::readMT(const QString& filePath, const MTParamet
   };
   const auto readFrames = [&]()
   {
-    static const float dt = 1.0f / params.samplingRate;
-
     int it = 0;
     while (verifyPacket())
     {
@@ -765,13 +758,13 @@ FileReader::MTResult FileReader::readMT(const QString& filePath, const MTParamet
       }
 
       // Add Keyframes
-      float time = dt * (++it);
-      result->addKeyFrame(0, time, rot);
-      result->addKeyFrame(1, time, acc);
+      MTResultFrame frame;
+      {
+        frame.acceleration = acc;
+        frame.rotation = rot;
+      }
+      result.append(frame);
     }
-
-    // Setup Parenting
-    params.parent->addChildren(result);
   };
 
   // Algorithm
@@ -782,7 +775,7 @@ FileReader::MTResult FileReader::readMT(const QString& filePath, const MTParamet
   }
   catch (...)
   {
-    return nullptr;
+    return MTResult();
   }
 
   return result;

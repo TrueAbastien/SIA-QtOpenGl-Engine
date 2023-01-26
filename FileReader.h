@@ -4,7 +4,6 @@
 #include "JointRenderer.h"
 #include "SkinMesh.h"
 #include "MeshRigRelation.h"
-#include "MTAnimatorPlug.h"
 
 #include <QMap>
 
@@ -32,12 +31,12 @@ public:
     OFFResult skin;
   };
 
-  using MTResult = QSharedPointer<MTAnimatorPlug>;
-  struct MTParameters
+  struct MTResultFrame
   {
-    Component::Pointer parent;
-    int samplingRate;
+    QVector3D acceleration;
+    QVector3D rotation;
   };
+  using MTResult = QVector<MTResultFrame>;
 
   using MTMappingResult = QSharedPointer<QMap<QString, QString>>;
 
@@ -49,7 +48,7 @@ public:
 
   static WeightResult readWeight(const QString& filePath, const WeightParameters& params);
 
-  static MTResult readMT(const QString& filePath, const MTParameters& params);
+  static MTResult readMT(const QString& filePath);
 
   static MTMappingResult readMTMapping(const QString& filePath);
 };

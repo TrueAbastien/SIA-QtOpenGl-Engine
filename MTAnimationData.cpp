@@ -49,16 +49,12 @@ QVector3D positionOf(const QMatrix4x4& model)
 }
 
 // ------------------------------------------------------------------------------------------------
-bool isDrivingMT(const Component::Pointer& comp, QSharedPointer<MTAnimatorPlug>& animator, QMatrix3x3& invORot)
+bool isDrivingMT(const Component::Pointer& comp)
 {
   for (const auto& child : comp->children())
   {
     auto item = child.dynamicCast<MTAnimatorPlug>();
-    if (!item.isNull())
-    {
-      invORot = rotationMatrix(item->originalRotation()).transposed();
-      return true;
-    }
+    if (!item.isNull()) return true;
   }
 
   return false;
@@ -89,6 +85,7 @@ void computeOverChildren(
   size_t frameIndex,
   const NodePtr& jointOH, // Original Hierarchy
   const MTBody::BodyMap& bodyMap,
+  const MTAnimationData::InputData& inputData,
   const MTAnimationData::JointFrame& parentJF,
   MTAnimationData::JFMap& resultMap,
   AscendingData& ascendingData)
@@ -98,16 +95,22 @@ void computeOverChildren(
   bool hasParent = !jointOH->parent.isNull();
   auto trueJT = bodyMap[name];
 
+  bool isDriving = isDrivingMT(trueJT);
+
+  FileReader::MTResultFrame input;
   QMatrix3x3 invORot;
-  QSharedPointer<MTAnimatorPlug> animator;
-  bool isDriving = isDrivingMT(trueJT, animator, invORot);
+  if (isDriving)
+  {
+    input = inputData.value(name).at(frameIndex);
+    invORot = rotationMatrix(inputData.value(name).at(0).rotation);
+  }
 
   QMatrix4x4 parentModel = hasParent ?
     parentJF.localToRoot :
     QMatrix4x4();
   QMatrix4x4 model = isDriving ?
     computeJoint(
-      animator->animation()->getProperty(0).keyFrames[frameIndex].value,
+      input.rotation,
       parentModel,
       invORot,
       jointOH->joint->localPosition()) :
@@ -117,7 +120,7 @@ void computeOverChildren(
   if (__controlNames.contains(name) && isDrivingMT)
   {
     // Get Acceleration
-    float acc = animator->animation()->getProperty(1).keyFrames[frameIndex].value.length();
+    float acc = input.acceleration.length();
 
     // Saving Offset
     if (acc < ascendingData.acc)
@@ -143,30 +146,23 @@ void computeOverChildren(
   // Compute Children
   for (const auto& child : jointOH->children)
   {
-    computeOverChildren(frameIndex, child, bodyMap, frame, resultMap, ascendingData);
+    computeOverChildren(frameIndex, child, bodyMap, inputData, frame, resultMap, ascendingData);
   }
 }
 
 // ------------------------------------------------------------------------------------------------
-size_t frameCount(const NodePtr& root)
+size_t frameCount(const MTAnimationData::InputData& data)
 {
-  QSharedPointer<MTAnimatorPlug> animator;
-  for (const auto& child : root->joint->children())
-  {
-    animator = child.dynamicCast<MTAnimatorPlug>();
-    if (!animator.isNull()) break;
-  }
-
-  return animator->animation()->getProperty(0).keyFrames.size();
+  return (size_t)data.first().size();
 }
 
 // ------------------------------------------------------------------------------------------------
-MTAnimationData::MTAnimationData(const QSharedPointer<MTBody>& body)
+MTAnimationData::MTAnimationData(const QSharedPointer<MTBody>& body, const InputData& data)
 {
   const auto& bodyMap = body->hierarchyMap();
   const auto& originalHierarchy = body->originalHierarchy();
 
-  size_t count = frameCount(body->hierarchy()->root());
+  size_t count = frameCount(data);
 
   QVector3D offset;
   AscendingData posData;
@@ -187,7 +183,7 @@ MTAnimationData::MTAnimationData(const QSharedPointer<MTBody>& body)
 
     AscendingData prevData = posData;
 
-    computeOverChildren(ii, originalHierarchy->root(), bodyMap, frame, m_map, posData);
+    computeOverChildren(ii, originalHierarchy->root(), bodyMap, data, frame, m_map, posData);
 
     if (prevData.jtName == posData.jtName)
     {
@@ -222,4 +218,42 @@ MTAnimationData::JFVec MTAnimationData::data(const QString& key, bool* ok) const
 MTAnimationData::JFMap MTAnimationData::map() const
 {
   return m_map;
+}
+
+
+// ------------------------------------------------------------------------------------------------
+void constructOverChildren(const NodePtr& node, const MTAnimationData::JFMap& map, int samplingRate)
+{
+  // Get Animator
+  QSharedPointer<MTAnimatorPlug> animator = nullptr;
+  for (const auto& child : node->joint->children())
+  {
+    animator = child.dynamicCast<MTAnimatorPlug>();
+    if (!animator.isNull()) break;
+  }
+
+  // Driving Joint
+  if (!animator.isNull())
+  {
+    QString name = node->joint->name();
+    const auto& data = map.value(name);
+
+    const float dt = 1.0 / samplingRate;
+    for (int ii = 0; ii < data.size(); ++ii)
+    {
+      animator->addKeyFrame(0, dt * ii, data[ii]);
+    }
+  }
+
+  // Construct Children
+  for (const auto& child : node->children)
+  {
+    constructOverChildren(child, map, samplingRate);
+  }
+}
+
+// ------------------------------------------------------------------------------------------------
+void MTAnimationData::constructAnimation(const QSharedPointer<MTBody>& body, int samplingRate)
+{
+  constructOverChildren(body->hierarchy()->root(), m_map, samplingRate);
 }

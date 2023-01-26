@@ -1,20 +1,11 @@
 #pragma once
 
 #include "AnimatorPlug.h"
+#include "MTAnimationData.h"
 
-class MTAnimatorPlug : public AnimatorPlugBase<QVector3D>
+class MTAnimatorPlug : public AnimatorPlugBase<MTAnimationData::JointFrame>
 {
 public:
 
   MTAnimatorPlug();
-
-public:
-
-  void init() override;
-
-  QVector3D originalRotation() const;
-
-private:
-
-  QVector3D m_originalRotation;
 };
