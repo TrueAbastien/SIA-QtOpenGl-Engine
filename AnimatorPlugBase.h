@@ -2,7 +2,7 @@
 #pragma once
 
 #include "Component.h"
-#include "Animation.h"
+#include "AnimationBase.h"
 
 template <typename T>
 class AnimatorPlugBase : public Component
@@ -17,11 +17,11 @@ public:
 
   void addKeyFrame(int typeIndex, float time, T value);
 
-  QSharedPointer<Animation<T>> animation() const;
+  QSharedPointer<AnimationBase<T>> animation() const;
 
 protected:
 
-  QSharedPointer<Animation<T>> m_animation;
+  QSharedPointer<AnimationBase<T>> m_animation;
 };
 
 // ------------------------------------------------------------------------------------------------
@@ -35,7 +35,7 @@ void AnimatorPlugBase<T>::update(UpdateInfo infos)
 template <typename T>
 void AnimatorPlugBase<T>::addKeyFrame(int typeIndex, float time, T value)
 {
-  Animation<T>::KeyFrame kf;
+  AnimationBase<T>::KeyFrame kf;
   {
     kf.time = time;
     kf.value = value;
@@ -45,7 +45,7 @@ void AnimatorPlugBase<T>::addKeyFrame(int typeIndex, float time, T value)
 
 // ------------------------------------------------------------------------------------------------
 template<typename T>
-inline QSharedPointer<Animation<T>> AnimatorPlugBase<T>::animation() const
+inline QSharedPointer<AnimationBase<T>> AnimatorPlugBase<T>::animation() const
 {
   return m_animation;
 }

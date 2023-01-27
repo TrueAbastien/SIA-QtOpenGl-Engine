@@ -40,6 +40,7 @@ SOURCES += \
 
 HEADERS += \
     Animation.h \
+    AnimationBase.h \
     AnimationController.h \
     AnimatorPlug.h \
     AnimatorPlugBase.h \

@@ -3,11 +3,11 @@
 // ------------------------------------------------------------------------------------------------
 AnimatorPlug::AnimatorPlug()
 {
-  m_animation = QSharedPointer<Animation<QVector3D>>::create();
+  m_animation = QSharedPointer<Animation>::create();
 
   // Position
   {
-    AnimationType::Property prop;
+    Animation::Property prop;
     {
       prop.setter = [=](QVector3D value)
       {
@@ -20,7 +20,7 @@ AnimatorPlug::AnimatorPlug()
 
   // Rotation
   {
-    AnimationType::Property prop;
+    Animation::Property prop;
     {
       prop.setter = [=](QVector3D value)
       {
@@ -43,7 +43,7 @@ void AnimatorPlug::init()
 
   // Position
   {
-    AnimationType::KeyFrame kf;
+    Animation::KeyFrame kf;
     {
       kf.time = 0.0f;
       kf.value = currPos;
@@ -53,7 +53,7 @@ void AnimatorPlug::init()
 
   // Rotation
   {
-    AnimationType::KeyFrame kf;
+    Animation::KeyFrame kf;
     {
       kf.time = 0.0f;
       kf.value = currRot;

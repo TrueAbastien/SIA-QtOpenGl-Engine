@@ -1,11 +1,11 @@
 #pragma once
 
-#include "Animation.h"
+#include "AnimationBase.h"
 #include "MTAnimationData.h"
 
 #include <QQuaternion>
 
-class MTAnimation final : public Animation<MTAnimationData::JointFrame>
+class MTAnimation final : public AnimationBase<MTAnimationData::JointFrame>
 {
 public:
 

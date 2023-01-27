@@ -2,13 +2,10 @@
 #pragma once
 
 #include "AnimatorPlugBase.h"
+#include "Animation.h"
 
 class AnimatorPlug : public AnimatorPlugBase<QVector3D>
 {
-public:
-
-  using AnimationType = Animation<QVector3D>;
-
 public:
 
   AnimatorPlug();
