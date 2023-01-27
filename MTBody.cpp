@@ -95,7 +95,7 @@ void MTBody::init()
 {
   WiredRenderable::init();
 
-  constructOverChildren(m_body.get(), QMatrix4x4(), m_vertices, m_indices, m_bodyMap, this);
+  constructOverChildren(m_body.get(), m_body->localToParent(), m_vertices, m_indices, m_bodyMap, this);
 
   WiredRenderable::initRenderable(
     m_vertices.data(), m_vertices.size(),
