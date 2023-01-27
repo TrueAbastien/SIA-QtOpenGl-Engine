@@ -111,6 +111,8 @@ void writeJoint(
 }
 bool FileWriter::writeMTBody(const QString& filePath, const MTInput& body, const MTParameters& params)
 {
+  return false;
+  /*
   if (body.isNull())
   {
     return false;
@@ -339,4 +341,5 @@ bool FileWriter::writeMTBody(const QString& filePath, const MTInput& body, const
 
   file.close();
   return true;
+  */
 }

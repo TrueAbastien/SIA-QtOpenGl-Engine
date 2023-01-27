@@ -1,8 +1,9 @@
 
 #pragma once
 
-#include "MTBody.h"
 #include "FileReader.h"
+
+class MTBody;
 
 class MTAnimationData final
 {
@@ -22,14 +23,14 @@ public:
 
 public:
 
-  MTAnimationData(const QSharedPointer<MTBody>& body, const InputData& data);
+  MTAnimationData(MTBody* body, const InputData& data);
 
   JFVec& data(const QString& key, bool* ok = nullptr);
   JFVec data(const QString& key, bool* ok = nullptr) const;
 
   JFMap map() const;
 
-  void constructAnimation(const QSharedPointer<MTBody>& body, int samplingRate);
+  void constructAnimation(MTBody* body, int samplingRate);
 
 private:
 

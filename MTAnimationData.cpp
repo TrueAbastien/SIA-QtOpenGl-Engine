@@ -1,4 +1,5 @@
 #include "MTAnimationData.h"
+#include "MTBody.h"
 
 #include "MTAnimatorPlug.h"
 #include "MTAnimation.h"
@@ -117,7 +118,7 @@ void computeOverChildren(
     parentModel * jointOH->joint->localToParent();
 
   static const QStringList __controlNames = { "FOOTL", "FOOTR" };
-  if (__controlNames.contains(name) && isDrivingMT)
+  if (__controlNames.contains(name) && isDriving)
   {
     // Get Acceleration
     float acc = input.acceleration.length();
@@ -157,7 +158,7 @@ size_t frameCount(const MTAnimationData::InputData& data)
 }
 
 // ------------------------------------------------------------------------------------------------
-MTAnimationData::MTAnimationData(const QSharedPointer<MTBody>& body, const InputData& data)
+MTAnimationData::MTAnimationData(MTBody* body, const InputData& data)
 {
   const auto& bodyMap = body->hierarchyMap();
   const auto& originalHierarchy = body->originalHierarchy();
@@ -253,7 +254,7 @@ void constructOverChildren(const NodePtr& node, const MTAnimationData::JFMap& ma
 }
 
 // ------------------------------------------------------------------------------------------------
-void MTAnimationData::constructAnimation(const QSharedPointer<MTBody>& body, int samplingRate)
+void MTAnimationData::constructAnimation(MTBody* body, int samplingRate)
 {
   constructOverChildren(body->hierarchy()->root(), m_map, samplingRate);
 }

@@ -124,6 +124,8 @@ void MTSetupWindow::loadMapping()
   JointMap joints;
   fillJointMap(joints, m_body);
 
+  MTAnimationData::InputData input;
+
   for (const QString& name : joints.keys())
   {
     QString path = mapping->value(name, "");
@@ -132,23 +134,19 @@ void MTSetupWindow::loadMapping()
       continue;
     }
 
-    FileReader::MTParameters params;
-    {
-      params.parent = joints[name];
-      params.samplingRate = 60;
-    }
-
-    auto result = FileReader::readMT(path, params);
-    if (result == nullptr)
+    auto result = FileReader::readMT(path);
+    if (result.isEmpty())
     {
       log(LogType::ERROR_, "Couldn't read Tracker for '" + name.toStdString() + "' in '" + path.toStdString() + "'...");
       return;
     }
 
-    result->init();
+    input.insert(name, result);
 
     log(LogType::INFO, "'" + path.toStdString() + "' for '" + name.toStdString() + "' read successfully !");
   }
+
+  m_body->setup(input, 60);
 
   log(LogType::INFO, "Mapping finished !");
 }

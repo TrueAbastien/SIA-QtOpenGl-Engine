@@ -2,6 +2,7 @@
 #pragma once
 
 #include "JointRenderer.h"
+#include "MTAnimationData.h"
 
 class MTBody final : public BodyBase
 {
@@ -12,6 +13,8 @@ public:
 
   using Vertices = QVector<VertexData_Wired>;
   using Indices = QVector<GLushort>;
+
+  using AnimationDataPtr = QSharedPointer<MTAnimationData>;
 
 public:
 
@@ -27,6 +30,8 @@ public:
 
   BodyMap hierarchyMap() const;
 
+  void setup(const MTAnimationData::InputData& input, int samplingRate = 60);
+
 private:
 
   void updatePositions();
@@ -35,6 +40,8 @@ private:
 
   Body m_body;
   BodyMap m_bodyMap;
+
+  AnimationDataPtr m_animationData;
 
   Vertices m_vertices;
   Indices m_indices;
