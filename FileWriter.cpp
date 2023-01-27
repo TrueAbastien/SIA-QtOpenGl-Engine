@@ -88,31 +88,27 @@ bool FileWriter::writeOFF(const QString& filePath, const OFFInput& skin, const O
 
 // ------------------------------------------------------------------------------------------------
 using MTJoint = MTBody::Hierarchy::Node::Pointer;
-using TransformVec = std::vector<QMatrix3x3>;
-using WriteBegin = std::function<TransformVec(const std::string&, const MTJoint&, const TransformVec&, bool, bool)>;
+using WriteBegin = std::function<void(const std::string&, const MTJoint&, bool, bool)>;
 using WriteEnd = std::function<void()>;
 
 void writeJoint(
   const std::string& title,
   const MTJoint& jt,
-  const TransformVec& trVec,
   const WriteBegin& beginFunc,
   const WriteEnd& endFunc)
 {
-  auto parentVec = beginFunc(title, jt, trVec, jt->children.isEmpty(), jt->parent.isNull());
+  beginFunc(title, jt, jt->children.isEmpty(), jt->parent.isNull());
 
   for (const auto& child : jt->children)
   {
     std::string childTitle = child->children.isEmpty() ? "END" : "JOINT";
-    writeJoint(childTitle, child, parentVec, beginFunc, endFunc);
+    writeJoint(childTitle, child, beginFunc, endFunc);
   }
 
   endFunc();
 }
 bool FileWriter::writeMTBody(const QString& filePath, const MTInput& body, const MTParameters& params)
 {
-  return false;
-  /*
   if (body.isNull())
   {
     return false;
@@ -124,30 +120,12 @@ bool FileWriter::writeMTBody(const QString& filePath, const MTInput& body, const
     return false;
   }
 
-  
-
   // Data
   const auto hierarchy = body->originalHierarchy();
   const auto bodyMap = body->hierarchyMap();
   std::vector<std::vector<QVector3D>> animations(0);
+  std::vector<QVector3D> offsets(0);
   int depth = 0;
-
-  // Get Animation Frame Count
-  size_t frameCount = [&]() -> size_t
-  {
-    const auto& children = bodyMap[hierarchy->root()->joint->name()]->children();
-
-    QSharedPointer<MTAnimatorPlug> animator;
-    for (const auto& child : children)
-    {
-      animator = child.dynamicCast<MTAnimatorPlug>();
-      if (!animator.isNull()) break;
-    }
-
-    return animator->animation()->getProperty(0).keyFrames.size();
-  }();
-  std::vector<std::pair<float, QVector3D>> offsets(
-    frameCount, std::make_pair(FLT_MAX, QVector3D()));
 
   // Utilities
   const auto append = [&](auto value, bool eol = false)
@@ -159,33 +137,12 @@ bool FileWriter::writeMTBody(const QString& filePath, const MTInput& body, const
     file << std::string(depth, '\t');
   };
 
-  // Convert
-  const auto trToRot = [](const QMatrix3x3& r) -> QVector3D
-  {
-    float t = QVector2D(r(2, 1), r(2, 2)).length();
-    return QVector3D(
-      qAtan2(r(2, 1), r(2, 2)),
-      qAtan2(-r(2, 0), t),
-      qAtan2(r(1, 0), r(0, 0))
-    ) * RAD2DEG;
-  };
-  const auto rotToTr = [](const QVector3D& r) -> QMatrix3x3
-  {
-    QMatrix4x4 m = {};
-    m.rotate(r.z(), 0.0, 0.0, 1.0);
-    m.rotate(r.y(), 0.0, 1.0, 0.0);
-    m.rotate(r.x(), 1.0, 0.0, 0.0);
-    return m.normalMatrix();
-  };
-
   // Write
   const auto writeJointBegin = [&](
     std::string title,
     const MTJoint& jt,
-    const TransformVec& parentVec,
     bool isEnd = false,
     bool isRoot = false)
-    -> TransformVec
   {
     // Title
     tabs();
@@ -225,58 +182,27 @@ bool FileWriter::writeMTBody(const QString& filePath, const MTInput& body, const
     for (const auto& child : children)
     {
       animator = child.dynamicCast<MTAnimatorPlug>();
-      if (!animator.isNull())
-      {
-        break;
-      }
+      if (!animator.isNull()) break;
     }
 
-    if (isEnd) return parentVec;
+    if (isEnd) return;
 
-    // Not Animated
+    // Animation
     std::vector<QVector3D> animation(0);
-    if (animator.isNull())
-    {
-      for (size_t ii = 0; ii < parentVec.size(); ++ii)
-      {
-        animation.push_back(QVector3D(0, 0, 0));
-      }
-
-      animations.push_back(animation);
-      return parentVec;
-    }
-
-    static const QStringList __controlNames = { "FOOTR", "FOOTL" };
-    bool isControl = __controlNames.contains(jt->joint->name());
-    QVector3D offset = QVector3D(0, 0, 0);
-
-    // Transform Vec
-    TransformVec result(0);
     const auto keyframes = animator->animation()->getProperty(0).keyFrames;
-    bool isFirst = parentVec.size() != keyframes.size();
-    for (size_t ii = 0; ii < keyframes.size(); ++ii)
+    for (const auto& frame : keyframes)
     {
-      auto localRot = rotToTr(keyframes[ii].value)
-        * rotToTr(animator->originalRotation()).transposed();
-
-      result.push_back(localRot);
-
-      if (!isFirst)
+      // Offset
+      if (isRoot)
       {
-        localRot = parentVec[ii].transposed() * localRot;
+        offsets.push_back(frame.value.worldOffset);
       }
 
-      if (isControl)
-      {
-        auto& offset = offsets[ii];
-        float acc = 0.0f; // TODO: realizing it won't works...
-      }
-
-      animation.push_back(trToRot(localRot));
+      // Rotation
+      animation.push_back(frame.value.localToParentRotation);
     }
 
     animations.push_back(animation);
-    return result;
   };
   const auto writeJointEnd = [&]()
   {
@@ -288,14 +214,14 @@ bool FileWriter::writeMTBody(const QString& filePath, const MTInput& body, const
   {
     append("HIERARCHY", true);
 
-    writeJoint("ROOT", hierarchy->root(), TransformVec(0), writeJointBegin, writeJointEnd);
+    writeJoint("ROOT", hierarchy->root(), writeJointBegin, writeJointEnd);
   };
   const auto writeMotion = [&]()
   {
     append("MOTION", true);
 
     // Time
-    size_t animationCount = animations.front().size();
+    size_t animationCount = offsets.size();
     append("Frames:");
     append(animationCount, true);
     append("Frame Time:");
@@ -306,14 +232,12 @@ bool FileWriter::writeMTBody(const QString& filePath, const MTInput& body, const
     {
       // Offset
       {
-        //const auto& o = offsets[ii];
-        const auto& o = QVector3D(); // TEMP
-
+        const auto o = offsets[ii];
         append(o[0]);
         append(o[1]);
         append(o[2]);
       }
-
+      
       // Rotations
       for (size_t jj = 0; jj < animations.size(); ++jj)
       {
@@ -341,5 +265,5 @@ bool FileWriter::writeMTBody(const QString& filePath, const MTInput& body, const
 
   file.close();
   return true;
-  */
+  
 }
