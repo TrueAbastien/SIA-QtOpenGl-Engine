@@ -61,7 +61,6 @@ public slots:
 
   void loadBVH();
   void loadOFF();
-  void loadMT();
   void saveMTBody();
 
   void openMeshEdit();
