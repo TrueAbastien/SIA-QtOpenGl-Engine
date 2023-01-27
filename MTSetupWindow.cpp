@@ -1,6 +1,7 @@
 #include "MTSetupWindow.h"
 
 #include "AxisCorrector.h"
+#include "MTAnimatorPlug.h"
 
 #include <QVBoxLayout>
 #include <QHBoxLayout>
@@ -142,6 +143,9 @@ void MTSetupWindow::loadMapping()
     }
 
     input.insert(name, result);
+
+    auto animator = QSharedPointer<MTAnimatorPlug>::create();
+    joints[name]->addChildren(animator);
 
     log(LogType::INFO, "'" + path.toStdString() + "' for '" + name.toStdString() + "' read successfully !");
   }

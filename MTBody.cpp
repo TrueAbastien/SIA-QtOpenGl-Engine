@@ -22,8 +22,14 @@ void constructOverChildren(
 
   // Joint Item
   {
+    const auto method = [=](QVector3D, QVector3D)
+    {
+      return model;
+    };
+
     auto jt = QSharedPointer<Joint>::create();
     jt->setName(parent->name());
+    jt->setMatrixConstruct(method);
     body->addChildren(jt);
 
     // Map Binding
@@ -36,9 +42,11 @@ void constructOverChildren(
     // Ensure Child is joint
     if (child.isNull() || child.dynamicCast<Joint>().isNull()) continue;
 
+    QMatrix4x4 newModel = model * child->localToParent();
+
     VertexData_Wired child_vtx;
     {
-      child_vtx.position = model * QVector3D(0, 0, 0);
+      child_vtx.position = newModel * QVector3D(0, 0, 0);
       child_vtx.color = QVector3D(0.8f, 0.4f, 0);
     }
 
@@ -46,7 +54,7 @@ void constructOverChildren(
     ids.push_back((GLushort)vts.size());
     vts.push_back(child_vtx);
 
-    constructOverChildren(child.get(), model * child->localToParent(), vts, ids, map, body);
+    constructOverChildren(child.get(), newModel, vts, ids, map, body);
   }
 }
 
@@ -55,6 +63,8 @@ QVector3D positionVector(const MTBody::Hierarchy::Node::Pointer& node)
 {
   return node->joint->localToParent() * QVector3D(0, 0, 0);
 }
+
+// ------------------------------------------------------------------------------------------------
 void updateOverChildren(
   const MTBody::Hierarchy::Node::Pointer& node,
   JointRenderer::Vertices& vts,
@@ -157,7 +167,7 @@ void MTBody::updatePositions()
 {
   int jtIndex = -1;
 
-  updateOverChildren(m_body->hierarchy()->root(), m_vertices, jtIndex);
+  updateOverChildren(hierarchy()->root(), m_vertices, jtIndex);
 
   // Update Buffers Infos
   Renderable::updateVertices<VertexData_Wired>(m_vertices.data(), m_vertices.size());

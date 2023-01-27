@@ -68,7 +68,7 @@ QMatrix4x4 computeJoint(
   const QMatrix3x3& invORot,
   const QVector3D& localPosition)
 {
-  QVector3D worldPosition = model * QVector3D(0, 0, 0);
+  /*QVector3D worldPosition = model * QVector3D(0, 0, 0);
 
   QMatrix4x4 r(rotationMatrix(worldRotation) * invORot);
 
@@ -78,7 +78,13 @@ QMatrix4x4 computeJoint(
   QMatrix4x4 t = p * r;
   t.translate(localPosition);
 
-  return t;
+  return t;*/
+
+  QMatrix4x4 t;
+  t.translate(model * localPosition);
+
+  QMatrix4x4 r(rotationMatrix(worldRotation) * invORot);
+  return t * r;
 }
 
 // ------------------------------------------------------------------------------------------------

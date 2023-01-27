@@ -26,3 +26,9 @@ MTAnimatorPlug::MTAnimatorPlug()
     m_animation->addProperty(prop);
   }
 }
+
+// ------------------------------------------------------------------------------------------------
+void MTAnimatorPlug::init()
+{
+  //
+}

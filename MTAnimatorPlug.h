@@ -8,4 +8,8 @@ class MTAnimatorPlug : public AnimatorPlugBase<MTAnimationData::JointFrame>
 public:
 
   MTAnimatorPlug();
+
+public:
+
+  void init() override;
 };
