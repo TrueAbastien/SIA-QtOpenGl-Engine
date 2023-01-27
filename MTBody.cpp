@@ -32,6 +32,9 @@ void constructOverChildren(
     jt->setMatrixConstruct(method);
     body->addChildren(jt);
 
+    auto animator = QSharedPointer<MTAnimatorPlug>::create();
+    jt->addChildren(animator);
+
     // Map Binding
     map.insert(jt->name(), jt);
   }

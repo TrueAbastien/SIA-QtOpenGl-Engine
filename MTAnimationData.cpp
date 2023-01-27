@@ -50,18 +50,6 @@ QVector3D positionOf(const QMatrix4x4& model)
 }
 
 // ------------------------------------------------------------------------------------------------
-bool isDrivingMT(const Component::Pointer& comp)
-{
-  for (const auto& child : comp->children())
-  {
-    auto item = child.dynamicCast<MTAnimatorPlug>();
-    if (!item.isNull()) return true;
-  }
-
-  return false;
-}
-
-// ------------------------------------------------------------------------------------------------
 QMatrix4x4 computeJoint(
   const QVector3D& worldRotation,
   const QMatrix4x4& model,
@@ -102,14 +90,14 @@ void computeOverChildren(
   bool hasParent = !jointOH->parent.isNull();
   auto trueJT = bodyMap[name];
 
-  bool isDriving = isDrivingMT(trueJT);
+  bool isDriving = inputData.contains(name);
 
   FileReader::MTResultFrame input;
   QMatrix3x3 invORot;
   if (isDriving)
   {
     input = inputData.value(name).at(frameIndex);
-    invORot = rotationMatrix(inputData.value(name).at(0).rotation);
+    invORot = rotationMatrix(inputData.value(name).at(0).rotation).transposed();
   }
 
   QMatrix4x4 parentModel = hasParent ?
@@ -239,7 +227,7 @@ void constructOverChildren(const NodePtr& node, const MTAnimationData::JFMap& ma
     if (!animator.isNull()) break;
   }
 
-  // Driving Joint
+  // Joint Animation
   if (!animator.isNull())
   {
     QString name = node->joint->name();

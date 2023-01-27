@@ -144,9 +144,6 @@ void MTSetupWindow::loadMapping()
 
     input.insert(name, result);
 
-    auto animator = QSharedPointer<MTAnimatorPlug>::create();
-    joints[name]->addChildren(animator);
-
     log(LogType::INFO, "'" + path.toStdString() + "' for '" + name.toStdString() + "' read successfully !");
   }
 
