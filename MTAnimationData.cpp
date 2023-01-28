@@ -24,23 +24,66 @@ QMatrix3x3 rotationMatrix(const QVector3D& rot)
   m.rotate(rot.y(), 0.0, 1.0, 0.0);
   m.rotate(rot.x(), 1.0, 0.0, 0.0);
 
-  /*QMatrix3x3 r = {};
-  for (int ii = 0; ii < 3; ++ii)
-    for (int jj = 0; jj < 3; ++jj)
-      r(ii, jj) = m(ii, jj);*/
-
   return m.normalMatrix();
 }
 
 // ------------------------------------------------------------------------------------------------
 QVector3D matrixRotation(const QMatrix3x3& m)
 {
-  float t = QVector2D(m(2, 1), m(2, 2)).length();
+  /*float t = QVector2D(m(2, 1), m(2, 2)).length();
   return QVector3D(
     qAtan2(m(2, 1), m(2, 2)),
     qAtan2(-m(2, 0), t),
     qAtan2(m(1, 0), m(0, 0))
-  ) * RAD2DEG;
+  ) * RAD2DEG;*/
+
+  QVector3D v;
+  if (m(2, 0) < 1.0)
+  {
+    if (m(2, 0) > -1.0)
+    {
+      v[0] = qAtan2(m(2, 1), m(2, 2));
+      v[1] = qAsin(-m(2, 0));
+      v[2] = qAtan2(m(1, 0), m(0, 0));
+    }
+    else
+    {
+      v[0] = 0;
+      v[1] = M_PI / 2.0;
+      v[2] = -qAtan2(-m(1, 2), m(1, 1));
+    }
+  }
+  else
+  {
+    v[0] = 0;
+    v[1] = -M_PI / 2.0;
+    v[2] = qAtan2(-m(1, 2), m(1, 1));
+  }
+  return v * RAD2DEG;
+
+  /*QVector3D v;
+  if (m(0, 2) < 1.0)
+  {
+    if (m(0, 2) > -1.0)
+    {
+      v[0] = qAtan2(-m(1, 2), m(2, 2));
+      v[1] = qAsin(m(0, 2));
+      v[2] = qAtan2(m(1, 0), m(0, 0));
+    }
+    else
+    {
+      v[0] = -qAtan2(m(1, 0), m(1, 1));
+      v[1] = -M_PI / 2.0;
+      v[2] = 0;
+    }
+  }
+  else
+  {
+    v[0] = qAtan2(m(1, 0), m(1, 1));
+    v[1] = M_PI / 2.0;
+    v[2] = 0;
+  }
+  return v * RAD2DEG;*/
 };
 
 // ------------------------------------------------------------------------------------------------

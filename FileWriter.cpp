@@ -195,7 +195,9 @@ bool FileWriter::writeMTBody(const QString& filePath, const MTInput& body, const
       // Offset
       if (isRoot)
       {
-        offsets.push_back(frame.value.worldOffset);
+        offsets.push_back(
+          frame.value.localToRoot * QVector3D(0, 0, 0)
+          + frame.value.worldOffset);
       }
 
       // Rotation
