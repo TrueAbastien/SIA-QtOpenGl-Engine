@@ -61,6 +61,7 @@ public slots:
 
   void loadBVH();
   void loadOFF();
+  void loadMTSkin();
   void saveMTBody();
 
   void openMeshEdit();
@@ -95,7 +96,7 @@ private:
   void openFile(const QString& filePath);
   void openBVH(const QString& filePath, const FileReader::BVHParameters& params);
   void openOFF(const QString& filePath, const FileReader::OFFParameters& params);
-  //
+  void openMTSkin(const QString& filePath, const FileReader::MTSkinParameters& params);
 
   template <typename T>
   using ComponentPredicate = std::function<bool(const QSharedPointer<T>&)>;

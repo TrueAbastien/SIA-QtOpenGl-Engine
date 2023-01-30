@@ -12,6 +12,7 @@
 #include <functional>
 #include <algorithm>
 #include <numeric>
+#include <sstream>
 
 // ------------------------------------------------------------------------------------------------
 enum DofType
@@ -883,4 +884,188 @@ FileReader::MTMappingResult FileReader::readMTMapping(const QString& filePath)
   }
 
   return result;
+}
+
+// ------------------------------------------------------------------------------------------------
+FileReader::MTSkinResult FileReader::readMTSkin(const QString& filePath, const MTSkinParameters& params)
+{
+  auto file = std::ifstream(filePath.toStdString());
+  if (!file.is_open())
+  {
+    return nullptr;
+  }
+
+  // Data
+  MTSkinMesh::Vertices vertices(0);
+  MTSkinMesh::Indices indices(0);
+  // ---
+  using Position = std::array<float, 3>;
+  std::vector<Position> positions(0);
+  // ---
+  using Normal = std::array<float, 3>;
+  std::vector<Normal> normals(0);
+  // ---
+  using TexCoord = std::array<float, 2>;
+  std::vector<TexCoord> texCoords(0);
+  // ---
+  using Face = std::vector<std::string>;
+  std::vector<Face> faces(0);
+
+  // Utilities
+  const auto lassert = [](bool cond)
+  {
+#ifdef _DEBUG
+    assert(cond);
+#else
+    if (!cond) throw false;
+#endif
+  };
+  const auto next = [&](auto& value)
+  {
+    file >> std::skipws >> value;
+  };
+  const auto skip = [&]()-> std::string
+  {
+    std::string val; next(val);
+    return val;
+  };
+  const auto upper = [](std::string s) -> std::string
+  {
+    std::string r;
+
+    std::transform(s.begin(), s.end(), std::back_inserter(r), [](char c)
+      {
+        return std::toupper(c);
+      });
+
+    return r;
+  };
+
+  // Reading
+  const auto readPosition = [&]()
+  {
+    Position p;
+    next(p[0]);
+    next(p[1]);
+    next(p[2]);
+    positions.push_back(p);
+  };
+  const auto readNormal = [&]()
+  {
+    Normal n;
+    next(n[0]);
+    next(n[1]);
+    next(n[2]);
+    normals.push_back(n);
+  };
+  const auto readTexCoord = [&]()
+  {
+    TexCoord t;
+    next(t[0]);
+    next(t[1]);
+    texCoords.push_back(t);
+  };
+  const auto readFace = [&]()
+  {
+    const size_t faceSize = 3;
+
+    Face f(faceSize);
+    for (size_t ii = 0; ii < faceSize; ++ii)
+    {
+      next(f[ii]);
+    }
+    faces.push_back(f);
+  };
+  const auto readToken = [&]() -> bool
+  {
+    std::string token = upper(skip());
+
+    if      (token == "V")  readPosition();
+    else if (token == "VN") readNormal();
+    else if (token == "VT") readTexCoord();
+    else if (token == "F")  readFace();
+
+    else return false;
+    return true;
+  };
+
+  // Convert
+  const auto convertFaces = [&]()
+  {
+    bool hasNormals = !normals.empty();
+    bool hasTexCoords = !texCoords.empty();
+
+    for (const auto& face : faces)
+    {
+      MTSkinMesh::Poly poly(0);
+      
+      for (auto it : face)
+      {
+        VertexData_Textured vtx;
+        {
+          int nSep = std::count(it.begin(), it.end(), '/');
+          
+          if (!(
+            (!hasNormals && nSep == 1)
+            || (nSep == 2)
+            ))
+          {
+            continue;
+          }
+
+          std::replace(it.begin(), it.end(), '/', ' ');
+          std::stringstream ss(it);
+          {
+            // Position
+            {
+              int pIndex;
+              ss >> std::skipws >> pIndex;
+              const auto& p = positions[pIndex - 1];
+
+              vtx.position = QVector3D(p[0], p[1], p[2]) * params.scale;
+            }
+
+            // Texture
+            if (hasTexCoords)
+            {
+              int tIndex;
+              ss >> std::skipws >> tIndex;
+              const auto& t = texCoords[tIndex - 1];
+
+              vtx.texCoord = QVector2D(t[0], t[1]);
+            }
+
+            // Normal
+            if (hasNormals)
+            {
+              int nIndex;
+              ss >> std::skipws >> nIndex;
+              const auto& n = normals[nIndex - 1];
+
+              vtx.normal = QVector3D(n[0], n[1], n[2]);
+            }
+          }
+        }
+
+        poly.push_back((GLushort)vertices.size());
+        vertices.push_back(vtx);
+      }
+
+      MTSkinMesh::ProcessPoly(indices, poly);
+    }
+  };
+
+  // Algorithm
+  try
+  {
+    while (readToken());
+
+    convertFaces();
+  }
+  catch (...)
+  {
+    return nullptr;
+  }
+
+  return MTSkinResult::create(params.texture, vertices, indices);
 }

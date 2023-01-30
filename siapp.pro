@@ -32,6 +32,7 @@ SOURCES += \
     MTAnimatorPlug.cpp \
     MTBody.cpp \
     MTSetupWindow.cpp \
+    MTSkinMesh.cpp \
     Renderable.cpp \
     Scene.cpp \
     SkinMesh.cpp \
@@ -65,9 +66,11 @@ HEADERS += \
     MTAnimatorPlug.h \
     MTBody.h \
     MTSetupWindow.h \
+    MTSkinMesh.h \
     Renderable.h \
     Scene.h \
     SkinMesh.h \
+    SkinMeshBase.h \
     Structs.h \
     TexturedRenderable.h \
     WiredRenderable.h

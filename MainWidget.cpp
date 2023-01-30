@@ -105,6 +105,13 @@ QMenuBar* MainWidget::makeMenu()
       menu->addAction(action);
     }
 
+    // Load MTSkin Action
+    {
+      QAction* action = new QAction("Load MTSkin");
+      connect(action, &QAction::triggered, this, &MainWidget::loadMTSkin);
+      menu->addAction(action);
+    }
+
     // Separator
     {
       menu->addSeparator();
@@ -829,6 +836,42 @@ void MainWidget::loadOFF()
 }
 
 // ------------------------------------------------------------------------------------------------
+void MainWidget::loadMTSkin()
+{
+  QString fileName = QFileDialog::getOpenFileName(this, tr("Open OBJ"), "", tr("OBJ Files (*.obj)"));
+  if (fileName.isEmpty())
+  {
+    return;
+  }
+
+  static const QStringList __availableTextures =
+  {
+    "ruben.jpg"
+  };
+
+  bool ok;
+  QString texture = QInputDialog::getItem(this, "MTSkin Texture", "Texture File", __availableTextures, 0, false, &ok);
+  if (!ok)
+  {
+    return;
+  }
+
+  double scale = QInputDialog::getDouble(this, "MTSkin Scale", "Scale Percent", 100.0f, 0.0f, 10'000.0f, 2, &ok);
+  if (!ok)
+  {
+    return;
+  }
+
+  FileReader::MTSkinParameters params;
+  {
+    params.texture = ":/textures/" + texture;
+    params.scale = scale * 1e-2f;
+  }
+
+  openMTSkin(fileName, params);
+}
+
+// ------------------------------------------------------------------------------------------------
 void MainWidget::saveMTBody()
 {
   const auto naming = [](const Component::Pointer& ptr) -> QString
@@ -1366,6 +1409,24 @@ void MainWidget::openBVH(const QString& filePath, const FileReader::BVHParameter
 void MainWidget::openOFF(const QString& filePath, const FileReader::OFFParameters& params)
 {
   auto result = FileReader::readOFF(filePath, params);
+  if (result == nullptr)
+  {
+    return;
+  }
+
+  QString name = getFileName(filePath);
+  auto parent = createComponent<AxisCorrector>(name, AxisCorrector::Mode::Y_Z);
+  parent->addChildren(result);
+
+  internalLog(INFO, name.toStdString() + " successfully loaded !");
+
+  scene->addChildren(parent);
+}
+
+// ------------------------------------------------------------------------------------------------
+void MainWidget::openMTSkin(const QString& filePath, const FileReader::MTSkinParameters& params)
+{
+  auto result = FileReader::readMTSkin(filePath, params);
   if (result == nullptr)
   {
     return;

@@ -4,6 +4,7 @@
 #include "JointRenderer.h"
 #include "SkinMesh.h"
 #include "MeshRigRelation.h"
+#include "MTSkinMesh.h"
 
 #include <QMap>
 
@@ -40,6 +41,13 @@ public:
 
   using MTMappingResult = QSharedPointer<QMap<QString, QString>>;
 
+  using MTSkinResult = QSharedPointer<MTSkinMesh>;
+  struct MTSkinParameters
+  {
+    QString texture;
+    float scale;
+  };
+
 public:
 
   static BVHResult readBVH(const QString& filePath, const BVHParameters& params);
@@ -51,4 +59,6 @@ public:
   static MTResult readMT(const QString& filePath);
 
   static MTMappingResult readMTMapping(const QString& filePath);
+
+  static MTSkinResult readMTSkin(const QString& filePath, const MTSkinParameters& params);
 };

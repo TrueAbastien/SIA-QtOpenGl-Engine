@@ -2,5 +2,6 @@
     <qresource prefix="/">
         <file>textures/cube.png</file>
         <file>textures/floor.png</file>
+        <file>textures/ruben.jpg</file>
     </qresource>
 </RCC>
