@@ -68,6 +68,7 @@ public slots:
   void openMTSetup();
 
   void makeSkin();
+  void makeMTSkin();
   void resetCamera();
   void recenterCamera();
   void startAnimation();

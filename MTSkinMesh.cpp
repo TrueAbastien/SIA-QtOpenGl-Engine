@@ -107,7 +107,7 @@ void MTSkinMesh::verticesUpdate()
 {
   Renderable::computeNormals<VertexData_Textured>(
     m_vertices.data(), (int)m_vertices.size(),
-    m_indices.data(), (int)m_indices.size(), 3, false);
+    m_indices.data(), (int)m_indices.size(), 3, true);
 
   Renderable::updateVertices<VertexData_Textured>(m_vertices.data(), (int)m_vertices.size());
 }

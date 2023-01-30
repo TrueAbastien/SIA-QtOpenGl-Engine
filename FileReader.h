@@ -45,8 +45,10 @@ public:
   struct MTSkinParameters
   {
     QString texture;
-    float scale;
+    QMatrix4x4 transform;
   };
+
+  using TransformResult = QMatrix4x4;
 
 public:
 
@@ -61,4 +63,6 @@ public:
   static MTMappingResult readMTMapping(const QString& filePath);
 
   static MTSkinResult readMTSkin(const QString& filePath, const MTSkinParameters& params);
+
+  static TransformResult readTransform(const QString& filePath);
 };

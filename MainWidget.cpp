@@ -13,6 +13,7 @@
 #include "Frame.h"
 #include "BodyBase.h"
 #include "FileWriter.h"
+#include "MTSkinMesh.h"
 
 #include <QMouseEvent>
 #include <QVBoxLayout>
@@ -163,23 +164,30 @@ QWidget* MainWidget::makeControls()
   // Scene
   {
     QGroupBox* box = new QGroupBox("Scene");
-    QVBoxLayout* cameraVL = new QVBoxLayout;
+    QVBoxLayout* sceneVL = new QVBoxLayout;
 
     // Clear Button
     {
       QPushButton* button = new QPushButton("Clear");
       connect(button, &QPushButton::clicked, this, &MainWidget::clearScene);
-      cameraVL->addWidget(button);
+      sceneVL->addWidget(button);
     }
 
     // Make Skin
     {
       QPushButton* button = new QPushButton("Make Skin");
       connect(button, &QPushButton::clicked, this, &MainWidget::makeSkin);
-      cameraVL->addWidget(button);
+      sceneVL->addWidget(button);
     }
 
-    box->setLayout(cameraVL);
+    // Make MT Skin
+    {
+      QPushButton* button = new QPushButton("Make MT Skin");
+      connect(button, &QPushButton::clicked, this, &MainWidget::makeMTSkin);
+      sceneVL->addWidget(button);
+    }
+
+    box->setLayout(sceneVL);
     layout->addWidget(box);
   }
 
@@ -856,8 +864,8 @@ void MainWidget::loadMTSkin()
     return;
   }
 
-  double scale = QInputDialog::getDouble(this, "MTSkin Scale", "Scale Percent", 100.0f, 0.0f, 10'000.0f, 2, &ok);
-  if (!ok)
+  QString fileName2 = QFileDialog::getOpenFileName(this, tr("Open Transform"), "", tr("TXT Files (*.txt)"));
+  if (fileName2.isEmpty())
   {
     return;
   }
@@ -865,7 +873,7 @@ void MainWidget::loadMTSkin()
   FileReader::MTSkinParameters params;
   {
     params.texture = ":/textures/" + texture;
-    params.scale = scale * 1e-2f;
+    params.transform = FileReader::readTransform(fileName2);
   }
 
   openMTSkin(fileName, params);
@@ -1213,6 +1221,119 @@ void MainWidget::makeSkin()
     relation->setupWeight(data, skin->vertices(), skin->localToWorld());
 
     relation->setupColor(data, skin->vertices());
+
+    skin->setRelation(relation);
+  }
+
+  internalLog(INFO, "Relation created successfully !");
+}
+
+// ------------------------------------------------------------------------------------------------
+void MainWidget::makeMTSkin()
+{
+  const auto naming = [](const Component::Pointer& ptr) -> QString
+  {
+    if (ptr.isNull()) return "";
+    const Component* parent = ptr->parent();
+    if (parent == nullptr) return ptr->name();
+    return parent->name();
+  };
+
+  // Pick Body
+  QSharedPointer<BodyBase> body;
+  {
+    const auto& items = find_if<BodyBase>();
+    if (items.isEmpty())
+    {
+      internalLog(ERROR_, "No Body found...");
+      return;
+    }
+
+    QString name;
+    {
+      // Create Body List
+      QStringList names(0);
+      const auto func = [&](const QSharedPointer<BodyBase>& bb) -> QString
+      {
+        return naming(bb);
+      };
+      std::transform(items.begin(), items.end(), std::back_inserter(names), func);
+
+      // Create Dialog
+      bool ok;
+      name = QInputDialog::getItem(this, "Select Body", "Body", names, 0, false, &ok);
+      if (!ok)
+      {
+        return;
+      }
+    }
+
+    const auto pred = [&](const QSharedPointer<BodyBase>& bb) -> bool
+    {
+      return naming(bb) == name;
+    };
+    const auto& item = std::find_if(items.begin(), items.end(), pred);
+    if (item == items.end())
+    {
+      internalLog(ERROR_, "BVH couldn't be found...");
+      return;
+    }
+
+    body = *item;
+  }
+
+  // Pick SkinMesh
+  QSharedPointer<MTSkinMesh> skin;
+  {
+    const auto& items = find_if<MTSkinMesh>();
+    if (items.isEmpty())
+    {
+      internalLog(ERROR_, "No Skin found...");
+      return;
+    }
+
+    QString name;
+    {
+      // Create SkinMesh List
+      QStringList names(0);
+      const auto func = [&](const QSharedPointer<MTSkinMesh>& sm) -> QString
+      {
+        return naming(sm);
+      };
+      std::transform(items.begin(), items.end(), std::back_inserter(names), func);
+
+      // Create Dialog
+      bool ok;
+      name = QInputDialog::getItem(this, "Select Skin", "Skin", names, 0, false, &ok);
+      if (!ok)
+      {
+        return;
+      }
+    }
+
+    const auto pred = [&](const QSharedPointer<MTSkinMesh>& sm) -> bool
+    {
+      return naming(sm) == name;
+    };
+    const auto& item = std::find_if(items.begin(), items.end(), pred);
+    if (item == items.end())
+    {
+      internalLog(ERROR_, "Skin couldn't be found...");
+      return;
+    }
+
+    skin = *item;
+  }
+
+  // Compute & Assignation
+  {
+    auto relation = QSharedPointer<MeshRigRelation>::create();
+
+    const auto data = relation->computeHomeData(body);
+
+    relation->computeWeightData(data, skin->vertices(), skin->localToWorld());
+
+    relation->setupWeight(data, skin->vertices(), skin->localToWorld());
 
     skin->setRelation(relation);
   }

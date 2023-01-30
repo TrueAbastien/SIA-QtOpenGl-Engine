@@ -1022,7 +1022,7 @@ FileReader::MTSkinResult FileReader::readMTSkin(const QString& filePath, const M
               ss >> std::skipws >> pIndex;
               const auto& p = positions[pIndex - 1];
 
-              vtx.position = QVector3D(p[0], p[1], p[2]) * params.scale;
+              vtx.position = params.transform * QVector3D(p[0], p[1], p[2]);
             }
 
             // Texture
@@ -1068,4 +1068,104 @@ FileReader::MTSkinResult FileReader::readMTSkin(const QString& filePath, const M
   }
 
   return MTSkinResult::create(params.texture, vertices, indices);
+}
+
+// ------------------------------------------------------------------------------------------------
+FileReader::TransformResult FileReader::readTransform(const QString& filePath)
+{
+  auto file = std::ifstream(filePath.toStdString());
+  if (!file.is_open())
+  {
+    return QMatrix4x4();
+  }
+
+  // Data
+  QVector3D pos, rot, scale;
+
+  // Utilities
+  const auto lassert = [](bool cond)
+  {
+#ifdef _DEBUG
+    assert(cond);
+#else
+    if (!cond) throw false;
+#endif
+  };
+  const auto next = [&](auto& value)
+  {
+    file >> std::skipws >> value;
+  };
+  const auto skip = [&]()-> std::string
+  {
+    std::string val; next(val);
+    return val;
+  };
+  const auto upper = [](std::string s) -> std::string
+  {
+    std::string r;
+
+    std::transform(s.begin(), s.end(), std::back_inserter(r), [](char c)
+      {
+        return std::toupper(c);
+      });
+
+    return r;
+  };
+
+  // Reading
+  const auto readTranslate = [&]()
+  {
+    next(pos[0]);
+    next(pos[1]);
+    next(pos[2]);
+  };
+  const auto readRotation = [&]()
+  {
+    next(rot[0]);
+    next(rot[1]);
+    next(rot[2]);
+  };
+  const auto readScale = [&]()
+  {
+    next(scale[0]);
+    next(scale[1]);
+    next(scale[2]);
+  };
+
+  // Convert
+  const auto convertTransform = [&]() -> QMatrix4x4
+  {
+    QMatrix4x4 t;
+    t.translate(pos);
+
+    QMatrix4x4 r;
+    r.rotate(rot.x(), 1.0, 0.0, 0.0);
+    r.rotate(rot.y(), 0.0, 1.0, 0.0);
+    r.rotate(rot.z(), 0.0, 0.0, 1.0);
+
+    QMatrix4x4 s;
+    for (int ii = 0; ii < 3; ++ii)
+      s(ii, ii) = scale[ii];
+
+    return t * r * s;
+  };
+
+  // Algorithm
+  try
+  {
+    lassert(upper(skip()) == "T");
+    readTranslate();
+
+    lassert(upper(skip()) == "R");
+    readRotation();
+
+    lassert(upper(skip()) == "S");
+    readScale();
+  }
+  catch (...)
+  {
+    return QMatrix4x4();
+  }
+
+  return convertTransform();
 }
