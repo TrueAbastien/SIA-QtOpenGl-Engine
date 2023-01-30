@@ -87,7 +87,7 @@ pcviewer.cfg
 *.core
 *.moc
 *.o
-*.obj
+#*.obj
 *.orig
 *.swp
 *.rej
@@ -405,7 +405,7 @@ StyleCopReport.xml
 *_h.h
 *.ilk
 *.meta
-*.obj
+#*.obj
 *.iobj
 *.pch
 *.pdb
